@@ -1,0 +1,30 @@
+[submodule "ThirdParty/assimp"]
+	path = ThirdParty/assimp
+	url = https://github.com/assimp/assimp.git
+[submodule "ThirdParty/freetype"]
+	path = ThirdParty/freetype
+	url = https://gitlab.freedesktop.org/freetype/freetype.git
+[submodule "ThirdParty/glew-cmake"]
+	path = ThirdParty/glew-cmake
+	url = https://github.com/Perlmint/glew-cmake.git
+[submodule "ThirdParty/glfw"]
+	path = ThirdParty/glfw
+	url = https://github.com/glfw/glfw.git
+[submodule "ThirdParty/glm"]
+	path = ThirdParty/glm
+	url = https://github.com/g-truc/glm.git
+[submodule "ThirdParty/imgui"]
+	path = ThirdParty/imgui
+	url = https://github.com/ocornut/imgui.git
+[submodule "ThirdParty/openal-soft"]
+	path = ThirdParty/openal-soft
+	url = https://github.com/kcat/openal-soft
+[submodule "ThirdParty/libsndfile"]
+	path = ThirdParty/libsndfile
+	url = https://github.com/libsndfile/libsndfile.git
+[submodule "ThirdParty/soil"]
+	path = ThirdParty/soil
+	url = https://github.com/paralin/soil.git
+[submodule "ThirdParty/googletest"]
+	path = ThirdParty/googletest
+	url = https://github.com/google/googletest.git

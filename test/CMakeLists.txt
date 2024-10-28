@@ -12,13 +12,14 @@ include_directories(
     ${CMAKE_SOURCE_DIR}/include
     ${CMAKE_SOURCE_DIR}/ThirdParty/assimp/include
     ${CMAKE_SOURCE_DIR}/ThirdParty/freetype/include
-    ${CMAKE_SOURCE_DIR}/ThirdParty/GLEW/include
-    ${CMAKE_SOURCE_DIR}/ThirdParty/GLFW/include
-    ${CMAKE_SOURCE_DIR}/ThirdParty/glm
+    ${CMAKE_SOURCE_DIR}/ThirdParty/glew-cmake/include
+    ${CMAKE_SOURCE_DIR}/ThirdParty/glfw/include
+    ${CMAKE_SOURCE_DIR}/ThirdParty/glm2/glm
     ${CMAKE_SOURCE_DIR}/ThirdParty/imgui
-    ${CMAKE_SOURCE_DIR}/ThirdParty/openAL/include
-    ${CMAKE_SOURCE_DIR}/ThirdParty/sndfile/include
-    ${CMAKE_SOURCE_DIR}/ThirdParty/SOIL/include
+    ${CMAKE_SOURCE_DIR}/ThirdParty/imgui/backends
+    ${CMAKE_SOURCE_DIR}/ThirdParty/openal-soft/include
+    ${CMAKE_SOURCE_DIR}/ThirdParty/libsndfile/include
+    ${CMAKE_SOURCE_DIR}/ThirdParty/soil/inc/SOIL
 )
 
 # Add the source files for the test executable

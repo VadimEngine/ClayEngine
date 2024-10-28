@@ -1,6 +1,7 @@
-Early Alpha Clay Engine static library for developing games in C++. Currently supports an entity component system for game objects that are rendered in a Scene,
+# Clay Engine
+Early Alpha Clay Engine static library for developing games in C++. Currently supports an entity component system for game objects that are rendered in a Scene.
 
-Third party files need to be unzipped to run to work around the 100mb file size limit in github.
+This libraries uses the following third party libraries.
 ### Third Party Libraries
 - assimp
     - For loading 3d models
@@ -14,22 +15,30 @@ Third party files need to be unzipped to run to work around the 100mb file size 
     - for unit test
 - imgui
     - For prototype GUI
-- openAL
+- OpenAL
     - For playing audio files
 - sndfile
     - For loading audio files
 - SOIL
     - For loading/saving images such as pngs or bmp
 
-### Instructions 
-Windows PowerShell commands (Only works for x64 due to difficulty getting Assimp to work for x86):
+All the libraries are included in `./ThirdParty` directory as submodules. They are linked through cmake and can be all build with the bash script
+
+```bash
+./build-tool.sh -Build all
+```
+
+# Instructions 
+With the third party libraries built, the Clay Static lib can be built with the following commands:
 
 - To build (outputs to `\build` directory). `-DBUILD_TESTS=ON` is optional:
     - `cmake -S . -B build -DBUILD_TESTS=ON`
     - `cmake --build .\build\`
-    - Combined with clean: 
-        - `cmake -S . -B build ; cmake --build .\build\ --clean-first`
-        - OR `.\build-tool.ps1 -Clean`
+
+- Clean build for a clean build
+    - `./clean-build`
 
 - Run test:
     - `.\build\test\Debug\ClayEngineTest.exe`
+
+A demo project for using this library can be seen [here](https://github.com/VadimEngine/ClayEngineDemo)
