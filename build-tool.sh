@@ -103,7 +103,7 @@ done
 
 # Handle "all" in the build items
 if [[ " ${BUILD_ITEMS[@]} " =~ " all " ]]; then
-    BUILD_ITEMS=("assimp" "freeType" "GLEW" "GLFW", "OpenAL", "sndfile", "SOIL", "GLM")
+    BUILD_ITEMS=("assimp" "freeType" "GLEW" "GLFW" "OpenAL" "sndfile" "SOIL" "GLM")
 fi
 
 # Clean the build folder if the -Clean flag is provided

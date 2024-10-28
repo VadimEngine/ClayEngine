@@ -31,14 +31,14 @@ All the libraries are included in `./ThirdParty` directory as submodules. They a
 # Instructions 
 With the third party libraries built, the Clay Static lib can be built with the following commands:
 
-- To build (outputs to `\build` directory). `-DBUILD_TESTS=ON` is optional:
+- To build (outputs to `/build` directory). `-DBUILD_TESTS=ON` is optional:
     - `cmake -S . -B build -DBUILD_TESTS=ON`
-    - `cmake --build .\build\`
+    - `cmake --build ./build/`
 
 - Clean build for a clean build
     - `./clean-build`
 
 - Run test:
-    - `.\build\test\Debug\ClayEngineTest.exe`
+    - `./build/test/Debug/ClayEngineTest.exe`
 
 A demo project for using this library can be seen [here](https://github.com/VadimEngine/ClayEngineDemo)
