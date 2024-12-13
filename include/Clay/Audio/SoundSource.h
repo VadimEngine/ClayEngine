@@ -1,7 +1,7 @@
 #pragma once
 #define AL_LIBTYPE_STATIC
 // third party
-#include <AL\al.h>
+#include <AL/al.h>
 
 namespace clay {
 

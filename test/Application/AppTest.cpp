@@ -3,10 +3,8 @@
 #include <Clay/Application/App.h>
 
 TEST(AppTest, Initialization) {
-    // Confirm an instance of app can be made
-    clay::Resource::SRC_PATH = std::filesystem::current_path() / "res";
-    clay::Resource::RESOURCE_PATH = std::filesystem::current_path() / "res";
-
+    // Confirm an instance of app can be made 
+    LOG_I("Resource: %s", clay::Resource::RESOURCE_PATH);
     clay::App app;
 
     app.isRunning();

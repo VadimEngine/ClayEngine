@@ -19,8 +19,6 @@ class Resource {
 public:
     /** Path to resource folder */
     static std::filesystem::path RESOURCE_PATH;
-    /** Path to the source folder */
-    static std::filesystem::path SRC_PATH;
 
     /** Loaded/Built Mesh resources */
     std::unordered_map<std::string, std::unique_ptr<Mesh>> mMeshes_;

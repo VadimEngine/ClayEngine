@@ -6,80 +6,103 @@ project(ClayEngine)
 # Specify the C++ standard
 set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED True)
-set(BUILD_MODE "x64" CACHE STRING "Build mode: x64 or Win32")
 
-# Define paths to third-party libraries
-set(GLEW_LIB ${CMAKE_SOURCE_DIR}/ThirdParty/glew-cmake/out/build/glew/lib/Release/libglew32.lib) # OpenGL API
-set(GLFW_LIB ${CMAKE_SOURCE_DIR}/ThirdParty/glfw/build/src/Debug/glfw3.lib) # OpenGL window
-set(SOIL_LIB ${CMAKE_SOURCE_DIR}/ThirdParty/soil/build/Debug/soil.lib) # Image loading
-set(OPENAL_LIB ${CMAKE_SOURCE_DIR}/ThirdParty/openal-soft/build/Debug/OpenAL32.lib) # Audio
-set(AL_EXCOMMON_LIB ${CMAKE_SOURCE_DIR}/ThirdParty/openal-soft/build/Debug/alsoft.excommon.lib) # Audio
-set(ASSIMP_LIB ${CMAKE_SOURCE_DIR}/ThirdParty/assimp/lib/Debug/assimp-vc142-mtd.lib) # 3d model loading
-set(ZLIB_LIB ${CMAKE_SOURCE_DIR}/ThirdParty/assimp/contrib/zlib/Debug/zlibstaticd.lib) # 3d model loading
-set(SNDFILE_LIB ${CMAKE_SOURCE_DIR}/ThirdParty/libsndfile/build/Debug/sndfile.lib) # Audio file loading
-set(FREETYPE_LIB ${CMAKE_SOURCE_DIR}/ThirdParty/freetype/build/Debug/freetyped.lib) # Font/Text Rendering
+# Assimp, sndfile glfw
+set(BUILD_SHARED_LIBS OFF CACHE BOOL "Build shared libraries" FORCE)
+# assimp
+set(ASSIMP_BUILD_TESTS OFF CACHE BOOL "If the test suite for Assimp is built in addition to the library." FORCE)
+set(ASSIMP_INSTALL OFF CACHE BOOL "Disable this if you want to use assimp as a submodule." FORCE)
+# Open AL
+set(LIBTYPE STATIC CACHE STRING "Build OpenAL as a static library" FORCE)
+set(ALSOFT_TESTS OFF CACHE BOOL "Build test programs")
+set(ALSOFT_EXAMPLES OFF CACHE BOOL "Build example program")
+# GLEW
+set(glew-cmake_BUILD_SHARED OFF CACHE BOOL "Build the shared glew library")
+set(ONLY_LIBS ON CACHE BOOL "Do not build executables")
+# GLFW
+set(GLFW_BUILD_EXAMPLES OFF CACHE BOOL "Build the GLFW example programs" FORCE)
+set(GLFW_BUILD_TESTS OFF CACHE BOOL "Build the GLFW test programs" FORCE)
+set(GLFW_BUILD_DOCS OFF CACHE BOOL "Build the GLFW documentation" FORCE)
+set(GLFW_INSTALL OFF CACHE BOOL "Generate installation target" FORCE)
+# sndfile
+set(BUILD_PROGRAMS OFF CACHE BOOL "Build program" FORCE)
+set(BUILD_EXAMPLES OFF CACHE BOOL "Build examples" FORCE)
+set(BUILD_TESTING  OFF CACHE BOOL "build tests" FORCE)
 
-set(OPENGL_LIB opengl32.lib) # OpenGL
-set(WINMM_LIB winmm.lib) # Windows Mulitmedia
-set(AVRT_LIB avrt.lib) # Windows Multimedia Thread API
+# Add third party directories
+add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/ThirdParty/assimp assimp_build)
+add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/ThirdParty/freetype freetype_build)
+add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/ThirdParty/glew-cmake glew_build)
+add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/ThirdParty/glfw glfw_build)
+add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/ThirdParty/libsndfile libsndfile_build)
+add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/ThirdParty/openal-soft openal_build)
+add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/ThirdParty/soil soil_build)
 
 # Collect all source files
-file(GLOB_RECURSE SRC_FILES ${CMAKE_SOURCE_DIR}/src/*.cpp)
+file(GLOB_RECURSE SRC_FILES ${CMAKE_CURRENT_SOURCE_DIR}/src/*.cpp)
 
-# Add imgui
+# Add imgui source files
 list(APPEND SRC_FILES
-    ${CMAKE_SOURCE_DIR}/ThirdParty/imgui/imgui.cpp
-    ${CMAKE_SOURCE_DIR}/ThirdParty/imgui/imgui_demo.cpp
-    ${CMAKE_SOURCE_DIR}/ThirdParty/imgui/imgui_draw.cpp
-    ${CMAKE_SOURCE_DIR}/ThirdParty/imgui/backends/imgui_impl_glfw.cpp
-    ${CMAKE_SOURCE_DIR}/ThirdParty/imgui/backends/imgui_impl_opengl3.cpp
-    ${CMAKE_SOURCE_DIR}/ThirdParty/imgui/imgui_tables.cpp
-    ${CMAKE_SOURCE_DIR}/ThirdParty/imgui/imgui_widgets.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/ThirdParty/imgui/imgui.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/ThirdParty/imgui/imgui_demo.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/ThirdParty/imgui/imgui_draw.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/ThirdParty/imgui/backends/imgui_impl_glfw.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/ThirdParty/imgui/backends/imgui_impl_opengl3.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/ThirdParty/imgui/imgui_tables.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/ThirdParty/imgui/imgui_widgets.cpp
 )
 
 # Define the library target
 add_library(${PROJECT_NAME} STATIC ${SRC_FILES})
-target_link_libraries(${PROJECT_NAME}
-    ${GLEW_LIB}
-    ${GLFW_LIB}
-    ${SOIL_LIB}
-    ${OPENGL_LIB}
-    ${ASSIMP_LIB}
-    ${ZLIB_LIB}
-    ${AL_EXCOMMON_LIB}
-    ${OPENAL_LIB}
-    ${WINMM_LIB}
-    ${SNDFILE_LIB}
-    ${FREETYPE_LIB}
-    ${AVRT_LIB}
+
+# Define the DEFAULT_RESOURCE_PATH macro
+target_compile_definitions(${PROJECT_NAME} PRIVATE DEFAULT_RESOURCE_PATH="${CMAKE_SOURCE_DIR}/res")
+
+# Define platform-specific libraries
+if (WIN32)
+    set(CLAY_PLATFORM_LIBS
+        opengl32
+        winmm
+        avrt
+    )
+elseif (UNIX)
+    set(CLAY_PLATFORM_LIBS
+        GL         # OpenGL library on Linux
+        pthread    # Necessary for threading
+        X11        # X Window System
+    )
+endif()
+
+# Define common libraries
+set(CLAY_COMMON_LIBS
+    assimp
+    freetype
+    libglew_static
+    glfw
+    sndfile
+    OpenAL
+    soil
 )
-# Update the static linker flags
-set(
-    CMAKE_STATIC_LINKER_FLAGS 
-    "${CMAKE_STATIC_LINKER_FLAGS} ${GLEW_LIB} ${GLFW_LIB} ${SOIL_LIB} ${OPENGL_LIB} ${ASSIMP_LIB} ${ZLIB_LIB} ${AL_EXCOMMON_LIB} ${OPENAL_LIB} ${WINMM_LIB} ${SNDFILE_LIB} ${FREETYPE_LIB} ${AVRT_LIB}"
-)
+
+# Combine platform-specific and common libraries
+target_link_libraries(${PROJECT_NAME} ${CLAY_PLATFORM_LIBS} ${CLAY_COMMON_LIBS})
 
 # Include directories for public headers
 target_include_directories(${PROJECT_NAME} PUBLIC
     # source code
-    ${CMAKE_SOURCE_DIR}/include
+    ${CMAKE_CURRENT_SOURCE_DIR}/include
     # third party
-    ${CMAKE_SOURCE_DIR}/ThirdParty/assimp/include
-    ${CMAKE_SOURCE_DIR}/ThirdParty/freetype/include
-    ${CMAKE_SOURCE_DIR}/ThirdParty/glew-cmake/include
-    ${CMAKE_SOURCE_DIR}/ThirdParty/glfw/include
-    ${CMAKE_SOURCE_DIR}/ThirdParty/glm
-    ${CMAKE_SOURCE_DIR}/ThirdParty/imgui
-    ${CMAKE_SOURCE_DIR}/ThirdParty/imgui/backends
-    ${CMAKE_SOURCE_DIR}/ThirdParty/openal-soft/include
-    ${CMAKE_SOURCE_DIR}/ThirdParty/libsndfile/include
-    ${CMAKE_SOURCE_DIR}/ThirdParty/soil/inc/SOIL
+    ${CMAKE_CURRENT_SOURCE_DIR}/ThirdParty/glm
+    ${CMAKE_CURRENT_SOURCE_DIR}/ThirdParty/imgui
+    ${CMAKE_CURRENT_SOURCE_DIR}/ThirdParty/imgui/backends
+    ${CMAKE_CURRENT_SOURCE_DIR}/ThirdParty/soil/inc/SOIL
 )
 
-if (BUILD_TESTS)
+if (CLAY_BUILD_TESTS)
     set(gtest_force_shared_crt ON CACHE BOOL "" FORCE)
     enable_testing()
-    # Build test
-    add_subdirectory(${CMAKE_SOURCE_DIR}/ThirdParty/googletest)
-    add_subdirectory(test)
+    # Add googletest as a subdirectory
+    add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/ThirdParty/googletest gtest_build)
+    # Add the test directory
+    add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/test)
 endif()

@@ -2,6 +2,7 @@
 #define AL_LIBTYPE_STATIC
 // standard lib
 #include <stdio.h>
+#include <stdexcept>
 // third party
 #include <AL/al.h>
 #include <AL/alc.h>

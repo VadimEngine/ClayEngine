@@ -4,25 +4,33 @@
 namespace clay {
 
 AudioManager::AudioManager() {
-    mSoundDevice_ = new SoundDevice();
-    mSoundSource_ = new SoundSource();
+    try {
+        mpSoundDevice_ = std::make_unique<SoundDevice>();
+        mpSoundSource_ = std::make_unique<SoundSource>();
+        mAudioInitialized_ = true;
+    } catch (const std::exception& e) {
+        LOG_E("AudioManager error: %s", e.what());
+    }
 }
 
-AudioManager::~AudioManager() {
-    delete mSoundSource_;
-    delete mSoundDevice_;
-}
+AudioManager::~AudioManager() {}
 
 void AudioManager::playSound(ALuint audioId) {
-    mSoundSource_->play(audioId);
+    if (mAudioInitialized_) {
+        mpSoundSource_->play(audioId);
+    }
 }
 
 void AudioManager::setGain(float newGain) {
-    mSoundSource_->setGain(newGain);
+    if (mAudioInitialized_) {
+        mpSoundSource_->setGain(newGain);
+    }
 }
 
 float AudioManager::getGain() const {
-    return mSoundSource_->getGain();
+    if (mAudioInitialized_) {
+        return mpSoundSource_->getGain();
+    }
 }
 
 } // namespace clay

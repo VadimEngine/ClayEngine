@@ -6,16 +6,16 @@ namespace clay {
 SoundDevice::SoundDevice() {
     mpALCDevice_ = alcOpenDevice(nullptr); // nullptr = get default device
     if (!mpALCDevice_) {
-        throw("failed to get sound device");
+        throw std::runtime_error("failed to get sound device");
     }
     // create context
     mpALCContext_ = alcCreateContext(mpALCDevice_, nullptr);
     if (!mpALCContext_) {
-        throw("Failed to set sound context");
+        throw std::runtime_error("Failed to set sound context");
     }
     // make context current
     if (!alcMakeContextCurrent(mpALCContext_)) {
-        throw("failed to make context current");
+        throw std::runtime_error("failed to make context current");
     }
     const ALCchar* name = nullptr;
     if (alcIsExtensionPresent(mpALCDevice_, "ALC_ENUMERATE_ALL_EXT")) {
@@ -29,15 +29,15 @@ SoundDevice::SoundDevice() {
 
 SoundDevice::~SoundDevice() {
     if (!alcMakeContextCurrent(nullptr)) {
-        throw("failed to set context to nullptr");
+        throw std::runtime_error("failed to set context to nullptr");
     }
     alcDestroyContext(mpALCContext_);
     ALenum err = alcGetError(mpALCDevice_);
     if (err != AL_NO_ERROR) {
-       throw("failed to unset audio context during close");
+       throw std::runtime_error("failed to unset audio context during close");
     }
     if (!alcCloseDevice(mpALCDevice_)) {
-        throw("failed to close sound device");
+        throw std::runtime_error("failed to close sound device");
     }
 }
 

@@ -1,8 +1,10 @@
 # Clay Engine
-Early Alpha Clay Engine static library for developing games in C++. Currently supports an entity component system for game objects that are rendered in a Scene.
+Early Alpha Clay Engine static library for developing games in C++. Currently supports an entity component system for game objects that are rendered in custom Scenes.
 
-This libraries uses the following third party libraries.
+
 ### Third Party Libraries
+This libraries uses the following third party libraries:
+
 - assimp
     - For loading 3d models
 - freetype
@@ -16,27 +18,23 @@ This libraries uses the following third party libraries.
 - imgui
     - For prototype GUI
 - OpenAL
-    - For playing audio files
+    - For playing audio
 - sndfile
     - For loading audio files
 - SOIL
-    - For loading/saving images such as pngs or bmp
+    - For loading/saving image files such as pngs or bmp
 
-All the libraries are included in `./ThirdParty` directory as submodules. They are linked through cmake and can be all build with the bash script
-
-```bash
-./build-tool.sh -Build all
-```
+All the libraries are included in `./ThirdParty` directory as submodules.
 
 # Instructions 
-With the third party libraries built, the Clay Static lib can be built with the following commands:
+The Clay Static library can be built with the following commands:
 
-- To build (outputs to `/build` directory). `-DBUILD_TESTS=ON` is optional:
-    - `cmake -S . -B build -DBUILD_TESTS=ON`
+- To build (outputs to `/build` directory). `-DCLAY_BUILD_TESTS=ON` is optional:
+    - `cmake -S . -B build -DCLAY_BUILD_TESTS=ON`
     - `cmake --build ./build/`
 
-- Clean build for a clean build
-    - `./clean-build`
+- Clean build directory for a clean build
+    - `./clean-build.sh`
 
 - Run test:
     - `./build/test/Debug/ClayEngineTest.exe`

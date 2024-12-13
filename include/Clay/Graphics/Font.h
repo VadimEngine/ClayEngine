@@ -48,7 +48,7 @@ public:
      * Get the Character Info for the given char if it exists
      *
      * @param theChar char to get character information for
-     * @return Character font infomation
+     * @return Character font information
      */
     const Character* getCharInfo(GLchar theChar) const;
 

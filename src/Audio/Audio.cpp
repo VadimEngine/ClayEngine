@@ -3,7 +3,7 @@
 
 namespace clay {
 
-int Audio::loadAudio(const std::filesystem::path& filename) {
+int Audio::loadAudio(const std::filesystem::path& filepath) {
     ALenum err, format;
     ALuint buffer;
     SNDFILE* sndfile;
@@ -13,13 +13,13 @@ int Audio::loadAudio(const std::filesystem::path& filename) {
     ALsizei num_bytes;
 
     // Open the audio file and check that it's usable.
-    sndfile = sf_open(filename.string().c_str(), SFM_READ, &sfinfo);
+    sndfile = sf_open(filepath.string().c_str(), SFM_READ, &sfinfo);
     if (!sndfile) {
-        fprintf(stderr, "Could not open audio in %s: %s\n", filename.string().c_str(), sf_strerror(sndfile));
+        fprintf(stderr, "Could not open audio in %s: %s\n", filepath.string().c_str(), sf_strerror(sndfile));
         return 0;
     }
     if (sfinfo.frames < 1 || sfinfo.frames >(sf_count_t)(INT_MAX / sizeof(short)) / sfinfo.channels) {
-        fprintf(stderr, "Bad sample count in %s (%" PRId64 ")\n", filename, sfinfo.frames);
+        fprintf(stderr, "Bad sample count in %s (%" PRId64 ")\n", filepath, sfinfo.frames);
         sf_close(sndfile);
         return 0;
     }
@@ -51,7 +51,7 @@ int Audio::loadAudio(const std::filesystem::path& filename) {
     if (num_frames < 1) {
         free(membuf);
         sf_close(sndfile);
-        fprintf(stderr, "Failed to read samples in %s (%" PRId64 ")\n", filename, num_frames);
+        fprintf(stderr, "Failed to read samples in %s (%" PRId64 ")\n", filepath, num_frames);
         return 0;
     }
     num_bytes = (ALsizei)(num_frames * sfinfo.channels) * (ALsizei)sizeof(short);
@@ -64,7 +64,7 @@ int Audio::loadAudio(const std::filesystem::path& filename) {
     free(membuf);
     sf_close(sndfile);
 
-    // Check if an error occured, and clean up if so.
+    // Check if an error occurred, and clean up if so.
     err = alGetError();
     if (err != AL_NO_ERROR) {
         fprintf(stderr, "OpenAL Error: %s\n", alGetString(err));

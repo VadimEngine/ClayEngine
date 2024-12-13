@@ -1,6 +1,7 @@
 #pragma once
 // standard lib
 #include <chrono>
+#include <list>
 #include <numbers>
 // third party
 #define GLEW_STATIC

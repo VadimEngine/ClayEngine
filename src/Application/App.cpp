@@ -152,57 +152,57 @@ void App::loadResources() {
     // Shaders
     mResources_.loadResource<Shader>(
         {
-        Resource::SRC_PATH / "Shaders/AssimpLight.vert",
-        Resource::SRC_PATH / "Shaders/AssimpLight.frag"
+        Resource::RESOURCE_PATH / "Shaders/AssimpLight.vert",
+        Resource::RESOURCE_PATH / "Shaders/AssimpLight.frag"
         },
         "AssimpLight"
     );
     mResources_.loadResource<Shader>(
         {
-        Resource::SRC_PATH / "Shaders/Assimp.vert",
-        Resource::SRC_PATH / "Shaders/Assimp.frag"
+        Resource::RESOURCE_PATH / "Shaders/Assimp.vert",
+        Resource::RESOURCE_PATH / "Shaders/Assimp.frag"
         },
         "Assimp"
     );
     mResources_.loadResource<Shader>(
         {
-        Resource::SRC_PATH / "Shaders/MVPTexShader.vert",
-        Resource::SRC_PATH / "Shaders/MVPTexShader.frag"
+        Resource::RESOURCE_PATH / "Shaders/MVPTexShader.vert",
+        Resource::RESOURCE_PATH / "Shaders/MVPTexShader.frag"
         },
         "MVPTexShader"
     );
     mResources_.loadResource<Shader>(
         {
-        Resource::SRC_PATH / "Shaders/Text.vert",
-        Resource::SRC_PATH / "Shaders/Text.frag"
+        Resource::RESOURCE_PATH / "Shaders/Text.vert",
+        Resource::RESOURCE_PATH / "Shaders/Text.frag"
         },
         "Text"
     );
     mResources_.loadResource<Shader>(
         {
-        Resource::SRC_PATH / "Shaders/MVPShader.vert",
-        Resource::SRC_PATH / "Shaders/MVPShader.frag"
+        Resource::RESOURCE_PATH / "Shaders/MVPShader.vert",
+        Resource::RESOURCE_PATH / "Shaders/MVPShader.frag"
         },
         "MVPShader"
     );
     mResources_.loadResource<Shader>(
         {
-        Resource::SRC_PATH / "Shaders/TextureSurface.vert",
-        Resource::SRC_PATH / "Shaders/TextureSurface.frag"
+        Resource::RESOURCE_PATH / "Shaders/TextureSurface.vert",
+        Resource::RESOURCE_PATH / "Shaders/TextureSurface.frag"
         },
          "TextureSurface"
     );
     mResources_.loadResource<Shader>(
         {
-        Resource::SRC_PATH / "Shaders/Blur.vert",
-        Resource::SRC_PATH / "Shaders/Blur.frag"
+        Resource::RESOURCE_PATH / "Shaders/Blur.vert",
+        Resource::RESOURCE_PATH / "Shaders/Blur.frag"
         },
         "Blur"
     );
     mResources_.loadResource<Shader>(
         {
-        Resource::SRC_PATH / "Shaders/BloomFinal.vert",
-        Resource::SRC_PATH / "Shaders/BloomFinal.frag"
+        Resource::RESOURCE_PATH / "Shaders/BloomFinal.vert",
+        Resource::RESOURCE_PATH / "Shaders/BloomFinal.frag"
         },
         "BloomFinal"
     );

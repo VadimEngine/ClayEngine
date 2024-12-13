@@ -3,8 +3,7 @@
 
 namespace clay {
 
-std::filesystem::path Resource::RESOURCE_PATH = "";
-std::filesystem::path Resource::SRC_PATH = "";
+std::filesystem::path Resource::RESOURCE_PATH = DEFAULT_RESOURCE_PATH;
 
 Resource::Resource() {}
 

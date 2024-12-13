@@ -1,12 +1,15 @@
 #pragma once
 // standard lib
 #include <inttypes.h>
+#include <memory>
 // third party
 #include <AL/alext.h>
 #include <sndfile.h>
+#include <stdexcept>
 // project
 #include "Clay/Audio/SoundDevice.h"
 #include "Clay/Audio/SoundSource.h"
+#include "Clay/Application/Logger.h"
 
 namespace clay {
 
@@ -35,9 +38,11 @@ public:
 
 private:
     /** Sound Device*/
-    SoundDevice* mSoundDevice_;
+    std::unique_ptr<SoundDevice> mpSoundDevice_;
     /** Sound Source */
-    SoundSource* mSoundSource_;
+    std::unique_ptr<SoundSource> mpSoundSource_;
+    /** If audio was set up successfully */
+    bool mAudioInitialized_ = false;
 };
 
 } // namespace clay

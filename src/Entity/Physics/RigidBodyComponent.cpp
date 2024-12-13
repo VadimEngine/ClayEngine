@@ -68,8 +68,8 @@ void RigidBodyComponent::applyIfAttraction(RigidBodyComponent* other, float dt) 
                 0.0f
             );
 
-            glm::vec3 newVeli = (mParentEntity_.getVelocity() - (dir * (scale * (1.0f / pow(distance, 2.0f)) * dt)));
-            glm::vec3 newVelj = (other->mParentEntity_.getVelocity() + (dir * (scale * (1.0f / pow(distance, 2.0f)) * dt)));
+            glm::vec3 newVeli = (mParentEntity_.getVelocity() - (dir * static_cast<float>(scale * (1.0f / pow(distance, 2.0f)) * dt)));
+            glm::vec3 newVelj = (other->mParentEntity_.getVelocity() + (dir * static_cast<float>(scale * (1.0f / pow(distance, 2.0f)) * dt)));
 
             if (mMobile_) {
                 mParentEntity_.setVelocity(newVeli);
