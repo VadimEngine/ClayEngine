@@ -43,8 +43,8 @@ void App::run() {
 
 void App::update() {
     // Calculate time since last update (in seconds)
-    std::chrono::duration<float> dt = (std::chrono::high_resolution_clock::now() - mLastTime_);
-    mLastTime_ = std::chrono::high_resolution_clock::now();
+    std::chrono::duration<float> dt = (std::chrono::steady_clock::now() - mLastTime_);
+    mLastTime_ = std::chrono::steady_clock::now();
     // Update application content
     mWindow_.update(dt.count());
     // Update list in reverse order and delete any marked for removal

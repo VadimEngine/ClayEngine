@@ -30,13 +30,13 @@ set(BUILD_EXAMPLES OFF CACHE BOOL "Build examples" FORCE)
 set(BUILD_TESTING  OFF CACHE BOOL "build tests" FORCE)
 
 # Add third party directories
-add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/ThirdParty/assimp assimp_build)
-add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/ThirdParty/freetype freetype_build)
-add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/ThirdParty/glew-cmake glew_build)
-add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/ThirdParty/glfw glfw_build)
-add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/ThirdParty/libsndfile libsndfile_build)
-add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/ThirdParty/openal-soft openal_build)
-add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/ThirdParty/soil soil_build)
+add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/ThirdParty/assimp)
+add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/ThirdParty/freetype)
+add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/ThirdParty/glew-cmake)
+add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/ThirdParty/glfw)
+add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/ThirdParty/libsndfile)
+add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/ThirdParty/openal-soft)
+add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/ThirdParty/soil)
 
 # Collect all source files
 file(GLOB_RECURSE SRC_FILES ${CMAKE_CURRENT_SOURCE_DIR}/src/*.cpp)

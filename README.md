@@ -34,7 +34,7 @@ The Clay Static library can be built with the following commands:
     - `cmake --build ./build/`
 
 - Clean build directory for a clean build
-    - `./clean-build.sh`
+    - `./tools/clean-build.sh`
 
 - Run test:
     - `./build/test/Debug/ClayEngineTest.exe`

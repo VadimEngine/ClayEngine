@@ -3,6 +3,7 @@
 #include <filesystem>
 #include <inttypes.h>
 #include <string>
+#include <climits>
 // third party
 #include <AL/alext.h>
 #include <sndfile.h>
