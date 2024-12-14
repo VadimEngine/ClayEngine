@@ -30,6 +30,8 @@ void AudioManager::setGain(float newGain) {
 float AudioManager::getGain() const {
     if (mAudioInitialized_) {
         return mpSoundSource_->getGain();
+    } else {
+        return 0;
     }
 }
 

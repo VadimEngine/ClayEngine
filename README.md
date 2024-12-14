@@ -1,6 +1,5 @@
 # Clay Engine
-Early Alpha Clay Engine static library for developing games in C++. Currently supports an entity component system for game objects that are rendered in custom Scenes.
-
+Early Alpha Clay Engine cross-platform static library for developing games in C++. Currently supports an entity component system for game objects that are rendered in custom Scenes using OpenGL. Works on windows and Linux (Tested on Arch and Fedora)
 
 ### Third Party Libraries
 This libraries uses the following third party libraries:
@@ -39,7 +38,7 @@ The Clay Static library can be built with the following commands:
 - Clean build directory for a clean build
     - `./tools/clean-build.sh`
 
-- Run test:
+- Run test (if build with -DCLAY_BUILD_TESTS=ON):
     - `./build/test/Debug/ClayEngineTest.exe`
 
 A demo project for using this library can be seen [here](https://github.com/VadimEngine/ClayEngineDemo)
