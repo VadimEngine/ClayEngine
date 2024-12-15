@@ -1,6 +1,6 @@
 #include <gtest/gtest.h>
 // ClayEngine
-#include <Clay/Application/App.h>
+#include <clay/application/App.h>
 
 TEST(AppTest, Initialization) {
     // Confirm an instance of app can be made 

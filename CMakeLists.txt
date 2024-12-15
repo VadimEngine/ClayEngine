@@ -30,26 +30,26 @@ set(BUILD_EXAMPLES OFF CACHE BOOL "Build examples" FORCE)
 set(BUILD_TESTING  OFF CACHE BOOL "build tests" FORCE)
 
 # Add third party directories
-add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/ThirdParty/assimp)
-add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/ThirdParty/freetype)
-add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/ThirdParty/glew-cmake)
-add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/ThirdParty/glfw)
-add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/ThirdParty/libsndfile)
-add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/ThirdParty/openal-soft)
-add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/ThirdParty/soil)
+add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/thirdparty/assimp)
+add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/thirdparty/freetype)
+add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/thirdparty/glew-cmake)
+add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/thirdparty/glfw)
+add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/thirdparty/libsndfile)
+add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/thirdparty/openal-soft)
+add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/thirdparty/soil)
 
 # Collect all source files
 file(GLOB_RECURSE SRC_FILES ${CMAKE_CURRENT_SOURCE_DIR}/src/*.cpp)
 
 # Add imgui source files
 list(APPEND SRC_FILES
-    ${CMAKE_CURRENT_SOURCE_DIR}/ThirdParty/imgui/imgui.cpp
-    ${CMAKE_CURRENT_SOURCE_DIR}/ThirdParty/imgui/imgui_demo.cpp
-    ${CMAKE_CURRENT_SOURCE_DIR}/ThirdParty/imgui/imgui_draw.cpp
-    ${CMAKE_CURRENT_SOURCE_DIR}/ThirdParty/imgui/backends/imgui_impl_glfw.cpp
-    ${CMAKE_CURRENT_SOURCE_DIR}/ThirdParty/imgui/backends/imgui_impl_opengl3.cpp
-    ${CMAKE_CURRENT_SOURCE_DIR}/ThirdParty/imgui/imgui_tables.cpp
-    ${CMAKE_CURRENT_SOURCE_DIR}/ThirdParty/imgui/imgui_widgets.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/thirdparty/imgui/imgui.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/thirdparty/imgui/imgui_demo.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/thirdparty/imgui/imgui_draw.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/thirdparty/imgui/backends/imgui_impl_glfw.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/thirdparty/imgui/backends/imgui_impl_opengl3.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/thirdparty/imgui/imgui_tables.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/thirdparty/imgui/imgui_widgets.cpp
 )
 
 # Define the library target
@@ -92,17 +92,17 @@ target_include_directories(${PROJECT_NAME} PUBLIC
     # source code
     ${CMAKE_CURRENT_SOURCE_DIR}/include
     # third party
-    ${CMAKE_CURRENT_SOURCE_DIR}/ThirdParty/glm
-    ${CMAKE_CURRENT_SOURCE_DIR}/ThirdParty/imgui
-    ${CMAKE_CURRENT_SOURCE_DIR}/ThirdParty/imgui/backends
-    ${CMAKE_CURRENT_SOURCE_DIR}/ThirdParty/soil/inc/SOIL
+    ${CMAKE_CURRENT_SOURCE_DIR}/thirdparty/glm
+    ${CMAKE_CURRENT_SOURCE_DIR}/thirdparty/imgui
+    ${CMAKE_CURRENT_SOURCE_DIR}/thirdparty/imgui/backends
+    ${CMAKE_CURRENT_SOURCE_DIR}/thirdparty/soil/inc/SOIL
 )
 
 if (CLAY_BUILD_TESTS)
     set(gtest_force_shared_crt ON CACHE BOOL "" FORCE)
     enable_testing()
     # Add googletest as a subdirectory
-    add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/ThirdParty/googletest gtest_build)
+    add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/thirdparty/googletest gtest_build)
     # Add the test directory
     add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/test)
 endif()
