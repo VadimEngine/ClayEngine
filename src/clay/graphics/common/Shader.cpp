@@ -1,5 +1,5 @@
 // class
-#include "clay/graphics/Shader.h"
+#include "clay/graphics/common/Shader.h"
 
 namespace clay {
 

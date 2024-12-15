@@ -1,5 +1,5 @@
 // class
-#include "clay/graphics/Model.h"
+#include "clay/graphics/common/Model.h"
 
 namespace clay {
 
@@ -23,7 +23,7 @@ void Model::loadMesh(const std::filesystem::path& meshPath) {
     Mesh::loadMeshes(meshPath, mMeshes_);
 }
 
-void Model::render(const Shader& shader) const {
+void Model::render(const ShaderProgram& shader) const {
     for (auto& each: mMeshes_) {
         each.render(shader);
     }

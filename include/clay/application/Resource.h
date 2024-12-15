@@ -6,12 +6,13 @@
 #include <unordered_map>
 // project
 #include "clay/audio/Audio.h"
-#include "clay/graphics/Font.h"
-#include "clay/graphics/Mesh.h"
-#include "clay/graphics/Model.h"
-#include "clay/graphics/Shader.h"
-#include "clay/graphics/SpriteSheet.h"
-#include "clay/graphics/Texture.h"
+#include "clay/graphics/common/Font.h"
+#include "clay/graphics/common/Mesh.h"
+#include "clay/graphics/common/Model.h"
+#include "clay/graphics/common/Shader.h"
+#include "clay/graphics/common/ShaderProgram.h"
+#include "clay/graphics/common/SpriteSheet.h"
+#include "clay/graphics/common/Texture.h"
 
 namespace clay {
 
@@ -27,7 +28,7 @@ public:
     /** Loaded/Built Model textures */
     std::unordered_map<std::string, std::unique_ptr<Texture>> mTextures_;
     /** Loaded/Built Shader resources */
-    std::unordered_map<std::string, std::unique_ptr<Shader>> mShaders_;
+    std::unordered_map<std::string, std::unique_ptr<ShaderProgram>> mShaders_;
     /** Loaded/Built Audio resources */
     std::unordered_map<std::string, std::unique_ptr<Audio>> mAudios_;
     /** Loaded/Built Fonts resources */

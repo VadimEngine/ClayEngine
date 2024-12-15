@@ -1,5 +1,5 @@
 // forward declare
-#include "clay/graphics/Camera.h"
+#include "clay/graphics/common/Camera.h"
 // class
 #include "clay/application/CameraController.h"
 

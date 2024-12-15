@@ -4,7 +4,7 @@
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
 // project
-#include "clay/graphics/Renderer.h"
+#include "clay/graphics/common/Renderer.h"
 
 namespace clay {
 

@@ -6,7 +6,7 @@ namespace clay {
 SoundDevice::SoundDevice() {
     mpALCDevice_ = alcOpenDevice(nullptr); // nullptr = get default device
     if (!mpALCDevice_) {
-        throw std::runtime_error("failed to get sound device");
+        throw std::runtime_error("Failed to get sound device");
     }
     // create context
     mpALCContext_ = alcCreateContext(mpALCDevice_, nullptr);
@@ -15,7 +15,7 @@ SoundDevice::SoundDevice() {
     }
     // make context current
     if (!alcMakeContextCurrent(mpALCContext_)) {
-        throw std::runtime_error("failed to make context current");
+        throw std::runtime_error("Failed to make context current");
     }
     const ALCchar* name = nullptr;
     if (alcIsExtensionPresent(mpALCDevice_, "ALC_ENUMERATE_ALL_EXT")) {

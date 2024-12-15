@@ -2,7 +2,7 @@
 // third party
 #include <glm/vec2.hpp>
 // project
-#include "clay/graphics/Texture.h"
+#include "clay/graphics/common/Texture.h"
 
 namespace clay {
 

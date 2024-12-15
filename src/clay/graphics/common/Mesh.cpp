@@ -1,5 +1,5 @@
 // class
-#include "clay/graphics/Mesh.h"
+#include "clay/graphics/common/Mesh.h"
 
 namespace clay {
 
@@ -102,7 +102,7 @@ Mesh::Mesh(const std::vector<Vertex>& vertices, const std::vector<unsigned int>&
 
 Mesh::~Mesh() {}
 
-void Mesh::render(const Shader& theShader) const {
+void Mesh::render(const ShaderProgram& theShader) const {
     glBindVertexArray(mVAO);
     glDrawElements(GL_TRIANGLES, static_cast<unsigned int>(indices.size()), GL_UNSIGNED_INT, 0);
     glBindVertexArray(0);

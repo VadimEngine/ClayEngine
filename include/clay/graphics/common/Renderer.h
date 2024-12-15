@@ -5,13 +5,14 @@
 #include <glm/gtc/type_ptr.hpp>
 #include <glm/gtx/string_cast.hpp>
 // project
-#include "clay/graphics/Camera.h"
-#include "clay/graphics/Font.h"
-#include "clay/graphics/LightSource.h"
-#include "clay/graphics/Mesh.h"
-#include "clay/graphics/Shader.h"
-#include "clay/graphics/SpriteSheet.h"
-#include "clay/graphics/Texture.h"
+#include "clay/graphics/common/Camera.h"
+#include "clay/graphics/common/Font.h"
+#include "clay/graphics/common/LightSource.h"
+#include "clay/graphics/common/Mesh.h"
+#include "clay/graphics/common/ShaderProgram.h"
+#include "clay/graphics/common/Shader.h"
+#include "clay/graphics/common/SpriteSheet.h"
+#include "clay/graphics/common/Texture.h"
 
 namespace clay {
 
@@ -28,8 +29,9 @@ public:
      * @param mvpShader shader for rendering simple shapes
      * @param rectPlane Mesh for a simple rect shape
      */
-    Renderer(const glm::vec2& screenDim, Shader& spriteShader,
-        Shader& text2Shader, Shader& mvpShader, Mesh& rectPlane, Shader& frameBufferShader, Shader& bloomFinalShader);
+    Renderer(const glm::vec2& screenDim, ShaderProgram& spriteShader,
+        ShaderProgram& text2Shader, ShaderProgram& mvpShader, Mesh& rectPlane,
+        ShaderProgram& frameBufferShader, ShaderProgram& bloomFinalShader);
 
     /** Destructor*/
     ~Renderer();
@@ -149,11 +151,11 @@ private:
     /* VAO for a texture quad **/
     unsigned int mTextureQuadVAO_;
     /** Shader for rendering sprites/textures */
-    const Shader& mMVPShader_;
+    const ShaderProgram& mMVPShader_;
     /** Shader used to render sprites */
-    const Shader& mSpriteShader_;
+    const ShaderProgram& mSpriteShader_;
     /** Shader for rendering Texts */
-    const Shader& mTextShader_;
+    const ShaderProgram& mTextShader_;
 
     Mesh mRectPlane_;
 
@@ -178,9 +180,9 @@ private:
     GLuint pingpongFBO_[2];
     GLuint pingpongColorbuffers_[2];
 
-    const Shader& mBlurShader_;
+    const ShaderProgram& mBlurShader_;
 
-    const Shader& mBloomFinalShader_;
+    const ShaderProgram& mBloomFinalShader_;
 
     unsigned int mAttachments_[2] = { GL_COLOR_ATTACHMENT0, GL_COLOR_ATTACHMENT1 };
 

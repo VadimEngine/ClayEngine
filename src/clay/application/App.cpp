@@ -9,19 +9,21 @@ App::App()
  : mWindow_("OpenGL Application", 800, 600) {
     // Initialize OpenGL and imgui
     initializeOpenGL();
+    mGraphicsAPI_ = new GraphicsAPIOpenGL();
     ImGuiComponent::initializeImGui(mWindow_.getGLFWWindow());
     // Load/build Application resources
     loadResources();
     // Renderer and Scene (must be called after OpenGL is initialized)
     mpRenderer_ = std::make_unique<Renderer>(
         glm::vec2{800, 600},
-        *(mResources_.getResource<Shader>("TextureSurface")),
-        *(mResources_.getResource<Shader>("Text")),
-        *(mResources_.getResource<Shader>("MVPShader")),
+        *(mResources_.getResource<ShaderProgram>("TextureSurface")),
+        *(mResources_.getResource<ShaderProgram>("Text")),
+        *(mResources_.getResource<ShaderProgram>("MVPShader")),
         *(mResources_.getResource<Mesh>("RectPlane")),
-        *(mResources_.getResource<Shader>("Blur")),
-        *(mResources_.getResource<Shader>("BloomFinal"))
+        *(mResources_.getResource<ShaderProgram>("Blur")),
+        *(mResources_.getResource<ShaderProgram>("BloomFinal"))
     );
+
 }
 
 App::~App() {
@@ -150,62 +152,223 @@ void App::setAntiAliasing(unsigned int sampleSize) {
 
 void App::loadResources() {
     // Shaders
-    mResources_.loadResource<Shader>(
-        {
-        Resource::RESOURCE_PATH / "shaders/AssimpLight.vert",
-        Resource::RESOURCE_PATH / "shaders/AssimpLight.frag"
-        },
-        "AssimpLight"
-    );
-    mResources_.loadResource<Shader>(
-        {
-        Resource::RESOURCE_PATH / "shaders/Assimp.vert",
-        Resource::RESOURCE_PATH / "shaders/Assimp.frag"
-        },
-        "Assimp"
-    );
-    mResources_.loadResource<Shader>(
-        {
-        Resource::RESOURCE_PATH / "shaders/MVPTexShader.vert",
-        Resource::RESOURCE_PATH / "shaders/MVPTexShader.frag"
-        },
-        "MVPTexShader"
-    );
-    mResources_.loadResource<Shader>(
-        {
-        Resource::RESOURCE_PATH / "shaders/Text.vert",
-        Resource::RESOURCE_PATH / "shaders/Text.frag"
-        },
-        "Text"
-    );
-    mResources_.loadResource<Shader>(
-        {
-        Resource::RESOURCE_PATH / "shaders/MVPShader.vert",
-        Resource::RESOURCE_PATH / "shaders/MVPShader.frag"
-        },
-        "MVPShader"
-    );
-    mResources_.loadResource<Shader>(
-        {
-        Resource::RESOURCE_PATH / "shaders/TextureSurface.vert",
-        Resource::RESOURCE_PATH / "shaders/TextureSurface.frag"
-        },
-         "TextureSurface"
-    );
-    mResources_.loadResource<Shader>(
-        {
-        Resource::RESOURCE_PATH / "shaders/Blur.vert",
-        Resource::RESOURCE_PATH / "shaders/Blur.frag"
-        },
-        "Blur"
-    );
-    mResources_.loadResource<Shader>(
-        {
-        Resource::RESOURCE_PATH / "shaders/BloomFinal.vert",
-        Resource::RESOURCE_PATH / "shaders/BloomFinal.frag"
-        },
-        "BloomFinal"
-    );
+    {
+        auto vertexShaderFileData = loadFile(Resource::RESOURCE_PATH / "shaders/AssimpLight.vert");
+        auto fragmentShaderFileData = loadFile(Resource::RESOURCE_PATH / "shaders/AssimpLight.frag");
+
+        std::unique_ptr<ShaderProgram> shader = std::make_unique<ShaderProgram>(*mGraphicsAPI_);
+        shader->addShader({
+            ShaderCreateInfo::Type::VERTEX,
+            std::string(vertexShaderFileData.begin(), vertexShaderFileData.end()).c_str(),
+            vertexShaderFileData.size()
+        });
+        shader->addShader({
+            ShaderCreateInfo::Type::FRAGMENT,
+            std::string(fragmentShaderFileData.begin(), fragmentShaderFileData.end()).c_str(),
+        });
+
+        shader->linkProgram();
+        // add to resource
+        mResources_.addResource<ShaderProgram>(std::move(shader), "AssimpLight");
+    }
+    {
+        auto vertexShaderFileData = loadFile(Resource::RESOURCE_PATH / "shaders/Assimp.vert");
+        auto fragmentShaderFileData = loadFile(Resource::RESOURCE_PATH / "shaders/Assimp.frag");
+        // TODO use size so null string conversion for null terminator is not needed
+        std::unique_ptr<ShaderProgram> shader = std::make_unique<ShaderProgram>(*mGraphicsAPI_);
+        shader->addShader({
+            ShaderCreateInfo::Type::VERTEX,
+            std::string(vertexShaderFileData.begin(), vertexShaderFileData.end()).c_str(),
+            vertexShaderFileData.size()
+        });
+        shader->addShader({
+            ShaderCreateInfo::Type::FRAGMENT,
+            std::string(fragmentShaderFileData.begin(), fragmentShaderFileData.end()).c_str(),
+            fragmentShaderFileData.size()
+        });
+
+        shader->linkProgram();
+        // add to resource
+        mResources_.addResource<ShaderProgram>(std::move(shader), "Assimp");
+    }
+    {
+        auto vertexShaderFileData = loadFile(Resource::RESOURCE_PATH / "shaders/MVPTexShader.vert");
+        auto fragmentShaderFileData = loadFile(Resource::RESOURCE_PATH / "shaders/MVPTexShader.frag");
+        // TODO use size so null string conversion for null terminator is not needed
+        std::unique_ptr<ShaderProgram> shader = std::make_unique<ShaderProgram>(*mGraphicsAPI_);
+        shader->addShader({
+            ShaderCreateInfo::Type::VERTEX,
+            std::string(vertexShaderFileData.begin(), vertexShaderFileData.end()).c_str(),
+            vertexShaderFileData.size()
+        });
+        shader->addShader({
+            ShaderCreateInfo::Type::FRAGMENT,
+            std::string(fragmentShaderFileData.begin(), fragmentShaderFileData.end()).c_str(),
+            fragmentShaderFileData.size()
+        });
+
+        shader->linkProgram();
+        // add to resource
+        mResources_.addResource<ShaderProgram>(std::move(shader), "MVPTexShader");
+    }
+    {
+        auto vertexShaderFileData = loadFile(Resource::RESOURCE_PATH / "shaders/Text.vert");
+        auto fragmentShaderFileData = loadFile(Resource::RESOURCE_PATH / "shaders/Text.frag");
+        // TODO use size so null string conversion for null terminator is not needed
+        std::unique_ptr<ShaderProgram> shader = std::make_unique<ShaderProgram>(*mGraphicsAPI_);
+        shader->addShader({
+            ShaderCreateInfo::Type::VERTEX,
+            std::string(vertexShaderFileData.begin(), vertexShaderFileData.end()).c_str(),
+            vertexShaderFileData.size()
+        });
+        shader->addShader({
+            ShaderCreateInfo::Type::FRAGMENT,
+            std::string(fragmentShaderFileData.begin(), fragmentShaderFileData.end()).c_str(),
+            fragmentShaderFileData.size()
+        });
+
+        shader->linkProgram();
+        // add to resource
+        mResources_.addResource<ShaderProgram>(std::move(shader), "Text");
+    }
+    {
+        auto vertexShaderFileData = loadFile(Resource::RESOURCE_PATH / "shaders/MVPShader.vert");
+        auto fragmentShaderFileData = loadFile(Resource::RESOURCE_PATH / "shaders/MVPShader.frag");
+        // TODO use size so null string conversion for null terminator is not needed
+        std::unique_ptr<ShaderProgram> shader = std::make_unique<ShaderProgram>(*mGraphicsAPI_);
+        shader->addShader({
+            ShaderCreateInfo::Type::VERTEX,
+            std::string(vertexShaderFileData.begin(), vertexShaderFileData.end()).c_str(),
+            vertexShaderFileData.size()
+        });
+        shader->addShader({
+            ShaderCreateInfo::Type::FRAGMENT,
+            std::string(fragmentShaderFileData.begin(), fragmentShaderFileData.end()).c_str(),
+            fragmentShaderFileData.size()
+        });
+
+        shader->linkProgram();
+        // add to resource
+        mResources_.addResource<ShaderProgram>(std::move(shader), "MVPShader");
+    }
+    {
+        auto vertexShaderFileData = loadFile(Resource::RESOURCE_PATH / "shaders/TextureSurface.vert");
+        auto fragmentShaderFileData = loadFile(Resource::RESOURCE_PATH / "shaders/TextureSurface.frag");
+        // TODO use size so null string conversion for null terminator is not needed
+        std::unique_ptr<ShaderProgram> shader = std::make_unique<ShaderProgram>(*mGraphicsAPI_);
+        shader->addShader({
+            ShaderCreateInfo::Type::VERTEX,
+            std::string(vertexShaderFileData.begin(), vertexShaderFileData.end()).c_str(),
+            vertexShaderFileData.size()
+        });
+        shader->addShader({
+            ShaderCreateInfo::Type::FRAGMENT,
+            std::string(fragmentShaderFileData.begin(), fragmentShaderFileData.end()).c_str(),
+            fragmentShaderFileData.size()
+        });
+
+        shader->linkProgram();
+        // add to resource
+        mResources_.addResource<ShaderProgram>(std::move(shader), "TextureSurface");
+    }
+    {
+        auto vertexShaderFileData = loadFile(Resource::RESOURCE_PATH / "shaders/Blur.vert");
+        auto fragmentShaderFileData = loadFile(Resource::RESOURCE_PATH / "shaders/Blur.frag");
+        // TODO use size so null string conversion for null terminator is not needed
+        std::unique_ptr<ShaderProgram> shader = std::make_unique<ShaderProgram>(*mGraphicsAPI_);
+        shader->addShader({
+            ShaderCreateInfo::Type::VERTEX,
+            std::string(vertexShaderFileData.begin(), vertexShaderFileData.end()).c_str(),
+            vertexShaderFileData.size()
+        });
+        shader->addShader({
+            ShaderCreateInfo::Type::FRAGMENT,
+            std::string(fragmentShaderFileData.begin(), fragmentShaderFileData.end()).c_str(),
+            fragmentShaderFileData.size()
+        });
+
+        shader->linkProgram();
+        // add to resource
+        mResources_.addResource<ShaderProgram>(std::move(shader), "Blur");
+    }
+    {
+        auto vertexShaderFileData = loadFile(Resource::RESOURCE_PATH / "shaders/BloomFinal.vert");
+        auto fragmentShaderFileData = loadFile(Resource::RESOURCE_PATH / "shaders/BloomFinal.frag");
+        // TODO use size so null string conversion for null terminator is not needed
+        std::unique_ptr<ShaderProgram> shader = std::make_unique<ShaderProgram>(*mGraphicsAPI_);
+        shader->addShader({
+            ShaderCreateInfo::Type::VERTEX,
+            std::string(vertexShaderFileData.begin(), vertexShaderFileData.end()).c_str(),
+            vertexShaderFileData.size()
+        });
+        shader->addShader({
+            ShaderCreateInfo::Type::FRAGMENT,
+            std::string(fragmentShaderFileData.begin(), fragmentShaderFileData.end()).c_str(),
+            fragmentShaderFileData.size()
+        });
+
+        shader->linkProgram();
+        // add to resource
+        mResources_.addResource<ShaderProgram>(std::move(shader), "BloomFinal");
+    }
+
+
+    // mResources_.loadResource<Shader>(
+    //     {
+    //     Resource::RESOURCE_PATH / "shaders/AssimpLight.vert",
+    //     Resource::RESOURCE_PATH / "shaders/AssimpLight.frag"
+    //     },
+    //     "AssimpLight"
+    // );
+    // mResources_.loadResource<Shader>(
+    //     {
+    //     Resource::RESOURCE_PATH / "shaders/Assimp.vert",
+    //     Resource::RESOURCE_PATH / "shaders/Assimp.frag"
+    //     },
+    //     "Assimp"
+    // );
+    // mResources_.loadResource<Shader>(
+    //     {
+    //     Resource::RESOURCE_PATH / "shaders/MVPTexShader.vert",
+    //     Resource::RESOURCE_PATH / "shaders/MVPTexShader.frag"
+    //     },
+    //     "MVPTexShader"
+    // );
+    // mResources_.loadResource<Shader>(
+    //     {
+    //     Resource::RESOURCE_PATH / "shaders/Text.vert",
+    //     Resource::RESOURCE_PATH / "shaders/Text.frag"
+    //     },
+    //     "Text"
+    // );
+    // mResources_.loadResource<Shader>(
+    //     {
+    //     Resource::RESOURCE_PATH / "shaders/MVPShader.vert",
+    //     Resource::RESOURCE_PATH / "shaders/MVPShader.frag"
+    //     },
+    //     "MVPShader"
+    // );
+    // mResources_.loadResource<Shader>(
+    //     {
+    //     Resource::RESOURCE_PATH / "shaders/TextureSurface.vert",
+    //     Resource::RESOURCE_PATH / "shaders/TextureSurface.frag"
+    //     },
+    //      "TextureSurface"
+    // );
+    // mResources_.loadResource<Shader>(
+    //     {
+    //     Resource::RESOURCE_PATH / "shaders/Blur.vert",
+    //     Resource::RESOURCE_PATH / "shaders/Blur.frag"
+    //     },
+    //     "Blur"
+    // );
+    // mResources_.loadResource<Shader>(
+    //     {
+    //     Resource::RESOURCE_PATH / "shaders/BloomFinal.vert",
+    //     Resource::RESOURCE_PATH / "shaders/BloomFinal.frag"
+    //     },
+    //     "BloomFinal"
+    // );
     // Textures
     mResources_.loadResource<Texture>(
         {Resource::RESOURCE_PATH / "Sprites.png"},
@@ -396,6 +559,28 @@ Resource& App::getResources() {
 
 Renderer& App::getRenderer() {
     return *mpRenderer_.get();
+}
+
+std::vector<unsigned char> App::loadFile(const std::filesystem::path& filePath) {
+    std::ifstream file(filePath, std::ios::binary | std::ios::ate);
+    if (!file) {
+        throw std::runtime_error("Could not open file: " + filePath.string());
+    }
+
+    std::streamsize fileSize = file.tellg();
+    if (fileSize < 0) {
+        throw std::runtime_error("Error reading file size: " + filePath.string());
+    }
+
+    std::vector<unsigned char> buffer(static_cast<size_t>(fileSize));
+    file.seekg(0, std::ios::beg);
+    if (!file.read(reinterpret_cast<char*>(buffer.data()), fileSize)) {
+        throw std::runtime_error("Error reading file contents: " + filePath.string());
+    }
+
+    // LOG_I("loading: %s", buffer.data());
+
+    return buffer;
 }
 
 } // namespace clay

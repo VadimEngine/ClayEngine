@@ -7,11 +7,13 @@
 #define GLEW_STATIC
 #include <GL/glew.h>
 // project
+#include "clay/graphics/opengl/GraphicsAPIOpenGL.h"
+#include "clay/graphics/common/ShaderProgram.h"
 #include "clay/application/Logger.h"
 #include "clay/application/Resource.h"
 #include "clay/application/Scene.h"
 #include "clay/audio/AudioManager.h"
-#include "clay/graphics/Renderer.h"
+#include "clay/graphics/common/Renderer.h"
 #include "clay/gui/ImGuiComponent.h"
 #include "clay/gui/Window.h"
 
@@ -67,6 +69,8 @@ public:
     /** Get the Renderer for this App */
     Renderer& getRenderer();
 
+    std::vector<unsigned char> loadFile(const std::filesystem::path& filePath);
+
 private:
     /** Load/Build the common resources for the scenes in this application */
     void loadResources();
@@ -87,5 +91,7 @@ private:
     AudioManager mAudioManger_;
     /** Resource for this application that can be shared with child scenes */
     Resource mResources_;
+
+    IGraphicsAPI* mGraphicsAPI_ = nullptr;
 };
 } // namespace clay

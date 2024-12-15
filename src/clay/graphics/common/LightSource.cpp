@@ -1,5 +1,5 @@
 // class
-#include "clay/graphics/LightSource.h"
+#include "clay/graphics/common/LightSource.h"
 
 namespace clay {
 

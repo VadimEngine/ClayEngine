@@ -1,12 +1,12 @@
 // class
-#include "clay/graphics/Renderer.h"
+#include "clay/graphics/common/Renderer.h"
 
 namespace clay {
 
 const int Renderer::MAX_LIGHTS = 16;
 
-Renderer::Renderer(const glm::vec2& screenDim, Shader& spriteShader, Shader& text2Shader,
-                   Shader& mvpShader, Mesh& rectPlane, Shader& frameBufferShader, Shader& bloomFinalShader)
+Renderer::Renderer(const glm::vec2& screenDim, ShaderProgram& spriteShader, ShaderProgram& text2Shader,
+                   ShaderProgram& mvpShader, Mesh& rectPlane, ShaderProgram& frameBufferShader, ShaderProgram& bloomFinalShader)
     : mSpriteShader_(spriteShader),
     mMVPShader_(mvpShader),
     mTextShader_(text2Shader),

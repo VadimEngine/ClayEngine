@@ -30,8 +30,8 @@ void Resource::loadResource(const std::vector<std::filesystem::path>& resourcePa
         mModels_[resourceName] = std::move(pModel);
     } else if constexpr(std::is_same_v<T, Texture>) {
         mTextures_[resourceName] = std::make_unique<Texture>(resourcePath[0], true);
-    } else if constexpr (std::is_same_v<T, Shader>) {
-        mShaders_[resourceName] = std::make_unique<Shader>(resourcePath[0].c_str(),resourcePath[1].c_str());
+    } else if constexpr (std::is_same_v<T, ShaderProgram>) {
+        // mShaders_[resourceName] = std::make_unique<Shader>(resourcePath[0].c_str(),resourcePath[1].c_str());
     } else if constexpr (std::is_same_v<T, Audio>) {
         mAudios_[resourceName] = std::make_unique<Audio>(resourcePath[0].string());
     } else if constexpr (std::is_same_v<T, Font>) {
@@ -47,8 +47,8 @@ void Resource::addResource(std::unique_ptr<T> resource, const std::string& resou
         mModels_[resourceName] = std::move(resource);
     } else if constexpr (std::is_same_v<T, Texture>) {
         mTextures_[resourceName] = std::move(resource);
-    } else if constexpr (std::is_same_v<T, Shader>) {
-        // Handle Shader case
+    } else if constexpr (std::is_same_v<T, ShaderProgram>) {
+        mShaders_[resourceName] = std::move(resource);
     } else if constexpr (std::is_same_v<T, Audio>) {
         mAudios_[resourceName] = std::move(resource);
     } else if constexpr (std::is_same_v<T, Font>) {
@@ -75,7 +75,7 @@ T* Resource::getResource(const std::string& resourceName) {
         if (it != mTextures_.end()) {
             return it->second.get();
         }
-    } else if constexpr (std::is_same_v<T, Shader>) {
+    } else if constexpr (std::is_same_v<T, ShaderProgram>) {
         auto it = mShaders_.find(resourceName);
         if (it != mShaders_.end()) {
             return it->second.get();
@@ -118,7 +118,7 @@ void Resource::release(const std::string& resourceName) {
         if (it != mTextures_.end()) {
             mTextures_.erase(it);
         }
-    } else if constexpr (std::is_same_v<T, Shader>) {
+    } else if constexpr (std::is_same_v<T, ShaderProgram>) {
         auto it = mShaders_.find(resourceName);
         if (it != mShaders_.end()) {
             mShaders_.erase(it);
@@ -155,7 +155,7 @@ void Resource::releaseAll() {
 template void Resource::loadResource<Mesh>(const std::vector<std::filesystem::path>& resourcePath, const std::string& resourceName);
 template void Resource::loadResource<Model>(const std::vector<std::filesystem::path>& resourcePath, const std::string& resourceName);
 template void Resource::loadResource<Texture>(const std::vector<std::filesystem::path>& resourcePath, const std::string& resourceName);
-template void Resource::loadResource<Shader>(const std::vector<std::filesystem::path>& resourcePath, const std::string& resourceName);
+template void Resource::loadResource<ShaderProgram>(const std::vector<std::filesystem::path>& resourcePath, const std::string& resourceName);
 template void Resource::loadResource<Audio>(const std::vector<std::filesystem::path>& resourcePath, const std::string& resourceName);
 template void Resource::loadResource<Font>(const std::vector<std::filesystem::path>& resourcePath, const std::string& resourceName);
 // No load for SpriteSheet
@@ -163,7 +163,7 @@ template void Resource::loadResource<Font>(const std::vector<std::filesystem::pa
 template void Resource::addResource(std::unique_ptr<Mesh> resource, const std::string& resourceName);
 template void Resource::addResource(std::unique_ptr<Model> resource, const std::string& resourceName);
 template void Resource::addResource(std::unique_ptr<Texture> resource, const std::string& resourceName);
-template void Resource::addResource(std::unique_ptr<Shader> resource, const std::string& resourceName);
+template void Resource::addResource(std::unique_ptr<ShaderProgram> resource, const std::string& resourceName);
 template void Resource::addResource(std::unique_ptr<Audio> resource, const std::string& resourceName);
 template void Resource::addResource(std::unique_ptr<Font> resource, const std::string& resourceName);
 template void Resource::addResource(std::unique_ptr<SpriteSheet> resource, const std::string& resourceName);
@@ -171,7 +171,7 @@ template void Resource::addResource(std::unique_ptr<SpriteSheet> resource, const
 template Mesh* Resource::getResource(const std::string& resourceName);
 template Model* Resource::getResource(const std::string& resourceName);
 template Texture* Resource::getResource(const std::string& resourceName);
-template Shader* Resource::getResource(const std::string& resourceName);
+template ShaderProgram* Resource::getResource(const std::string& resourceName);
 template Audio* Resource::getResource(const std::string& resourceName);
 template Font* Resource::getResource(const std::string& resourceName);
 template SpriteSheet* Resource::getResource(const std::string& resourceName);
@@ -179,7 +179,7 @@ template SpriteSheet* Resource::getResource(const std::string& resourceName);
 template void Resource::release<Mesh>(const std::string& resourceName);
 template void Resource::release<Model>(const std::string& resourceName);
 template void Resource::release<Texture>(const std::string& resourceName);
-template void Resource::release<Shader>(const std::string& resourceName);
+template void Resource::release<ShaderProgram>(const std::string& resourceName);
 template void Resource::release<Audio>(const std::string& resourceName);
 template void Resource::release<Font>(const std::string& resourceName);
 template void Resource::release<SpriteSheet>(const std::string& resourceName);

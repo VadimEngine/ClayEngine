@@ -1,5 +1,5 @@
 // class
-#include "clay/graphics/Camera.h"
+#include "clay/graphics/common/Camera.h"
 
 namespace clay {
 

@@ -7,8 +7,8 @@
 #include "clay/application/InputHandler.h"
 #include "clay/application/Resource.h"
 #include "clay/entity/Entity.h"
-#include "clay/graphics/Camera.h"
-#include "clay/graphics/Renderer.h"
+#include "clay/graphics/common/Camera.h"
+#include "clay/graphics/common/Renderer.h"
 
 namespace clay {
 

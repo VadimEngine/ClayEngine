@@ -15,7 +15,7 @@
 #include "clay/entity/render/ModelRenderable.h"
 #include "clay/entity/render/SpriteRenderable.h"
 #include "clay/entity/render/TextRenderable.h"
-#include "clay/graphics/Shader.h"
+#include "clay/graphics/common/Shader.h"
 
 namespace clay {
 

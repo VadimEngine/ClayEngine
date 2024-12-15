@@ -9,8 +9,9 @@
 #include <assimp/scene.h>
 // project
 #include "clay/application/Logger.h"
-#include "clay/graphics/Mesh.h"
-#include "clay/graphics/Shader.h"
+#include "clay/graphics/common/Mesh.h"
+#include "clay/graphics/common/Shader.h"
+#include "clay/graphics/common/ShaderProgram.h"
 
 namespace clay {
 
@@ -42,7 +43,7 @@ public:
      * Draw the Model meshes
      * @param shader Shader to render the meshes with
      */
-    void render(const Shader& shader) const;
+    void render(const ShaderProgram& shader) const;
 
 private:
     /** Meshes this model is made up of and owns*/

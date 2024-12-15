@@ -1,5 +1,5 @@
 // class
-#include "clay/graphics/SpriteSheet.h"
+#include "clay/graphics/common/SpriteSheet.h"
 
 namespace clay {
 

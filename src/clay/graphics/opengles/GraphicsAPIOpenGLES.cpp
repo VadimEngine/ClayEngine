@@ -1,0 +1,2 @@
+namespace clay {
+} // namespace clay

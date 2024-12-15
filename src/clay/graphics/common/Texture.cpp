@@ -1,5 +1,5 @@
 // class
-#include "clay/graphics/Texture.h"
+#include "clay/graphics/common/Texture.h"
 
 namespace clay {
 

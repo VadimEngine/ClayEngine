@@ -3,7 +3,7 @@
 #include <unordered_map>
 // project
 #include "clay/entity/render/BaseRenderable.h"
-#include "clay/graphics/Model.h"
+#include "clay/graphics/common/Model.h"
 
 namespace clay {
 
@@ -14,7 +14,7 @@ public:
      * @param pModel Model for this Renderable
      * @param pShader Shader used for this Renderable
      */
-    ModelRenderable(const Model* pModel = nullptr, const Shader* pShader = nullptr);
+    ModelRenderable(const Model* pModel = nullptr, const ShaderProgram* pShader = nullptr);
 
     /** Destructor*/
     ~ModelRenderable();
@@ -30,7 +30,7 @@ public:
     const Model* getModel() const;
 
     /** Get the Shader used for this Renderable */
-    const Shader* getShader() const;
+    const ShaderProgram* getShader() const;
 
     /**
      * Set the model this Renderable will render
@@ -42,7 +42,7 @@ public:
      * Set the Shader this Renderable will use
      * @param pShader the Shader
      */
-    void setShader(Shader* pShader);
+    void setShader(ShaderProgram* pShader);
 
     /**
      * Set a texture when rendering this renderable with the assign Texture unit
@@ -66,7 +66,7 @@ private:
     /**The Model of this Model Renderable */
     const Model* mpModel_ = nullptr;
     /** The Shader used to render this model */
-    const Shader* mpShader_ = nullptr;
+    const ShaderProgram* mpShader_ = nullptr;
     /** Map of texture ids and the uniform name for the shader*/
     std::unordered_map<unsigned int, std::pair<unsigned int, std::string>> mTextureByUnit_;
     /** If the wire frames are also rendered */

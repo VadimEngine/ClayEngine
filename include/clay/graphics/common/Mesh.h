@@ -9,7 +9,9 @@
 #include <assimp/postprocess.h>
 #include <glm/gtc/matrix_transform.hpp>
 // project
-#include "clay/graphics/Shader.h"
+#include "clay/graphics/common/Shader.h"
+#include "clay/graphics/common/ShaderProgram.h"
+
 
 namespace clay {
 
@@ -63,7 +65,7 @@ public:
      * Render the mesh with the given shader. TODO use textures
      * @param theShader Shader that will be used to draw. Textures will be bound to the shader before rendering
      */
-    void render(const Shader& theShader) const;
+    void render(const ShaderProgram& theShader) const;
 
 private:
     /**

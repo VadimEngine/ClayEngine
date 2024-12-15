@@ -8,7 +8,7 @@
 // project
 #include "clay/application/Logger.h"
 #include "clay/entity/physics/PhysicsComponentBase.h"
-#include "clay/graphics/Renderer.h"
+#include "clay/graphics/common/Renderer.h"
 
 namespace clay {
 

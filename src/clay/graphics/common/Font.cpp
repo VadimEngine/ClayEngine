@@ -1,5 +1,5 @@
 // class
-#include "clay/graphics/Font.h"
+#include "clay/graphics/common/Font.h"
 
 namespace clay {
 

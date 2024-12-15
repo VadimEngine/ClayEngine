@@ -3,7 +3,7 @@
 
 namespace clay {
 
-ModelRenderable::ModelRenderable(const Model* pModel, const Shader* pShader)
+ModelRenderable::ModelRenderable(const Model* pModel, const ShaderProgram* pShader)
     : mpModel_(pModel), mpShader_(pShader) {}
 
 ModelRenderable::~ModelRenderable() {}
@@ -54,7 +54,7 @@ const Model* ModelRenderable::getModel() const {
     return mpModel_;
 }
 
-const Shader* ModelRenderable::getShader() const {
+const ShaderProgram* ModelRenderable::getShader() const {
     return mpShader_;
 }
 
@@ -62,7 +62,7 @@ void ModelRenderable::setModel(Model* pModel) {
     mpModel_ = pModel;
 }
 
-void ModelRenderable::setShader(Shader* pShader) {
+void ModelRenderable::setShader(ShaderProgram* pShader) {
     mpShader_ = pShader;
 }
 
