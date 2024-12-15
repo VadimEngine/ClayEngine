@@ -1,30 +1,30 @@
-[submodule "ThirdParty/assimp"]
-	path = ThirdParty/assimp
+[submodule "thirdparty/assimp"]
+	path = thirdparty/assimp
 	url = https://github.com/assimp/assimp.git
-[submodule "ThirdParty/freetype"]
-	path = ThirdParty/freetype
+[submodule "thirdparty/freetype"]
+	path = thirdparty/freetype
 	url = https://gitlab.freedesktop.org/freetype/freetype.git
-[submodule "ThirdParty/glew-cmake"]
-	path = ThirdParty/glew-cmake
+[submodule "thirdparty/glew-cmake"]
+	path = thirdparty/glew-cmake
 	url = https://github.com/Perlmint/glew-cmake.git
-[submodule "ThirdParty/glfw"]
-	path = ThirdParty/glfw
+[submodule "thirdparty/glfw"]
+	path = thirdparty/glfw
 	url = https://github.com/glfw/glfw.git
-[submodule "ThirdParty/glm"]
-	path = ThirdParty/glm
+[submodule "thirdparty/glm"]
+	path = thirdparty/glm
 	url = https://github.com/g-truc/glm.git
-[submodule "ThirdParty/imgui"]
-	path = ThirdParty/imgui
+[submodule "thirdparty/imgui"]
+	path = thirdparty/imgui
 	url = https://github.com/ocornut/imgui.git
-[submodule "ThirdParty/openal-soft"]
-	path = ThirdParty/openal-soft
+[submodule "thirdparty/openal-soft"]
+	path = thirdparty/openal-soft
 	url = https://github.com/kcat/openal-soft
-[submodule "ThirdParty/libsndfile"]
-	path = ThirdParty/libsndfile
+[submodule "thirdparty/libsndfile"]
+	path = thirdparty/libsndfile
 	url = https://github.com/libsndfile/libsndfile.git
-[submodule "ThirdParty/soil"]
-	path = ThirdParty/soil
+[submodule "thirdparty/soil"]
+	path = thirdparty/soil
 	url = https://github.com/paralin/soil.git
-[submodule "ThirdParty/googletest"]
-	path = ThirdParty/googletest
+[submodule "thirdparty/googletest"]
+	path = thirdparty/googletest
 	url = https://github.com/google/googletest.git
