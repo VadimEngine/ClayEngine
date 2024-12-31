@@ -2,15 +2,11 @@
 // standard lib
 #include <filesystem>
 #include <stdexcept>
-#include <optional>
-#include <vector>
 // third party
-#define GLEW_STATIC
-#include <GL/glew.h>
 #include <glm/vec2.hpp>
-#include <SOIL.h>
 // project
-#include "clay/application/Logger.h"
+#include "clay/graphics/common/IGraphicsAPI.h"
+
 
 namespace clay {
 
@@ -24,14 +20,14 @@ public:
      * @param height height in pixels
      * @param channels channels per pixel
      */
-    Texture(const unsigned char* textureData, int width, int height, int channels, bool gammaCorrect = false);
+    Texture(IGraphicsAPI& graphicsAPI , const unsigned char* textureData, int width, int height, int channels, bool gammaCorrect = false);
 
     /**
      * @brief Load a texture from a given path
      *
      * @param path
      */
-    explicit Texture(const std::filesystem::path& path, bool gammaCorrect = false);
+    explicit Texture(IGraphicsAPI& graphicsAPI, const std::filesystem::path& path, bool gammaCorrect = false);
 
     /**
      * @brief Destructor. Frees the GL texture id
@@ -49,7 +45,9 @@ public:
      * @param channels Pointer to store number of channels per pixel
      * @return unsigned int GL Texture Id
      */
-    static unsigned int loadTexture(const std::filesystem::path& texturePath, int* width, int* height, int* channels, bool gammaCorrect = false);
+    static unsigned int loadTexture(IGraphicsAPI& graphicsAPI, const std::filesystem::path& texturePath, int* width, int* height, int* channels, bool gammaCorrect = false);
+
+    // static void saveImageAsBMP();
 
     /** Get the GL Texture Id */
     unsigned int getId() const;
@@ -66,6 +64,8 @@ public:
     /** Get Width x Height in pixels */
     glm::ivec2 getShape() const;
 
+    std::vector<unsigned char> getPixelData();
+
 private:
     /**
      * @brief Helper method to convert pixel data into a GL texture data
@@ -76,8 +76,10 @@ private:
      * @param channels Channels per pixel
      * @return Gl Texture Id
      */
-    static unsigned int genGLTexture(const unsigned char* textureData, int width, int height, int channels, bool gammaCorrect = false);
+    static unsigned int genGLTexture(IGraphicsAPI& graphicsAPI, const unsigned char* textureData, int width, int height, int channels, bool gammaCorrect = false);
 
+
+    IGraphicsAPI& mGraphicsAPI_;
     /** GL Texture Id*/
     unsigned int mTextureId_;
     /** Width in pixels*/

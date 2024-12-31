@@ -1,4 +1,8 @@
-// forward declare
+// standard lib
+// third party
+#include <glm/glm.hpp>
+#include <glm/gtc/matrix_transform.hpp>
+// ClayEngine
 #include "clay/application/App.h"
 // class
 #include "clay/application/Scene.h"
@@ -10,6 +14,7 @@ Scene::Scene(App& theApp)
     // Set camera aspect ratio
     glm::vec2 screenDim = mApp_.getWindow().getWindowDimensions();
     mpSceneCamera_->setAspectRatio(static_cast<float>(screenDim.x)/static_cast<float>(screenDim.y));
+    mResources_.mGraphicsAPI_ = &(mApp_.getGraphicsAPI());
 }
 
 void Scene::assembleResources() {}

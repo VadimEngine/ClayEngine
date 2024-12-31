@@ -1,16 +1,11 @@
 #pragma once
 // standard lib
 #include <filesystem>
-#include <string>
 #include <unordered_map>
 // third party
-#include <ft2build.h>
-#include FT_FREETYPE_H
-#define GLEW_STATIC
-#include <GL/glew.h>
-#include <glm/gtc/type_ptr.hpp>
-//project
-#include "clay/application/Logger.h"
+#include <glm/vec2.hpp>
+// project
+#include <clay/graphics/common/IGraphicsAPI.h>
 
 namespace clay {
 
@@ -30,19 +25,23 @@ public:
         unsigned int advance;
     };
 
+    IGraphicsAPI& mGraphicsAPI_;
+
     /* VAO for a text rendering **/
     unsigned int mTextVAO_;
     /* VBO for a text rendering **/
     unsigned int mTextVBO_;
     /** Character information from the loaded font */
-    std::unordered_map<GLchar, Character> mCharacterFrontInfo_;
+    std::unordered_map<char, Character> mCharacterFrontInfo_;
 
     /**
      * Construct a new Font object from a tff file
      *
      * @param fontPath font tff file path
      */
-    Font(const std::filesystem::path& fontPath);
+    Font(IGraphicsAPI& graphicsAPI, const std::filesystem::path& fontPath);
+
+    ~Font();
 
     /**
      * Get the Character Info for the given char if it exists
@@ -50,7 +49,7 @@ public:
      * @param theChar char to get character information for
      * @return Character font information
      */
-    const Character* getCharInfo(GLchar theChar) const;
+    const Character* getCharInfo(char theChar) const;
 
     /**
      * Get the VAO for this font

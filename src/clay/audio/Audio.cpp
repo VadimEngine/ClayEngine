@@ -1,3 +1,8 @@
+// standard lib
+#include <climits>
+// third party
+#include <AL/alext.h>
+#include <sndfile.h>
 // class
 #include "clay/audio/Audio.h"
 

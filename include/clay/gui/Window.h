@@ -3,8 +3,6 @@
 #include <string>
 #include <stdexcept>
 // third party
-#define GLEW_STATIC
-#include <GL/glew.h>
 #include <GLFW/glfw3.h>
 #include <glm/vec2.hpp>
 // project

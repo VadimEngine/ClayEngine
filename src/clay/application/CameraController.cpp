@@ -1,4 +1,3 @@
-// forward declare
 #include "clay/graphics/common/Camera.h"
 // class
 #include "clay/application/CameraController.h"

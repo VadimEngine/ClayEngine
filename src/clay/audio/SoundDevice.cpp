@@ -1,3 +1,7 @@
+// standard lib
+// third party
+// project
+#include <clay/application/Logger.h>
 // class
 #include "clay/audio/SoundDevice.h"
 
@@ -24,7 +28,7 @@ SoundDevice::SoundDevice() {
     if (!name || alcGetError(mpALCDevice_) != AL_NO_ERROR) {
         name = alcGetString(mpALCDevice_, ALC_DEVICE_SPECIFIER);
     }
-    printf("Opened \"%s\"\n", name);
+    LOG_I("Opened \"%s\"\n", name);
 }
 
 SoundDevice::~SoundDevice() {

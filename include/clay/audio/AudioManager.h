@@ -2,14 +2,11 @@
 // standard lib
 #include <inttypes.h>
 #include <memory>
-// third party
-#include <AL/alext.h>
-#include <sndfile.h>
 #include <stdexcept>
+// third party
 // project
 #include "clay/audio/SoundDevice.h"
 #include "clay/audio/SoundSource.h"
-#include "clay/application/Logger.h"
 
 namespace clay {
 
@@ -25,7 +22,7 @@ public:
      * Play the audio if it has been loaded
      * @param audioId Audio buffer id
      */
-    void playSound(ALuint audioId);
+    void playSound(unsigned int audioId);
 
     /**
      * Set the gain of the audio source

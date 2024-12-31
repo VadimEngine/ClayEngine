@@ -1,3 +1,8 @@
+// standard lib
+// third party
+#include <glm/gtc/type_ptr.hpp>
+#include <glm/gtx/string_cast.hpp>
+// project
 // class
 #include "clay/graphics/common/Renderer.h"
 
@@ -6,14 +11,18 @@ namespace clay {
 const int Renderer::MAX_LIGHTS = 16;
 
 Renderer::Renderer(const glm::vec2& screenDim, ShaderProgram& spriteShader, ShaderProgram& text2Shader,
-                   ShaderProgram& mvpShader, Mesh& rectPlane, ShaderProgram& frameBufferShader, ShaderProgram& bloomFinalShader)
+                   ShaderProgram& mvpShader, Mesh& rectPlane, ShaderProgram& frameBufferShader, 
+                   ShaderProgram& bloomFinalShader, IGraphicsAPI& graphicsAPI)
     : mSpriteShader_(spriteShader),
     mMVPShader_(mvpShader),
     mTextShader_(text2Shader),
     mRectPlane_(rectPlane),
     mBlurShader_(frameBufferShader),
-    mBloomFinalShader_(bloomFinalShader) {
+    mBloomFinalShader_(bloomFinalShader),
+    mAttachments_{0, 1},
+    mGraphicsAPI_(graphicsAPI) {
     mDefaultProjection_ = glm::ortho(0.0f, screenDim.x, 0.0f, screenDim.y);
+
     // Rect
     float verticesRect[] = {
         -0.5f, -0.5f, 0.0f,
@@ -29,20 +38,20 @@ Renderer::Renderer(const glm::vec2& screenDim, ShaderProgram& spriteShader, Shad
 
     unsigned int VBORect, EBORect;
 
-    glGenVertexArrays(1, &mRectVAO_);
-    glGenBuffers(1, &VBORect);
-    glGenBuffers(1, &EBORect);
+    mGraphicsAPI_.genVertexArrays(1, &mRectVAO_);
+    mGraphicsAPI_.genBuffer(1, &VBORect);
+    mGraphicsAPI_.genBuffer(1, &EBORect);
 
-    glBindVertexArray(mRectVAO_);
-    glBindBuffer(GL_ARRAY_BUFFER, VBORect);
-    glBufferData(GL_ARRAY_BUFFER, sizeof(verticesRect), verticesRect, GL_STATIC_DRAW);
+    mGraphicsAPI_.bindVertexArray(mRectVAO_);
+    mGraphicsAPI_.bindBuffer(IGraphicsAPI::BufferTarget::ARRAY_BUFFER, VBORect);
+    mGraphicsAPI_.bufferData(IGraphicsAPI::BufferTarget::ARRAY_BUFFER,  sizeof(verticesRect),verticesRect, IGraphicsAPI::DataUsage::STATIC_DRAW);
 
-    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBORect);
-    glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(indicesRect), indicesRect, GL_STATIC_DRAW);
+    mGraphicsAPI_.bindBuffer(IGraphicsAPI::BufferTarget::ARRAY_BUFFER, EBORect);
+    mGraphicsAPI_.bufferData(IGraphicsAPI::BufferTarget::ARRAY_BUFFER,  sizeof(indicesRect), indicesRect, IGraphicsAPI::DataUsage::STATIC_DRAW);
 
     // Set the vertex attribute pointers
-    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void*)0);
-    glEnableVertexAttribArray(0);
+    mGraphicsAPI_.vertexAttribPointer(0, 3, IGraphicsAPI::DataType::FLOAT, false, 3 * sizeof(float), (void*)0);
+    mGraphicsAPI_.enableVertexAttribArray(0);
 
     // quad for frame buffer texture
     {
@@ -61,24 +70,24 @@ Renderer::Renderer(const glm::vec2& screenDim, ShaderProgram& spriteShader, Shad
 
         unsigned int VBORect2, EBORect2;
 
-        glGenVertexArrays(1, &mFrameVAO_);
-        glGenBuffers(1, &VBORect2);
-        glGenBuffers(1, &EBORect2);
+        mGraphicsAPI_.genVertexArrays(1, &mFrameVAO_);
+        mGraphicsAPI_.genBuffer(1, &VBORect2);
+        mGraphicsAPI_.genBuffer(1, &EBORect2);
 
-        glBindVertexArray(mFrameVAO_);
-        glBindBuffer(GL_ARRAY_BUFFER, VBORect2);
-        glBufferData(GL_ARRAY_BUFFER, sizeof(verticesRect2), verticesRect2, GL_STATIC_DRAW);
+        mGraphicsAPI_.bindVertexArray(mFrameVAO_);
+        mGraphicsAPI_.bindBuffer(IGraphicsAPI::BufferTarget::ARRAY_BUFFER, VBORect2);
+        mGraphicsAPI_.bufferData(IGraphicsAPI::BufferTarget::ARRAY_BUFFER, sizeof(verticesRect2), verticesRect2, IGraphicsAPI::DataUsage::STATIC_DRAW);
 
-        glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBORect2);
-        glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(indicesRect2), indicesRect2, GL_STATIC_DRAW);
+        mGraphicsAPI_.bindBuffer(IGraphicsAPI::BufferTarget::ELEMENT_ARRAY_BUFFER, EBORect2);
+        mGraphicsAPI_.bufferData(IGraphicsAPI::BufferTarget::ELEMENT_ARRAY_BUFFER, sizeof(indicesRect2), indicesRect2, IGraphicsAPI::DataUsage::STATIC_DRAW);
 
         // Set the vertex attribute pointers
         // Position attribute
-        glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 5 * sizeof(float), (void*)0);
-        glEnableVertexAttribArray(0);
+        mGraphicsAPI_.vertexAttribPointer(0, 3, IGraphicsAPI::DataType::FLOAT, false, 5 * sizeof(float), (void*)0);
+        mGraphicsAPI_.enableVertexAttribArray(0);
         // Texture coordinate attribute
-        glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 5 * sizeof(float), (void*)(3 * sizeof(float)));
-        glEnableVertexAttribArray(1);
+        mGraphicsAPI_.vertexAttribPointer(1, 2, IGraphicsAPI::DataType::FLOAT, false, 5 * sizeof(float), (void*)(3 * sizeof(float)));
+        mGraphicsAPI_.enableVertexAttribArray(1);
     }
 
     // Set up Line properties
@@ -87,76 +96,99 @@ Renderer::Renderer(const glm::vec2& screenDim, ShaderProgram& spriteShader, Shad
         0,0,0,
     };
 
-    glGenVertexArrays(1, &mLineVAO_);
-    glGenBuffers(1, &mLineVBO_);
+    mGraphicsAPI_.genVertexArrays(1, &mLineVAO_);
+    mGraphicsAPI_.genBuffer(1, &mLineVBO_);
 
-    glBindVertexArray(mLineVAO_);
-    glBindBuffer(GL_ARRAY_BUFFER, mLineVBO_);
-    glBufferData(GL_ARRAY_BUFFER, sizeof(lineVertices), lineVertices, GL_DYNAMIC_DRAW);
+    mGraphicsAPI_.bindVertexArray(mLineVAO_);
+    mGraphicsAPI_.bindBuffer(IGraphicsAPI::BufferTarget::ARRAY_BUFFER, mLineVBO_);
+    mGraphicsAPI_.bufferData(IGraphicsAPI::BufferTarget::ARRAY_BUFFER,  sizeof(lineVertices), lineVertices, IGraphicsAPI::DataUsage::STATIC_DRAW);
 
     // Set the vertex attribute pointers
-    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void*)0);
-    glEnableVertexAttribArray(0);
+    mGraphicsAPI_.vertexAttribPointer(0, 3, IGraphicsAPI::DataType::FLOAT, false, 3 * sizeof(float), (void*)0);
+    mGraphicsAPI_.enableVertexAttribArray(0);
 
     // Create Camera UBO to hold View and Projection matrix
-    glGenBuffers(1, &mCameraUBO_);
-    glBindBuffer(GL_UNIFORM_BUFFER, mCameraUBO_);
-    glBufferData(GL_UNIFORM_BUFFER, sizeof(glm::mat4) * 2, NULL, GL_STATIC_DRAW);
+    mGraphicsAPI_.genBuffer(1, &mCameraUBO_);
+    mGraphicsAPI_.bindBuffer(IGraphicsAPI::BufferTarget::UNIFORM_BUFFER, mCameraUBO_);
+    mGraphicsAPI_.bufferData(IGraphicsAPI::BufferTarget::UNIFORM_BUFFER, sizeof(glm::mat4) * 2, NULL, IGraphicsAPI::DataUsage::STATIC_DRAW);
     // define the range of the buffer that links to a uniform binding point
-    glBindBufferRange(GL_UNIFORM_BUFFER, 0, mCameraUBO_, 0, 2 * sizeof(glm::mat4));
-    glBindBuffer(GL_UNIFORM_BUFFER, 0);
+    mGraphicsAPI_.bindBufferRange(IGraphicsAPI::BufferTarget::UNIFORM_BUFFER, 0, mCameraUBO_, 0, 2 * sizeof(glm::mat4));
+    mGraphicsAPI_.bindBuffer(IGraphicsAPI::BufferTarget::UNIFORM_BUFFER, 0);
 
     // Create Light UBO to hold light data
-    glGenBuffers(1, &mLightUBO_);
-    glBindBuffer(GL_UNIFORM_BUFFER, mLightUBO_);
+    mGraphicsAPI_.genBuffer(1, &mLightUBO_);
+    mGraphicsAPI_.bindBuffer(IGraphicsAPI::BufferTarget::UNIFORM_BUFFER, mLightUBO_);
     // Calculate the size of the light buffer data with padding
-    size_t lightBufferSize = sizeof(glm::vec4)                    // numLights
-                            + MAX_LIGHTS * sizeof(glm::vec4) // lightPositions
+    size_t lightBufferSize = sizeof(glm::vec4)                // numLights
+                            + MAX_LIGHTS * sizeof(glm::vec4)  // lightPositions
                             + MAX_LIGHTS * sizeof(glm::vec4); // lightColors
 
-    glBufferData(GL_UNIFORM_BUFFER, lightBufferSize, NULL, GL_STATIC_DRAW);
+    mGraphicsAPI_.bufferData(IGraphicsAPI::BufferTarget::UNIFORM_BUFFER, lightBufferSize, NULL, IGraphicsAPI::DataUsage::STATIC_DRAW);
     // Bind the buffer to the uniform binding point 1 (as an example)
-    glBindBufferRange(GL_UNIFORM_BUFFER, 1, mLightUBO_, 0, lightBufferSize);
-    glBindBuffer(GL_UNIFORM_BUFFER, 0);
+    mGraphicsAPI_.bindBufferRange(IGraphicsAPI::BufferTarget::UNIFORM_BUFFER, 1, mLightUBO_, 0, lightBufferSize);
+    mGraphicsAPI_.bindBuffer(IGraphicsAPI::BufferTarget::UNIFORM_BUFFER, 0);
 
     {
         // set up floating point framebuffer to render scene to
-        glGenFramebuffers(1, &hdrFBO_);
-        glBindFramebuffer(GL_FRAMEBUFFER, hdrFBO_);
-        glGenTextures(2, colorBuffers_);
+        mGraphicsAPI_.genFrameBuffers(1, &hdrFBO_);
+        mGraphicsAPI_.bindFrameBuffer(IGraphicsAPI::FrameBufferTarget::FRAMEBUFFER, hdrFBO_);
+        mGraphicsAPI_.genTextures(2, colorBuffers_);
+
         for (unsigned int i = 0; i < 2; i++) {
-            glBindTexture(GL_TEXTURE_2D, colorBuffers_[i]);
-            glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA16F, screenDim.x, screenDim.y, 0, GL_RGBA, GL_FLOAT, NULL);
-            glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-            glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-            glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-            glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+            mGraphicsAPI_.bindTexture(IGraphicsAPI::TextureTarget::TEXTURE_2D, colorBuffers_[i]);
+            mGraphicsAPI_.texImage2D(
+                IGraphicsAPI::TextureTarget::TEXTURE_2D,
+                0,
+                IGraphicsAPI::TextureFormat::RGBA16F,
+                screenDim.x,
+                screenDim.y,
+                0,
+                IGraphicsAPI::TextureFormat::RGBA,
+                IGraphicsAPI::DataType::FLOAT,
+                NULL
+            );
+            graphicsAPI.texParameter(IGraphicsAPI::TextureTarget::TEXTURE_2D, IGraphicsAPI::TextureParameterType::TEXTURE_MIN_FILTER, IGraphicsAPI::TextureParameterOption::LINEAR);
+            graphicsAPI.texParameter(IGraphicsAPI::TextureTarget::TEXTURE_2D, IGraphicsAPI::TextureParameterType::TEXTURE_MAG_FILTER, IGraphicsAPI::TextureParameterOption::LINEAR);
+            graphicsAPI.texParameter(IGraphicsAPI::TextureTarget::TEXTURE_2D, IGraphicsAPI::TextureParameterType::TEXTURE_WRAP_S, IGraphicsAPI::TextureParameterOption::CLAMP_TO_EDGE);
+            graphicsAPI.texParameter(IGraphicsAPI::TextureTarget::TEXTURE_2D, IGraphicsAPI::TextureParameterType::TEXTURE_WRAP_T, IGraphicsAPI::TextureParameterOption::CLAMP_TO_EDGE);
+
             // attach texture to framebuffer
-            glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0 + i, GL_TEXTURE_2D, colorBuffers_[i], 0);
+            graphicsAPI.framebufferTexture2D(IGraphicsAPI::FrameBufferTarget::FRAMEBUFFER, i, IGraphicsAPI::FBOTextureTarget::TEXTURE_2D, colorBuffers_[i], 0);
         }
 
         // create and attach depth buffer (renderbuffer)
         unsigned int rboDepth;
-        glGenRenderbuffers(1, &rboDepth);
-        glBindRenderbuffer(GL_RENDERBUFFER, rboDepth);
-        glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH_COMPONENT, screenDim.x, screenDim.y);
-        glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_RENDERBUFFER, rboDepth);
-        // tell OpenGL which color attachments we'll use (of this framebuffer) for rendering
-        glDrawBuffers(2, mAttachments_);
-        glBindFramebuffer(GL_FRAMEBUFFER, 0);
+        mGraphicsAPI_.genRenderBuffer(1, &rboDepth);
+        mGraphicsAPI_.bindRenderBuffer(IGraphicsAPI::RenderBufferTarget::RENDERBUFFER, rboDepth);
+        mGraphicsAPI_.renderBufferStorage(IGraphicsAPI::RenderBufferTarget::RENDERBUFFER, IGraphicsAPI::RenderBufferFormat::DEPTH_COMPONENT, screenDim.x, screenDim.y);
+        mGraphicsAPI_.frameBufferRenderBuffer(IGraphicsAPI::FrameBufferTarget::FRAMEBUFFER, IGraphicsAPI::FrameBufferAttachment::DEPTH_ATTACHMENT, IGraphicsAPI::RenderBufferTarget::RENDERBUFFER, rboDepth);
+        // tell OpenGL which color attachments we'll use (of this framebuffer) for rendering        
+        mGraphicsAPI_.drawBuffers(2, mAttachments_);
+        mGraphicsAPI_.bindFrameBuffer(IGraphicsAPI::FrameBufferTarget::FRAMEBUFFER, 0);
 
         // ping-pong-framebuffer for blurring
-        glGenFramebuffers(2, pingpongFBO_);
-        glGenTextures(2, pingpongColorbuffers_);
+        mGraphicsAPI_.genFrameBuffers(2, pingpongFBO_);
+        mGraphicsAPI_.genFrameBuffers(2, pingpongColorbuffers_);
         for (unsigned int i = 0; i < 2; i++) {
-            glBindFramebuffer(GL_FRAMEBUFFER, pingpongFBO_[i]);
-            glBindTexture(GL_TEXTURE_2D, pingpongColorbuffers_[i]);
-            glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA16F, screenDim.x, screenDim.y, 0, GL_RGBA, GL_FLOAT, NULL);
-            glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-            glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-            glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE); // we clamp to the edge as the blur filter would otherwise sample repeated texture values!
-            glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-            glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, pingpongColorbuffers_[i], 0);
+            mGraphicsAPI_.bindFrameBuffer(IGraphicsAPI::FrameBufferTarget::FRAMEBUFFER, pingpongFBO_[i]);
+            mGraphicsAPI_.bindTexture(IGraphicsAPI::TextureTarget::TEXTURE_2D, pingpongColorbuffers_[i]);
+            mGraphicsAPI_.texImage2D(
+                IGraphicsAPI::TextureTarget::TEXTURE_2D,
+                0,
+                IGraphicsAPI::TextureFormat::RGBA16F,
+                screenDim.x,
+                screenDim.y,
+                0,
+                IGraphicsAPI::TextureFormat::RGBA,
+                IGraphicsAPI::DataType::FLOAT,
+                NULL
+            );
+            mGraphicsAPI_.texParameter(IGraphicsAPI::TextureTarget::TEXTURE_2D, IGraphicsAPI::TextureParameterType::TEXTURE_MIN_FILTER, IGraphicsAPI::TextureParameterOption::LINEAR);
+            mGraphicsAPI_.texParameter(IGraphicsAPI::TextureTarget::TEXTURE_2D, IGraphicsAPI::TextureParameterType::TEXTURE_MAG_FILTER, IGraphicsAPI::TextureParameterOption::LINEAR);
+            // we clamp to the edge as the blur filter would otherwise sample repeated texture values!
+            mGraphicsAPI_.texParameter(IGraphicsAPI::TextureTarget::TEXTURE_2D, IGraphicsAPI::TextureParameterType::TEXTURE_WRAP_S, IGraphicsAPI::TextureParameterOption::CLAMP_TO_EDGE);
+            mGraphicsAPI_.texParameter(IGraphicsAPI::TextureTarget::TEXTURE_2D, IGraphicsAPI::TextureParameterType::TEXTURE_WRAP_T, IGraphicsAPI::TextureParameterOption::CLAMP_TO_EDGE);
+            mGraphicsAPI_.framebufferTexture2D(IGraphicsAPI::FrameBufferTarget::FRAMEBUFFER, 0, IGraphicsAPI::FBOTextureTarget::TEXTURE_2D, pingpongColorbuffers_[i], 0);
         }
 
     }
@@ -167,20 +199,20 @@ Renderer::Renderer(const glm::vec2& screenDim, ShaderProgram& spriteShader, Shad
 Renderer::~Renderer() {}
 
 void Renderer::setCamera(const Camera* camera) {
-    glBindBuffer(GL_UNIFORM_BUFFER, mCameraUBO_);
+    mGraphicsAPI_.bindBuffer(IGraphicsAPI::BufferTarget::UNIFORM_BUFFER, mCameraUBO_);
 
     if (camera != nullptr) {
-        glBufferSubData(GL_UNIFORM_BUFFER, 0, sizeof(glm::mat4), glm::value_ptr(camera->getViewMatrix()));
-        glBufferSubData(GL_UNIFORM_BUFFER, sizeof(glm::mat4), sizeof(glm::mat4), glm::value_ptr(camera->getProjectionMatrix()));
+        mGraphicsAPI_.bufferSubData(IGraphicsAPI::BufferTarget::UNIFORM_BUFFER, 0, sizeof(glm::mat4), glm::value_ptr(camera->getViewMatrix()));
+        mGraphicsAPI_.bufferSubData(IGraphicsAPI::BufferTarget::UNIFORM_BUFFER, sizeof(glm::mat4), sizeof(glm::mat4), glm::value_ptr(camera->getProjectionMatrix()));
     } else {
-        glBufferSubData(GL_UNIFORM_BUFFER, 0, sizeof(glm::mat4), glm::value_ptr(glm::mat4(1)));
-        glBufferSubData(GL_UNIFORM_BUFFER, sizeof(glm::mat4), sizeof(glm::mat4), glm::value_ptr(mDefaultProjection_));
+        mGraphicsAPI_.bufferSubData(IGraphicsAPI::BufferTarget::UNIFORM_BUFFER, 0, sizeof(glm::mat4), glm::value_ptr(glm::mat4(1)));
+        mGraphicsAPI_.bufferSubData(IGraphicsAPI::BufferTarget::UNIFORM_BUFFER, sizeof(glm::mat4), sizeof(glm::mat4), glm::value_ptr(mDefaultProjection_));
     }
-    glBindBuffer(GL_UNIFORM_BUFFER, 0);
+    mGraphicsAPI_.bindBuffer(IGraphicsAPI::BufferTarget::UNIFORM_BUFFER, 0);
 }
 
 void Renderer::setLightSources(const std::vector<std::unique_ptr<LightSource>>& lights) const {
-    glBindBuffer(GL_UNIFORM_BUFFER, mLightUBO_);
+    mGraphicsAPI_.bindBuffer(IGraphicsAPI::BufferTarget::UNIFORM_BUFFER, mLightUBO_);
 
     // Prepare data for the UBO
     std::vector<glm::vec4> lightPositions(MAX_LIGHTS); // Use vec4 for alignment
@@ -197,22 +229,21 @@ void Renderer::setLightSources(const std::vector<std::unique_ptr<LightSource>>& 
 
     // Fill UBO data
     glm::vec4 temp = {numPointLights, 0, 0, 0};
-    glBufferSubData(GL_UNIFORM_BUFFER, 0, sizeof(glm::vec4), &temp); // numLights
+    mGraphicsAPI_.bufferSubData(IGraphicsAPI::BufferTarget::UNIFORM_BUFFER, 0, sizeof(glm::vec4), &temp);// numLights
 
     // Set padding
     size_t offset = sizeof(glm::vec4); // Offset for padding
-
-    glBufferSubData(GL_UNIFORM_BUFFER, offset, sizeof(glm::vec4) * MAX_LIGHTS, lightPositions.data()); // lightPositions
+    mGraphicsAPI_.bufferSubData(IGraphicsAPI::BufferTarget::UNIFORM_BUFFER, offset, sizeof(glm::vec4) * MAX_LIGHTS, lightPositions.data()); // lightPositions
 
     // Set light colors
     offset += sizeof(glm::vec4) * MAX_LIGHTS;
-    glBufferSubData(GL_UNIFORM_BUFFER, offset, sizeof(glm::vec4) * MAX_LIGHTS, lightColors.data()); // lightColors
+    mGraphicsAPI_.bufferSubData(IGraphicsAPI::BufferTarget::UNIFORM_BUFFER, offset, sizeof(glm::vec4) * MAX_LIGHTS, lightColors.data()); // lightColors
 
-    glBindBuffer(GL_UNIFORM_BUFFER, 0);
+    mGraphicsAPI_.bindBuffer(IGraphicsAPI::BufferTarget::UNIFORM_BUFFER, 0);
 }
 
 void Renderer::setLightSources(const std::vector<LightSource*>& lights) const {
-        glBindBuffer(GL_UNIFORM_BUFFER, mLightUBO_);
+    mGraphicsAPI_.bindBuffer(IGraphicsAPI::BufferTarget::UNIFORM_BUFFER, mLightUBO_);
 
     // Prepare data for the UBO
     std::vector<glm::vec4> lightPositions(MAX_LIGHTS); // Use vec4 for alignment
@@ -229,24 +260,23 @@ void Renderer::setLightSources(const std::vector<LightSource*>& lights) const {
 
     // Fill UBO data
     glm::vec4 temp = {numPointLights, 0, 0, 0};
-    glBufferSubData(GL_UNIFORM_BUFFER, 0, sizeof(glm::vec4), &temp); // numLights
+    mGraphicsAPI_.bufferSubData(IGraphicsAPI::BufferTarget::UNIFORM_BUFFER, 0, sizeof(glm::vec4), &temp);// numLights
 
     // Set padding
     size_t offset = sizeof(glm::vec4); // Offset for padding
-
-    glBufferSubData(GL_UNIFORM_BUFFER, offset, sizeof(glm::vec4) * MAX_LIGHTS, lightPositions.data()); // lightPositions
+    mGraphicsAPI_.bufferSubData(IGraphicsAPI::BufferTarget::UNIFORM_BUFFER, offset, sizeof(glm::vec4) * MAX_LIGHTS, lightPositions.data()); // lightPositions
 
     // Set light colors
     offset += sizeof(glm::vec4) * MAX_LIGHTS;
-    glBufferSubData(GL_UNIFORM_BUFFER, offset, sizeof(glm::vec4) * MAX_LIGHTS, lightColors.data()); // lightColors
+    mGraphicsAPI_.bufferSubData(IGraphicsAPI::BufferTarget::UNIFORM_BUFFER, offset, sizeof(glm::vec4) * MAX_LIGHTS, lightColors.data()); // lightColors
 
-    glBindBuffer(GL_UNIFORM_BUFFER, 0);
+    mGraphicsAPI_.bindBuffer(IGraphicsAPI::BufferTarget::UNIFORM_BUFFER, 0);
 }
 
 void Renderer::renderSprite(unsigned int textureId, const glm::mat4& modelMat, const glm::vec4& theColor) const {
     mSpriteShader_.bind();
-    glActiveTexture(GL_TEXTURE0);
-    glBindTexture(GL_TEXTURE_2D, textureId);
+    mGraphicsAPI_.activeTexture(0);
+    mGraphicsAPI_.bindTexture(IGraphicsAPI::TextureTarget::TEXTURE_2D, textureId);
 
     mSpriteShader_.setMat4("uModel", modelMat);
 
@@ -261,8 +291,8 @@ void Renderer::renderSprite(unsigned int textureId, const glm::mat4& modelMat, c
 
 void Renderer::renderSprite(SpriteSheet::Sprite& theSprite, const glm::mat4& modelMat, const glm::vec4& theColor) const {
     mSpriteShader_.bind();
-    glActiveTexture(GL_TEXTURE0);
-    glBindTexture(GL_TEXTURE_2D, theSprite.parentSpriteSheet.getTextureId());
+    mGraphicsAPI_.activeTexture(0);
+    mGraphicsAPI_.bindTexture(IGraphicsAPI::TextureTarget::TEXTURE_2D, theSprite.parentSpriteSheet.getTextureId());
 
     mSpriteShader_.setMat4("uModel", modelMat);
     mSpriteShader_.setInt("uTexture", 0);
@@ -283,8 +313,8 @@ void Renderer::renderText(const std::string& text, const glm::vec2& position, co
     mTextShader_.bind();
     // TODO alpha color
     mTextShader_.setVec3("textColor", color);
-    glActiveTexture(GL_TEXTURE0);
-    glBindVertexArray(font.getVAO());
+    mGraphicsAPI_.activeTexture(0);
+    mGraphicsAPI_.bindVertexArray(font.getVAO());
 
     for (const char& c : text) {
         const Font::Character* ch = font.getCharInfo(c);
@@ -305,16 +335,16 @@ void Renderer::renderText(const std::string& text, const glm::vec2& position, co
                 { xpos + w, ypos + h,   1.0f, 0.0f }
             };
             // render glyph texture over quad
-            glBindTexture(GL_TEXTURE_2D, ch->textureId);
+            mGraphicsAPI_.bindTexture(IGraphicsAPI::TextureTarget::TEXTURE_2D, ch->textureId);
             // update content of VBO memory
-            glBindBuffer(GL_ARRAY_BUFFER, font.getVBO());
-            glBufferSubData(GL_ARRAY_BUFFER, 0, sizeof(vertices), vertices); // be sure to use glBufferSubData and not glBufferData
+            mGraphicsAPI_.bindBuffer(IGraphicsAPI::BufferTarget::ARRAY_BUFFER, font.getVBO());
+            mGraphicsAPI_.bufferSubData(IGraphicsAPI::BufferTarget::ARRAY_BUFFER, 0, sizeof(vertices), vertices);
 
-            glBindBuffer(GL_ARRAY_BUFFER, 0);
+            mGraphicsAPI_.bindBuffer(IGraphicsAPI::BufferTarget::ARRAY_BUFFER, 0);
             // TODO set only once?
             mTextShader_.setMat4("uModel", glm::mat4(1));
             // render quad
-            glDrawArrays(GL_TRIANGLES, 0, 6);
+            mGraphicsAPI_.drawArrays(IGraphicsAPI::PrimitiveTopology::TRIANGLE_LIST, 0, 6);
             // now advance cursors for next glyph (note that advance is number of 1/64 pixels)
             // bitshift by 6 to get value in pixels (2^6 = 64 (divide amount of 1/64th pixels by 64 to get amount of pixels))
             xPos += (ch->advance >> 6) * scale;
@@ -326,8 +356,8 @@ void Renderer::renderTextCentered(const std::string& text, const glm::vec2& posi
     // activate corresponding render state	
     mTextShader_.bind();
     mTextShader_.setVec3("textColor", color);
-    glActiveTexture(GL_TEXTURE0);
-    glBindVertexArray(font.getVAO());
+    mGraphicsAPI_.activeTexture(0);
+    mGraphicsAPI_.bindVertexArray(font.getVAO());
 
      // Calculate the total width of the text
     float textWidth = 0;
@@ -363,29 +393,31 @@ void Renderer::renderTextCentered(const std::string& text, const glm::vec2& posi
                 { xpos + w, ypos + h,   1.0f, 0.0f }
             };
             // render glyph texture over quad
-            glBindTexture(GL_TEXTURE_2D, ch->textureId);
+            mGraphicsAPI_.bindTexture(IGraphicsAPI::TextureTarget::TEXTURE_2D, ch->textureId);
             // update content of VBO memory
-            glBindBuffer(GL_ARRAY_BUFFER, font.getVBO());
-            glBufferSubData(GL_ARRAY_BUFFER, 0, sizeof(vertices), vertices); // be sure to use glBufferSubData and not glBufferData
+            mGraphicsAPI_.bindBuffer(IGraphicsAPI::BufferTarget::ARRAY_BUFFER, font.getVBO());
+            mGraphicsAPI_.bufferSubData(IGraphicsAPI::BufferTarget::ARRAY_BUFFER, 0, sizeof(vertices), vertices);
 
-            glBindBuffer(GL_ARRAY_BUFFER, 0);
+            mGraphicsAPI_.bindBuffer(IGraphicsAPI::BufferTarget::ARRAY_BUFFER, 0);
             mTextShader_.setMat4("uModel", glm::mat4(1));
             // render quad
-            glDrawArrays(GL_TRIANGLES, 0, 6);
+            
+            mGraphicsAPI_.drawArrays(IGraphicsAPI::PrimitiveTopology::TRIANGLE_LIST, 0, 6);
             // now advance cursors for next glyph (note that advance is number of 1/64 pixels)
             startX += (ch->advance >> 6) * scale; // bitshift by 6 to get value in pixels (2^6 = 64 (divide amount of 1/64th pixels by 64 to get amount of pixels))
         }
     }
-    glBindVertexArray(0);
-    glBindTexture(GL_TEXTURE_2D, 0);
+    
+    mGraphicsAPI_.bindVertexArray(0);
+    mGraphicsAPI_.bindTexture(IGraphicsAPI::TextureTarget::TEXTURE_2D, 0);
 }
 
 void Renderer::renderTextNormalized(const std::string& text, const glm::mat4& modelMat, const Font& font, const glm::vec3& scale, const glm::vec3& color) {
     // activate corresponding render state	
     mTextShader_.bind();
     mTextShader_.setVec3("textColor", color);
-    glActiveTexture(GL_TEXTURE0);
-    glBindVertexArray(font.getVAO());
+    mGraphicsAPI_.activeTexture(0);
+    mGraphicsAPI_.bindVertexArray(font.getVAO());
 
     // Calculate the total width of the text
     float totalWidth = 0.0f;
@@ -419,23 +451,23 @@ void Renderer::renderTextNormalized(const std::string& text, const glm::mat4& mo
                 { xpos + w, ypos + h,   1.0f, 0.0f }
             };
             // render glyph texture over quad
-            glBindTexture(GL_TEXTURE_2D, ch->textureId);
+            mGraphicsAPI_.bindTexture(IGraphicsAPI::TextureTarget::TEXTURE_2D, ch->textureId);
             // update content of VBO memory
-            glBindBuffer(GL_ARRAY_BUFFER, font.getVBO());
-            glBufferSubData(GL_ARRAY_BUFFER, 0, sizeof(vertices), vertices); // be sure to use glBufferSubData and not glBufferData
+            mGraphicsAPI_.bindBuffer(IGraphicsAPI::BufferTarget::ARRAY_BUFFER, font.getVBO());
+            mGraphicsAPI_.bufferSubData(IGraphicsAPI::BufferTarget::ARRAY_BUFFER, 0, sizeof(vertices), vertices);
 
-            glBindBuffer(GL_ARRAY_BUFFER, 0);
+            mGraphicsAPI_.bindBuffer(IGraphicsAPI::BufferTarget::ARRAY_BUFFER, 0);
             // Apply the model matrix to the shader
             mTextShader_.setMat4("uModel", modelMat);
 
             // render quad
-            glDrawArrays(GL_TRIANGLES, 0, 6);
+            mGraphicsAPI_.drawArrays(IGraphicsAPI::PrimitiveTopology::TRIANGLE_LIST, 0, 6);
             // now advance cursors for next glyph (note that advance is number of 1/64 pixels)
             startX += (ch->advance >> 6) * scale.x; // bitshift by 6 to get value in pixels (2^6 = 64 (divide amount of 1/64th pixels by 64 to get amount of pixels))
         }
     }
-    glBindVertexArray(0);
-    glBindTexture(GL_TEXTURE_2D, 0);
+    mGraphicsAPI_.bindVertexArray(0);
+    mGraphicsAPI_.bindTexture(IGraphicsAPI::TextureTarget::TEXTURE_2D, 0);
 }
 
 void Renderer::renderRectangleSimple(const glm::mat4& modelMat, const glm::vec4& theColor) const {
@@ -443,10 +475,9 @@ void Renderer::renderRectangleSimple(const glm::mat4& modelMat, const glm::vec4&
     mMVPShader_.bind();
     mMVPShader_.setMat4("uModel", modelMat);
     mMVPShader_.setVec4("uColor", theColor);
-
-    glBindVertexArray(mRectVAO_);
-    glDrawArrays(GL_LINE_LOOP, 0, 4);
-    glBindVertexArray(0);
+    mGraphicsAPI_.bindVertexArray(mRectVAO_);
+    mGraphicsAPI_.drawArrays(IGraphicsAPI::PrimitiveTopology::LINE_LOOP, 0, 4);
+    mGraphicsAPI_.bindVertexArray(0);
 }
 
 void Renderer::renderLineSimple(const glm::vec3& startPoint, const glm::vec3& endPoint, const glm::mat4& modelMat, const glm::vec4& theColor) const {
@@ -457,51 +488,52 @@ void Renderer::renderLineSimple(const glm::vec3& startPoint, const glm::vec3& en
         endPoint.x, endPoint.y, endPoint.z
     };
 
-    glBindBuffer(GL_ARRAY_BUFFER, mLineVBO_);
-    glBufferSubData(GL_ARRAY_BUFFER, 0, sizeof(vertices), vertices);
+    mGraphicsAPI_.bindBuffer(IGraphicsAPI::BufferTarget::ARRAY_BUFFER, mLineVBO_);
+    mGraphicsAPI_.bufferSubData(IGraphicsAPI::BufferTarget::ARRAY_BUFFER, 0, sizeof(vertices), vertices);
 
     // draw line
     mMVPShader_.bind();
     mMVPShader_.setMat4("uModel", modelMat);
     mMVPShader_.setVec4("uColor", theColor);
 
-    glBindVertexArray(mLineVAO_);
-    glDrawArrays(GL_LINES, 0, 2); // Draw a line using the two vertices
+    mGraphicsAPI_.bindVertexArray(mLineVAO_);
+    mGraphicsAPI_.drawArrays(IGraphicsAPI::PrimitiveTopology::LINE_LIST, 0, 2);
 
-    glBindVertexArray(0);
+    mGraphicsAPI_.bindVertexArray(0);
 }
 
-GLuint Renderer::getHDRFBO() const {
+unsigned int Renderer::getHDRFBO() const {
     return hdrFBO_;
 }
 
 void Renderer::renderHDR() {
     mBlurShader_.bind();  // Use the shader to render the quad
     mBlurShader_.setInt("image", 0); // Texture unit 0
-    glBindVertexArray(mFrameVAO_);
+    mGraphicsAPI_.bindVertexArray(mFrameVAO_);
 
     // blur with ping pong
     bool horizontal = true, first_iteration = true;
     const int blurAmount = 10;
-    glActiveTexture(GL_TEXTURE0);
+    mGraphicsAPI_.activeTexture(0);
 
     for (int i = 0; i < blurAmount; ++i) {
-        glBindFramebuffer(GL_FRAMEBUFFER, pingpongFBO_[horizontal]);
+        mGraphicsAPI_.bindFrameBuffer(IGraphicsAPI::FrameBufferTarget::FRAMEBUFFER, pingpongFBO_[horizontal]);
         mBlurShader_.setInt("horizontal", horizontal);
-        glBindTexture(
-            GL_TEXTURE_2D,
+        mGraphicsAPI_.bindTexture(
+            IGraphicsAPI::TextureTarget::TEXTURE_2D,
             first_iteration ? colorBuffers_[1] : pingpongColorbuffers_[!horizontal]
-        );  // bind texture of other framebuffer (or scene if first iteration)
-        glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
+        ); // bind texture of other framebuffer (or scene if first iteration)
+        mGraphicsAPI_.drawElements(IGraphicsAPI::PrimitiveTopology::TRIANGLE_LIST, 6, IGraphicsAPI::DataType::UINT, 0);
 
         horizontal = !horizontal;
-        if (first_iteration)
+        if (first_iteration) {
             first_iteration = false;
+        }
     }
-    glBindFramebuffer(GL_FRAMEBUFFER, 0);
+    mGraphicsAPI_.bindFrameBuffer(IGraphicsAPI::FrameBufferTarget::FRAMEBUFFER, 0);
     // clear the default buffer
-    glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
-    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+    mGraphicsAPI_.clearColor(0.0f, 0.0f, 0.0f, 1.0f);
+    mGraphicsAPI_.clearBuffers({IGraphicsAPI::ClearBufferTarget::COLOR, IGraphicsAPI::ClearBufferTarget::DEPTH});
     bool bloom = true;
 
     mBloomFinalShader_.bind();
@@ -509,25 +541,25 @@ void Renderer::renderHDR() {
     mBloomFinalShader_.setInt("bloomBlur", 1);
     mBloomFinalShader_.setInt("uGammaCorrect", mGammaCorrect_);
 
-    glActiveTexture(GL_TEXTURE0);
-    glBindTexture(GL_TEXTURE_2D, colorBuffers_[0]);
-    glActiveTexture(GL_TEXTURE1);
-    glBindTexture(GL_TEXTURE_2D, pingpongColorbuffers_[!horizontal]);
+    mGraphicsAPI_.activeTexture(0);
+    mGraphicsAPI_.bindTexture(IGraphicsAPI::TextureTarget::TEXTURE_2D, colorBuffers_[0]);
+    mGraphicsAPI_.activeTexture(1);
+    mGraphicsAPI_.bindTexture(IGraphicsAPI::TextureTarget::TEXTURE_2D, pingpongColorbuffers_[!horizontal]);
     mBloomFinalShader_.setInt("bloom", bloom);
     mBloomFinalShader_.setFloat("exposure", mExposure_);
-    glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
+    mGraphicsAPI_.drawElements(IGraphicsAPI::PrimitiveTopology::TRIANGLE_LIST, 6, IGraphicsAPI::DataType::UINT, 0);
 
-    glBindFramebuffer(GL_FRAMEBUFFER, 0);
-    glBindVertexArray(0);
+    mGraphicsAPI_.bindFrameBuffer(IGraphicsAPI::FrameBufferTarget::FRAMEBUFFER, 0);
+    mGraphicsAPI_.bindVertexArray(0);
 }
 
 void Renderer::setBloom(bool enable) {
     if (enable) {
-        glBindFramebuffer(GL_FRAMEBUFFER, getHDRFBO());
-        glDrawBuffers(2, mAttachments_);
+        mGraphicsAPI_.bindFrameBuffer(IGraphicsAPI::FrameBufferTarget::FRAMEBUFFER, getHDRFBO());
+        mGraphicsAPI_.drawBuffers(2, mAttachments_);
     } else {
-        glBindFramebuffer(GL_FRAMEBUFFER, getHDRFBO());
-        glDrawBuffers(1, mAttachments_);
+        mGraphicsAPI_.bindFrameBuffer(IGraphicsAPI::FrameBufferTarget::FRAMEBUFFER, getHDRFBO());
+        mGraphicsAPI_.drawBuffers(1, mAttachments_);
     }
 }
 
@@ -544,15 +576,24 @@ void Renderer::enableGammaCorrect(bool enable) {
 }
 
 void Renderer::clearBuffers(const glm::vec4& color0, const glm::vec4 color1) {
-    glBindFramebuffer(GL_FRAMEBUFFER, hdrFBO_);
+    mGraphicsAPI_.bindFrameBuffer(IGraphicsAPI::FrameBufferTarget::FRAMEBUFFER, hdrFBO_);
 
-    glDrawBuffer(GL_COLOR_ATTACHMENT0);
-    glClearColor(color0.r, color0.g, color0.b, color0.a);
-    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+    mGraphicsAPI_.drawBuffer(0);
+    mGraphicsAPI_.clearColor(color0.r, color0.g, color0.b, color0.a);
+    mGraphicsAPI_.clearBuffers({IGraphicsAPI::ClearBufferTarget::COLOR, IGraphicsAPI::ClearBufferTarget::DEPTH});
 
-    glDrawBuffer(GL_COLOR_ATTACHMENT1);
-    glClearColor(color1.r, color1.g, color1.b, color1.a);
-    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+    mGraphicsAPI_.drawBuffer(1);
+    mGraphicsAPI_.clearColor(color1.r, color1.g, color1.b, color1.a);
+    mGraphicsAPI_.clearBuffers({IGraphicsAPI::ClearBufferTarget::COLOR, IGraphicsAPI::ClearBufferTarget::DEPTH});
 }
+
+void Renderer::enableWireFrame(bool enabled) const {
+    if (enabled) {
+        mGraphicsAPI_.polygonMode(IGraphicsAPI::PolygonModeFace::FRONT_AND_BACK, IGraphicsAPI::PolygonModeType::LINE);
+    } else {
+        mGraphicsAPI_.polygonMode(IGraphicsAPI::PolygonModeFace::FRONT_AND_BACK, IGraphicsAPI::PolygonModeType::FILL);
+    }
+}
+
 
 } // namespace clay

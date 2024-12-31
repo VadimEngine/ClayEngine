@@ -9,10 +9,10 @@
 #include "clay/graphics/common/Font.h"
 #include "clay/graphics/common/Mesh.h"
 #include "clay/graphics/common/Model.h"
-#include "clay/graphics/common/Shader.h"
 #include "clay/graphics/common/ShaderProgram.h"
 #include "clay/graphics/common/SpriteSheet.h"
 #include "clay/graphics/common/Texture.h"
+#include "clay/graphics/common/IGraphicsAPI.h"
 
 namespace clay {
 
@@ -35,6 +35,8 @@ public:
     std::unordered_map<std::string, std::unique_ptr<Font>> mFonts_;
     /** Loaded Sprite Sheets */
     std::unordered_map<std::string, std::unique_ptr<SpriteSheet>> mSpriteSheets;
+
+    IGraphicsAPI* mGraphicsAPI_;
 
     /** Constructor default */
     Resource();

@@ -10,7 +10,6 @@
 // project
 #include "clay/application/Logger.h"
 #include "clay/graphics/common/Mesh.h"
-#include "clay/graphics/common/Shader.h"
 #include "clay/graphics/common/ShaderProgram.h"
 
 namespace clay {

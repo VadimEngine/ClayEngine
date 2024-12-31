@@ -1,4 +1,3 @@
-// forward declare
 #include "clay/entity/Entity.h"
 // class
 #include "clay/entity/physics/PhysicsComponentBase.h"

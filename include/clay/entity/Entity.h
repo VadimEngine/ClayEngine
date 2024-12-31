@@ -4,8 +4,6 @@
 #include <vector>
 // third party
 #include <glm/vec3.hpp>
-#include <glm/glm.hpp>
-#include <glm/gtc/matrix_transform.hpp>
 // project
 #include "clay/entity/physics/BoxCollider2D.h"
 #include "clay/entity/physics/Collider2.h"
@@ -15,7 +13,6 @@
 #include "clay/entity/render/ModelRenderable.h"
 #include "clay/entity/render/SpriteRenderable.h"
 #include "clay/entity/render/TextRenderable.h"
-#include "clay/graphics/common/Shader.h"
 
 namespace clay {
 

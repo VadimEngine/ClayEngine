@@ -1,5 +1,7 @@
 #pragma once
-#define AL_LIBTYPE_STATIC
+#ifndef AL_LIBTYPE_STATIC
+    #define AL_LIBTYPE_STATIC
+#endif
 // third party
 #include <AL/al.h>
 

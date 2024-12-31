@@ -1,5 +1,13 @@
+// standard lib
+#include <numbers>
+#include <fstream>
+// third party
+// project
+#include "clay/graphics/opengl/GraphicsAPIOpenGL.h"
+#include "clay/application/Logger.h"
 // class
 #include "clay/application/App.h"
+#include "clay/gui/ImGuiComponent.h" // include after app
 
 namespace clay {
 
@@ -8,8 +16,9 @@ bool App::sOpenGLInitialized_ = false;
 App::App()
  : mWindow_("OpenGL Application", 800, 600) {
     // Initialize OpenGL and imgui
-    initializeOpenGL();
+    initializeOpenGL(); // remove this?
     mGraphicsAPI_ = new GraphicsAPIOpenGL();
+    mResources_.mGraphicsAPI_ = mGraphicsAPI_;
     ImGuiComponent::initializeImGui(mWindow_.getGLFWWindow());
     // Load/build Application resources
     loadResources();
@@ -21,9 +30,9 @@ App::App()
         *(mResources_.getResource<ShaderProgram>("MVPShader")),
         *(mResources_.getResource<Mesh>("RectPlane")),
         *(mResources_.getResource<ShaderProgram>("Blur")),
-        *(mResources_.getResource<ShaderProgram>("BloomFinal"))
+        *(mResources_.getResource<ShaderProgram>("BloomFinal")),
+        *mGraphicsAPI_
     );
-
 }
 
 App::~App() {
@@ -91,7 +100,7 @@ void App::render() {
     // Set background color from scene
     if (!mScenes_.empty()) {
         glm::vec4 sceneBackgroundColor = mScenes_.front()->getBackgroundColor();
-        glClearColor(sceneBackgroundColor.r, sceneBackgroundColor.g, sceneBackgroundColor.b, sceneBackgroundColor.a);
+        mGraphicsAPI_->clearColor(sceneBackgroundColor.r, sceneBackgroundColor.g, sceneBackgroundColor.b, sceneBackgroundColor.a);
         mpRenderer_->clearBuffers(
             {sceneBackgroundColor.r, sceneBackgroundColor.g, sceneBackgroundColor.b, sceneBackgroundColor.a},
             {0,0,0,1}
@@ -102,9 +111,10 @@ void App::render() {
             {0,0,0,1}
         );
     }
-    glBindFramebuffer(GL_FRAMEBUFFER, mpRenderer_->getHDRFBO());
+    mGraphicsAPI_->bindFrameBuffer(IGraphicsAPI::FrameBufferTarget::FRAMEBUFFER, mpRenderer_->getHDRFBO());
     mpRenderer_->setBloom(false);
-    glEnable(GL_FRAMEBUFFER_SRGB); // for gamma correction
+    mGraphicsAPI_->enable(IGraphicsAPI::Capability::FRAMEBUFFER_SRGB);
+    //glEnable(GL_FRAMEBUFFER_SRGB); // for gamma correction
     // Render list in reverse order
     for (auto it = mScenes_.rbegin(); it != mScenes_.rend(); ++it) {
        (*it)->render(*mpRenderer_);
@@ -112,7 +122,7 @@ void App::render() {
     mpRenderer_->renderHDR();
 
     // render guis on top (avoid gamma correction)
-    glDisable(GL_FRAMEBUFFER_SRGB); // for gamma correction
+    mGraphicsAPI_->disable(IGraphicsAPI::Capability::FRAMEBUFFER_SRGB);
     for (auto it = mScenes_.rbegin(); it != mScenes_.rend(); ++it) {
        (*it)->renderGUI();
     }
@@ -144,9 +154,9 @@ void App::setAntiAliasing(unsigned int sampleSize) {
     glfwWindowHint(GLFW_SAMPLES, sampleSize);
     // Enable/disable anti-aliasing based on sample size
     if (sampleSize != 0) {
-        glEnable(GL_MULTISAMPLE);
+        mGraphicsAPI_->enable(IGraphicsAPI::Capability::MULTISAMPLE);
     } else {
-        glDisable(GL_MULTISAMPLE);
+        mGraphicsAPI_->disable(IGraphicsAPI::Capability::MULTISAMPLE);
     }
 }
 
@@ -311,64 +321,6 @@ void App::loadResources() {
         // add to resource
         mResources_.addResource<ShaderProgram>(std::move(shader), "BloomFinal");
     }
-
-
-    // mResources_.loadResource<Shader>(
-    //     {
-    //     Resource::RESOURCE_PATH / "shaders/AssimpLight.vert",
-    //     Resource::RESOURCE_PATH / "shaders/AssimpLight.frag"
-    //     },
-    //     "AssimpLight"
-    // );
-    // mResources_.loadResource<Shader>(
-    //     {
-    //     Resource::RESOURCE_PATH / "shaders/Assimp.vert",
-    //     Resource::RESOURCE_PATH / "shaders/Assimp.frag"
-    //     },
-    //     "Assimp"
-    // );
-    // mResources_.loadResource<Shader>(
-    //     {
-    //     Resource::RESOURCE_PATH / "shaders/MVPTexShader.vert",
-    //     Resource::RESOURCE_PATH / "shaders/MVPTexShader.frag"
-    //     },
-    //     "MVPTexShader"
-    // );
-    // mResources_.loadResource<Shader>(
-    //     {
-    //     Resource::RESOURCE_PATH / "shaders/Text.vert",
-    //     Resource::RESOURCE_PATH / "shaders/Text.frag"
-    //     },
-    //     "Text"
-    // );
-    // mResources_.loadResource<Shader>(
-    //     {
-    //     Resource::RESOURCE_PATH / "shaders/MVPShader.vert",
-    //     Resource::RESOURCE_PATH / "shaders/MVPShader.frag"
-    //     },
-    //     "MVPShader"
-    // );
-    // mResources_.loadResource<Shader>(
-    //     {
-    //     Resource::RESOURCE_PATH / "shaders/TextureSurface.vert",
-    //     Resource::RESOURCE_PATH / "shaders/TextureSurface.frag"
-    //     },
-    //      "TextureSurface"
-    // );
-    // mResources_.loadResource<Shader>(
-    //     {
-    //     Resource::RESOURCE_PATH / "shaders/Blur.vert",
-    //     Resource::RESOURCE_PATH / "shaders/Blur.frag"
-    //     },
-    //     "Blur"
-    // );
-    // mResources_.loadResource<Shader>(
-    //     {
-    //     Resource::RESOURCE_PATH / "shaders/BloomFinal.vert",
-    //     Resource::RESOURCE_PATH / "shaders/BloomFinal.frag"
-    //     },
-    //     "BloomFinal"
-    // );
     // Textures
     mResources_.loadResource<Texture>(
         {Resource::RESOURCE_PATH / "Sprites.png"},
@@ -380,11 +332,12 @@ void App::loadResources() {
     );
     // Single white pixel
     std::vector<unsigned char> whitePixel{0xFF, 0xFF, 0xFF};
-    mResources_.addResource(std::move(std::make_unique<Texture>(whitePixel.data(), 1, 1, 3)), "Blank");
+    mResources_.addResource(std::move(std::make_unique<Texture>(*mGraphicsAPI_, whitePixel.data(), 1, 1, 3)), "Blank");
 
     // Mesh
     mResources_.addResource(
         std::move(std::make_unique<Mesh>(
+            *mGraphicsAPI_,
             std::vector<Mesh::Vertex>{
                 // Position, normal, UV, tangent, bitangent
                 // Back
@@ -445,10 +398,11 @@ void App::loadResources() {
                 33,34,35
             }
         )),
-        "Cube"
+        "Cube" // TODO REPLACE WITH LOADING Cube.obj
     );
     mResources_.addResource(
         std::move(std::make_unique<Mesh>(
+            *mGraphicsAPI_,
             std::vector<Mesh::Vertex>{
                 // Position, normal, UV, tangent, bitangent
                 {{-.5f, -.5f, 0.0f}, {0.0f,  0.0f, -1.0f},  {0.0f,  0.0f},{0,0,0},{0,0,0}},
@@ -505,6 +459,7 @@ void App::loadResources() {
 
         mResources_.addResource(
             std::move(std::make_unique<Mesh>(
+                *mGraphicsAPI_,
                 vertices,
                 indices
             )),
@@ -532,19 +487,6 @@ void App::loadResources() {
 void App::initializeOpenGL() {
     // Only initialize if this if the first time
     if (!sOpenGLInitialized_) {
-        glewExperimental = true;
-
-        GLenum err = glewInit();
-        if (GLEW_OK != err) {
-            LOG_E("Glew Init failed");
-            throw std::runtime_error("GLEW Init error");
-        }
-        glEnable(GL_CULL_FACE);// Default Rendered in counter clockwise
-        glEnable(GL_DEPTH_TEST); // Enable z-buffer
-        glEnable(GL_BLEND); // Needed for text rendering
-        glDepthFunc(GL_LEQUAL); // Set Depth test to replace the current fragment if the z is less then OR equal
-        glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA); // Enable alpha drawing
-
         sOpenGLInitialized_ = true;
     }
 }
@@ -559,6 +501,10 @@ Resource& App::getResources() {
 
 Renderer& App::getRenderer() {
     return *mpRenderer_.get();
+}
+
+IGraphicsAPI& App::getGraphicsAPI() {
+    return *mGraphicsAPI_;
 }
 
 std::vector<unsigned char> App::loadFile(const std::filesystem::path& filePath) {
@@ -577,9 +523,6 @@ std::vector<unsigned char> App::loadFile(const std::filesystem::path& filePath) 
     if (!file.read(reinterpret_cast<char*>(buffer.data()), fileSize)) {
         throw std::runtime_error("Error reading file contents: " + filePath.string());
     }
-
-    // LOG_I("loading: %s", buffer.data());
-
     return buffer;
 }
 

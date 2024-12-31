@@ -1,9 +1,13 @@
+// third party
+#include <glm/gtc/matrix_transform.hpp>
+// project
+#include "clay/application/Logger.h"
 // class
 #include "clay/graphics/common/Mesh.h"
 
 namespace clay {
 
-void Mesh::loadMeshes(const std::filesystem::path& path, std::vector<Mesh>& meshList) {
+void Mesh::loadMeshes(IGraphicsAPI& graphicsAPI, const std::filesystem::path& path, std::vector<Mesh>& meshList) {
     Assimp::Importer import;
     const aiScene *scene = import.ReadFile(path.string(), aiProcess_Triangulate | aiProcess_GenSmoothNormals | aiProcess_CalcTangentSpace);
 
@@ -12,22 +16,22 @@ void Mesh::loadMeshes(const std::filesystem::path& path, std::vector<Mesh>& mesh
         return;
     }
     // Process the Assimp node and add to mMeshes_
-    processNode(scene->mRootNode, scene, meshList);
+    processNode(graphicsAPI, scene->mRootNode, scene, meshList);
 }
 
-void Mesh::processNode(aiNode *node, const aiScene *scene, std::vector<Mesh>& meshList) {
+void Mesh::processNode(IGraphicsAPI& graphicsAPI, aiNode *node, const aiScene *scene, std::vector<Mesh>& meshList) {
     // process all the node's meshes (if any)
     for (unsigned int i = 0; i < node->mNumMeshes; ++i) {
         aiMesh* mesh = scene->mMeshes[node->mMeshes[i]];
-        meshList.push_back(processMesh(mesh, scene));
+        meshList.push_back(processMesh(graphicsAPI, mesh, scene));
     }
     // then do the same for each of its children
     for (unsigned int i = 0; i < node->mNumChildren; ++i) {
-        processNode(node->mChildren[i], scene, meshList);
+        processNode(graphicsAPI, node->mChildren[i], scene, meshList);
     }
 }
 
-Mesh Mesh::processMesh(aiMesh *mesh, const aiScene *scene) {
+Mesh Mesh::processMesh(IGraphicsAPI& graphicsAPI, aiMesh *mesh, const aiScene *scene) {
     std::vector<Mesh::Vertex> vertices;
     std::vector<unsigned int> indices;
 
@@ -91,10 +95,11 @@ Mesh Mesh::processMesh(aiMesh *mesh, const aiScene *scene) {
 
     // TODO material/texture logic
 
-    return Mesh(vertices, indices);
+    return Mesh(graphicsAPI, vertices, indices);
 }
 
-Mesh::Mesh(const std::vector<Vertex>& vertices, const std::vector<unsigned int>& indices) {
+Mesh::Mesh(IGraphicsAPI& graphicsAPI, const std::vector<Vertex>& vertices, const std::vector<unsigned int>& indices) 
+    : mGraphicsAPI_(graphicsAPI) {
     this->vertices = vertices;
     this->indices = indices;
     buildOpenGLproperties();
@@ -103,44 +108,44 @@ Mesh::Mesh(const std::vector<Vertex>& vertices, const std::vector<unsigned int>&
 Mesh::~Mesh() {}
 
 void Mesh::render(const ShaderProgram& theShader) const {
-    glBindVertexArray(mVAO);
-    glDrawElements(GL_TRIANGLES, static_cast<unsigned int>(indices.size()), GL_UNSIGNED_INT, 0);
-    glBindVertexArray(0);
+    mGraphicsAPI_.bindVertexArray(mVAO);
+    mGraphicsAPI_.drawElements(IGraphicsAPI::PrimitiveTopology::TRIANGLE_LIST, static_cast<unsigned int>(indices.size()), IGraphicsAPI::DataType::UINT, 0);
+    mGraphicsAPI_.bindVertexArray(0);
 }
 
 void Mesh::buildOpenGLproperties() {
     // create buffers/arrays
-    glGenVertexArrays(1, &mVAO);
-    glGenBuffers(1, &mVBO_);
-    glGenBuffers(1, &mEBO_);
+    mGraphicsAPI_.genVertexArrays(1, &mVAO);
+    mGraphicsAPI_.genBuffer(1, &mVBO_);
+    mGraphicsAPI_.genBuffer(1, &mEBO_);
 
-    glBindVertexArray(mVAO);
+    mGraphicsAPI_.bindVertexArray(mVAO);
     // load data into vertex buffers
-    glBindBuffer(GL_ARRAY_BUFFER, mVBO_);
+    mGraphicsAPI_.bindBuffer(IGraphicsAPI::BufferTarget::ARRAY_BUFFER, mVBO_);
     // bind vertices
-    glBufferData(GL_ARRAY_BUFFER, vertices.size() * sizeof(Vertex), &vertices[0], GL_STATIC_DRAW);
+    mGraphicsAPI_.bufferData(IGraphicsAPI::BufferTarget::ARRAY_BUFFER, vertices.size() * sizeof(Vertex), &vertices[0], IGraphicsAPI::DataUsage::STATIC_DRAW);
 
-    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, mEBO_);
-    glBufferData(GL_ELEMENT_ARRAY_BUFFER, indices.size() * sizeof(unsigned int), &indices[0], GL_STATIC_DRAW);
+    mGraphicsAPI_.bindBuffer(IGraphicsAPI::BufferTarget::ELEMENT_ARRAY_BUFFER, mEBO_);
+    mGraphicsAPI_.bufferData(IGraphicsAPI::BufferTarget::ELEMENT_ARRAY_BUFFER, indices.size() * sizeof(unsigned int), &indices[0], IGraphicsAPI::DataUsage::STATIC_DRAW);
 
     // set the vertex attribute pointers
     // vertex Positions
-    glEnableVertexAttribArray(0);
-    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex), (void*)0);
+    mGraphicsAPI_.enableVertexAttribArray(0);
+    mGraphicsAPI_.vertexAttribPointer(0, 3, IGraphicsAPI::DataType::FLOAT, false, sizeof(Vertex), (void*)0);
     // vertex normals
-    glEnableVertexAttribArray(1);
-    glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex), (void*)offsetof(Vertex, normal));
+    mGraphicsAPI_.enableVertexAttribArray(1);
+    mGraphicsAPI_.vertexAttribPointer(1, 3, IGraphicsAPI::DataType::FLOAT, false, sizeof(Vertex), (void*)offsetof(Vertex, normal));
     // vertex texture coords
-    glEnableVertexAttribArray(2);
-    glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, sizeof(Vertex), (void*)offsetof(Vertex, texCoord));
+    mGraphicsAPI_.enableVertexAttribArray(2);
+    mGraphicsAPI_.vertexAttribPointer(2, 2, IGraphicsAPI::DataType::FLOAT, false, sizeof(Vertex), (void*)offsetof(Vertex, texCoord));
     // vertex tangent
-    glEnableVertexAttribArray(3);
-    glVertexAttribPointer(3, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex), (void*)offsetof(Vertex, tangent));
+    mGraphicsAPI_.enableVertexAttribArray(3);
+    mGraphicsAPI_.vertexAttribPointer(3, 3, IGraphicsAPI::DataType::FLOAT, false, sizeof(Vertex), (void*)offsetof(Vertex, tangent));
     // vertex bitangent
-    glEnableVertexAttribArray(4);
-    glVertexAttribPointer(4, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex), (void*)offsetof(Vertex, bitangent));
+    mGraphicsAPI_.enableVertexAttribArray(4);
+    mGraphicsAPI_.vertexAttribPointer(4, 3, IGraphicsAPI::DataType::FLOAT, false, sizeof(Vertex), (void*)offsetof(Vertex, bitangent));
 
-    glBindVertexArray(0);
+    mGraphicsAPI_.bindVertexArray(0);
 }
 
 } // namespace clay

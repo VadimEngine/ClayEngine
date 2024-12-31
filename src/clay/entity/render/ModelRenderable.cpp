@@ -23,11 +23,9 @@ void ModelRenderable::render(const Renderer& theRenderer, const glm::mat4& paren
     mpShader_->bind();
 
     // Bind all textures to the Texture Units
-    for (const auto& [slot, pair] : mTextureByUnit_) {
-        const auto& [texId, uniformName] = pair;
-        glActiveTexture(GL_TEXTURE0 + slot);
-        glBindTexture(GL_TEXTURE_2D, texId);
-        mpShader_->setInt(uniformName, slot);
+    for (const auto& [slot, texInfo] : mTextureByUnit_) {
+        const auto& [texId, uniformName] = texInfo; // Unpack the pair
+        mpShader_->setTexture(uniformName, texId, slot);
     }
 
     mpShader_->setMat4("uModel", parentModelMat * localModelMat);
@@ -38,13 +36,13 @@ void ModelRenderable::render(const Renderer& theRenderer, const glm::mat4& paren
 
     if (renderWireframe_) {
         // Enable wire frame
-        glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
+        theRenderer.enableWireFrame(true);
         mpShader_->setBool("uWireframeMode",true);
         // Render wire frame
         mpModel_->render(*mpShader_);
 
+        theRenderer.enableWireFrame(false);
         // revert back to non-wireframe
-        glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
         mpShader_->setBool("uWireframeMode", false);
     }
     mpModel_->render(*mpShader_);

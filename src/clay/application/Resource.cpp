@@ -3,7 +3,7 @@
 
 namespace clay {
 
-std::filesystem::path Resource::RESOURCE_PATH = DEFAULT_RESOURCE_PATH;
+std::filesystem::path Resource::RESOURCE_PATH = DEFAULT_CLAY_RESOURCE_PATH;
 
 Resource::Resource() {}
 
@@ -12,8 +12,9 @@ Resource::~Resource() {}
 template<typename T>
 void Resource::loadResource(const std::vector<std::filesystem::path>& resourcePath, const std::string& resourceName) {
     if constexpr (std::is_same_v<T, Mesh>) {
+        // TODO HOW TO PASS mGraphicsAPI_ TO HERE?
         std::vector<Mesh> loadedMeshes;
-        Mesh::loadMeshes(resourcePath[0], loadedMeshes);
+        Mesh::loadMeshes(*mGraphicsAPI_, resourcePath[0], loadedMeshes);
 
         if (loadedMeshes.size() == 1) {
             std::unique_ptr<Mesh> meshPtr = std::make_unique<Mesh>(std::move(loadedMeshes[0]));
@@ -26,16 +27,18 @@ void Resource::loadResource(const std::vector<std::filesystem::path>& resourcePa
         }
     } else if constexpr (std::is_same_v<T, Model>) {
         auto pModel = std::make_unique<Model>();
-        pModel->loadMesh(resourcePath[0]);
+        std::vector<Mesh> loadedMeshes;
+        Mesh::loadMeshes(*mGraphicsAPI_, resourcePath[0], loadedMeshes);
+        pModel->addMeshes(std::move(loadedMeshes));
         mModels_[resourceName] = std::move(pModel);
     } else if constexpr(std::is_same_v<T, Texture>) {
-        mTextures_[resourceName] = std::make_unique<Texture>(resourcePath[0], true);
+        mTextures_[resourceName] = std::make_unique<Texture>(*mGraphicsAPI_, resourcePath[0], true);
     } else if constexpr (std::is_same_v<T, ShaderProgram>) {
         // mShaders_[resourceName] = std::make_unique<Shader>(resourcePath[0].c_str(),resourcePath[1].c_str());
     } else if constexpr (std::is_same_v<T, Audio>) {
         mAudios_[resourceName] = std::make_unique<Audio>(resourcePath[0].string());
     } else if constexpr (std::is_same_v<T, Font>) {
-        mFonts_[resourceName] = std::make_unique<Font>(resourcePath[0]);
+        mFonts_[resourceName] = std::make_unique<Font>(*mGraphicsAPI_, resourcePath[0]);
     }
 }
 

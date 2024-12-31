@@ -1,4 +1,4 @@
-// forward declare
+// ClayEngine
 #include "clay/entity/Entity.h"
 // class
 #include "clay/entity/physics/RigidBodyComponent.h"

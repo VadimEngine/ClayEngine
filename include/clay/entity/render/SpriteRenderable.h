@@ -1,5 +1,4 @@
 #pragma once
-// forward declare
 #include "clay/entity/render/BaseRenderable.h"
 // class
 #include "clay/graphics/common/SpriteSheet.h"

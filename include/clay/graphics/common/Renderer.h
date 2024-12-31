@@ -1,18 +1,14 @@
 #pragma once
 // third party
-#define GLEW_STATIC
-#include <GL/glew.h>
-#include <glm/gtc/type_ptr.hpp>
-#include <glm/gtx/string_cast.hpp>
 // project
 #include "clay/graphics/common/Camera.h"
 #include "clay/graphics/common/Font.h"
 #include "clay/graphics/common/LightSource.h"
 #include "clay/graphics/common/Mesh.h"
 #include "clay/graphics/common/ShaderProgram.h"
-#include "clay/graphics/common/Shader.h"
 #include "clay/graphics/common/SpriteSheet.h"
 #include "clay/graphics/common/Texture.h"
+#include "clay/graphics/common/IGraphicsAPI.h"
 
 namespace clay {
 
@@ -31,7 +27,7 @@ public:
      */
     Renderer(const glm::vec2& screenDim, ShaderProgram& spriteShader,
         ShaderProgram& text2Shader, ShaderProgram& mvpShader, Mesh& rectPlane,
-        ShaderProgram& frameBufferShader, ShaderProgram& bloomFinalShader);
+        ShaderProgram& frameBufferShader, ShaderProgram& bloomFinalShader, IGraphicsAPI& graphicsAPI);
 
     /** Destructor*/
     ~Renderer();
@@ -102,7 +98,7 @@ public:
      *
      * @return GLuint HDR FBO
      */
-    GLuint getHDRFBO() const;
+    unsigned int getHDRFBO() const;
 
     /**
      * @brief Render the combination of the Scene and Bloom
@@ -144,6 +140,8 @@ public:
      */
     void clearBuffers(const glm::vec4& color0, const glm::vec4 color1);
 
+    void enableWireFrame(bool enabled) const;
+
 private:
     /** Max number of light that can be rendered with */
     const static int MAX_LIGHTS;
@@ -166,29 +164,29 @@ private:
 
     glm::mat4 mDefaultProjection_;
     /** Uniform buffer object to hold camera uniform variables shared by shaders */
-    GLuint mCameraUBO_;
+    unsigned int mCameraUBO_;
     /** Uniform buffer object to hold light uniform variables shared by shaders */
-    GLuint mLightUBO_;
-
+    unsigned int mLightUBO_;
 
     unsigned int mFrameVAO_;
 
+    unsigned int hdrFBO_;
+    unsigned int colorBuffers_[2];
 
-    GLuint hdrFBO_;
-    GLuint colorBuffers_[2];
-
-    GLuint pingpongFBO_[2];
-    GLuint pingpongColorbuffers_[2];
+    unsigned int pingpongFBO_[2];
+    unsigned int pingpongColorbuffers_[2];
 
     const ShaderProgram& mBlurShader_;
 
     const ShaderProgram& mBloomFinalShader_;
 
-    unsigned int mAttachments_[2] = { GL_COLOR_ATTACHMENT0, GL_COLOR_ATTACHMENT1 };
+    unsigned int mAttachments_[2];
 
     float mExposure_ = 1.0f;
 
     bool mGammaCorrect_ = true;
+
+    IGraphicsAPI& mGraphicsAPI_;
 
 };
 

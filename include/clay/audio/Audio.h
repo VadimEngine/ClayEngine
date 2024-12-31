@@ -2,11 +2,8 @@
 // standard lib
 #include <filesystem>
 #include <inttypes.h>
-#include <string>
-#include <climits>
 // third party
-#include <AL/alext.h>
-#include <sndfile.h>
+// project
 
 namespace clay {
 
@@ -35,7 +32,7 @@ public:
 
 private:
     /** AL audio id */
-    ALuint mId_;
+    unsigned int mId_;
 };
 
 } // namespace clay

@@ -1,4 +1,5 @@
-// forward declare
+// ClayEngine
+#include "clay/application/App.h"
 #include "clay/application/Scene.h"
 // class
 #include "clay/entity/Entity.h"
@@ -6,7 +7,7 @@
 namespace clay {
 
 Entity::Entity(Scene& scene)
-: mScene_(scene) {}
+    : mScene_(scene) {}
 
 Entity::~Entity() {}
 

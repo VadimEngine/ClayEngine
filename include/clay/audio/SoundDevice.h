@@ -1,7 +1,8 @@
 #pragma once
-#define AL_LIBTYPE_STATIC
+#ifndef AL_LIBTYPE_STATIC
+    #define AL_LIBTYPE_STATIC
+#endif
 // standard lib
-#include <stdio.h>
 #include <stdexcept>
 // third party
 #include <AL/al.h>

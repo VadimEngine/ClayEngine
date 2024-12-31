@@ -2,19 +2,14 @@
 // standard lib
 #include <chrono>
 #include <list>
-#include <numbers>
 // third party
-#define GLEW_STATIC
-#include <GL/glew.h>
 // project
-#include "clay/graphics/opengl/GraphicsAPIOpenGL.h"
+#include "clay/graphics/common/IGraphicsAPI.h"
 #include "clay/graphics/common/ShaderProgram.h"
-#include "clay/application/Logger.h"
 #include "clay/application/Resource.h"
 #include "clay/application/Scene.h"
 #include "clay/audio/AudioManager.h"
 #include "clay/graphics/common/Renderer.h"
-#include "clay/gui/ImGuiComponent.h"
 #include "clay/gui/Window.h"
 
 namespace clay {
@@ -70,6 +65,9 @@ public:
     Renderer& getRenderer();
 
     std::vector<unsigned char> loadFile(const std::filesystem::path& filePath);
+
+    // TODO USE THIS IN SCENES TO PASS TO RESOURCES
+    IGraphicsAPI& getGraphicsAPI();
 
 private:
     /** Load/Build the common resources for the scenes in this application */

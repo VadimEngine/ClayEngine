@@ -1,17 +1,16 @@
 #pragma once
 // standard lib
-#include <string>
-#include <unordered_map>
 #include <vector>
+#include <filesystem>
 // third party
 #include <assimp/Importer.hpp>
 #include <assimp/scene.h>
 #include <assimp/postprocess.h>
-#include <glm/gtc/matrix_transform.hpp>
+#include <glm/vec2.hpp>
+#include <glm/vec3.hpp>
+#include <clay/graphics/common/IGraphicsAPI.h>
 // project
-#include "clay/graphics/common/Shader.h"
 #include "clay/graphics/common/ShaderProgram.h"
-
 
 namespace clay {
 
@@ -23,7 +22,7 @@ public:
      * @param path obj file path
      * @param meshList
      */
-    static void loadMeshes(const std::filesystem::path& path, std::vector<Mesh>& meshList);
+    static void loadMeshes(IGraphicsAPI& graphicsAPI, const std::filesystem::path& path, std::vector<Mesh>& meshList);
 
     /** Mesh Vertex info*/
     struct Vertex {
@@ -54,7 +53,7 @@ public:
      * @param vertices Vertices for this Mesh
      * @param indices Render order of the vertices
      */
-    Mesh(const std::vector<Vertex>& vertices, const std::vector<unsigned int>& indices);
+    Mesh(IGraphicsAPI& graphicsAPI, const std::vector<Vertex>& vertices, const std::vector<unsigned int>& indices);
 
     /**
      * @brief Destructor
@@ -73,14 +72,14 @@ private:
      * @param aiNode Assimp node
      * @param aiScene Assimp scene
      */
-    static void processNode(aiNode *node, const aiScene *scene, std::vector<Mesh>& meshList);
+    static void processNode(IGraphicsAPI& graphicsAPI, aiNode *node, const aiScene *scene, std::vector<Mesh>& meshList);
 
     /**
      * Process an Assimp Mesh and add to list of meshes
      * @param mesh Child node
      * @param scene Assimp Scene
      */
-    static Mesh processMesh(aiMesh *mesh, const aiScene *scene);
+    static Mesh processMesh(IGraphicsAPI& graphicsAPI, aiMesh *mesh, const aiScene *scene);
 
     /** Initializes the OpenGl properties for this mesh*/
     void buildOpenGLproperties();
@@ -89,6 +88,8 @@ private:
     unsigned int mVBO_;
     /** Element Buffer Object for this Mesh */
     unsigned int mEBO_;
+
+    IGraphicsAPI& mGraphicsAPI_;
 };
 
 } // namespace clay

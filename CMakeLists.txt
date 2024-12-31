@@ -56,7 +56,16 @@ list(APPEND SRC_FILES
 add_library(${PROJECT_NAME} STATIC ${SRC_FILES})
 
 # Define the DEFAULT_RESOURCE_PATH macro
-target_compile_definitions(${PROJECT_NAME} PRIVATE DEFAULT_RESOURCE_PATH="${CMAKE_SOURCE_DIR}/res")
+target_compile_definitions(${PROJECT_NAME} PRIVATE DEFAULT_CLAY_RESOURCE_PATH="${CMAKE_SOURCE_DIR}/res")
+# enable opengl
+if(CLAY_ENABLE_OPENGL)
+    target_compile_definitions(${PROJECT_NAME} PRIVATE CLAY_ENABLE_OPENGL)
+endif()
+# enable opengl es
+if(CLAY_ENABLE_OPENGL_ES)
+    target_compile_definitions(${PROJECT_NAME} PRIVATE CLAY_ENABLE_OPENGL_ES)
+endif()
+
 
 # Define platform-specific libraries
 if (WIN32)

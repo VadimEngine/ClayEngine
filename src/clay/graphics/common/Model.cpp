@@ -20,7 +20,7 @@ void Model::addMeshes(std::vector<Mesh>&& meshes) {
 }
 
 void Model::loadMesh(const std::filesystem::path& meshPath) {
-    Mesh::loadMeshes(meshPath, mMeshes_);
+    // Mesh::loadMeshes(meshPath, mMeshes_);
 }
 
 void Model::render(const ShaderProgram& shader) const {

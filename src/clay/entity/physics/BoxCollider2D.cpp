@@ -1,4 +1,4 @@
-// forward declare
+// ClayEngine
 #include "clay/entity/Entity.h"
 #include "clay/entity/physics/CircleCollider2D.h"
 // class

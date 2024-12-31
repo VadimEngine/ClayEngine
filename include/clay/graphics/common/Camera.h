@@ -3,6 +3,7 @@
 #include <glm/vec3.hpp>
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
+#include <glm/gtc/quaternion.hpp>
 
 namespace clay {
 
@@ -140,6 +141,10 @@ public:
 private:
     /** Update the forward, Right and Up vector based on the camera's rotation*/
     void updateCameraVectors();
+
+    float mNear_ = 0.05f;
+    float mFar_ = 100.0f;
+    glm::quat mOrientation_; // TODO use quaternions
 
     /** World up vector */
     glm::vec3 mWorldUp_;

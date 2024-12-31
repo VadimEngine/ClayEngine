@@ -2,6 +2,7 @@
 // standard lib
 #include <cstdint>
 #include <string>
+#include <stdexcept>
 // third party
 #include <glm/glm.hpp>
 #include <glm/gtc/type_ptr.hpp>
@@ -22,6 +23,8 @@ public:
 
     void bind() const;
 
+    bool checkCompileErrors(unsigned int shaderID, ShaderCreateInfo::Type type);
+
     // utility uniform functions
     void setBool(const std::string& name, bool value) const;
     void setInt(const std::string& name, int value) const;
@@ -35,6 +38,8 @@ public:
     void setMat2(const std::string& name, const glm::mat2& mat) const;
     void setMat3(const std::string& name, const glm::mat3& mat) const;
     void setMat4(const std::string& name, const glm::mat4& mat) const;
+
+    void setTexture(const std::string& uniformName, unsigned int textureId, unsigned int textureUnit) const;
 
     /** Get the shader program Id*/
     unsigned int getProgramId() const;

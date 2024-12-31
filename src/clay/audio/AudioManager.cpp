@@ -1,5 +1,12 @@
+// standard lib
+// third party
+#include <AL/alext.h>
+#include <sndfile.h>
+// project
+#include "clay/application/Logger.h"
 // class
 #include "clay/audio/AudioManager.h"
+
 
 namespace clay {
 
@@ -15,7 +22,7 @@ AudioManager::AudioManager() {
 
 AudioManager::~AudioManager() {}
 
-void AudioManager::playSound(ALuint audioId) {
+void AudioManager::playSound(unsigned int audioId) {
     if (mAudioInitialized_) {
         mpSoundSource_->play(audioId);
     }

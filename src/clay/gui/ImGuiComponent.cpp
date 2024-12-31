@@ -1,3 +1,8 @@
+// third party
+#include <imgui_impl_glfw.h>
+#include <imgui_impl_opengl3.h>
+// project
+#include "clay/application/Logger.h"
 // class
 #include "clay/gui/ImGuiComponent.h"
 
