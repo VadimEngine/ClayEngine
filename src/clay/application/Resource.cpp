@@ -1,9 +1,14 @@
+// standard lib
+#include <fstream>
+#include <stdexcept>
 // class
 #include "clay/application/Resource.h"
 
 namespace clay {
 
 std::filesystem::path Resource::RESOURCE_PATH = DEFAULT_CLAY_RESOURCE_PATH;
+
+std::function<utils::FileData(const std::string&)> Resource::loadFileToMemory;
 
 Resource::Resource() {}
 
@@ -12,33 +17,38 @@ Resource::~Resource() {}
 template<typename T>
 void Resource::loadResource(const std::vector<std::filesystem::path>& resourcePath, const std::string& resourceName) {
     if constexpr (std::is_same_v<T, Mesh>) {
-        // TODO HOW TO PASS mGraphicsAPI_ TO HERE?
+        utils::FileData loadedFile = loadFileToMemory(resourcePath[0].string());
+        
         std::vector<Mesh> loadedMeshes;
-        Mesh::loadMeshes(*mGraphicsAPI_, resourcePath[0], loadedMeshes);
+        Mesh::parseMeshes(*mGraphicsAPI_, loadedFile, loadedMeshes);
 
         if (loadedMeshes.size() == 1) {
             std::unique_ptr<Mesh> meshPtr = std::make_unique<Mesh>(std::move(loadedMeshes[0]));
             mMeshes_[resourceName] = std::move(meshPtr);
         } else {
-            LOG_W("%s contains multiple meshes so it is saved as a Model", resourceName.c_str());
-            auto newModel = std::make_unique<Model>();
-            newModel->addMeshes(std::move(loadedMeshes));
-            mModels_[resourceName] = std::move(newModel);
+            LOG_E("%s contains %d meshes", resourceName.c_str(), loadedMeshes.size());
+            throw std::runtime_error("Invalid number of Meshes in Mesh Resource");
         }
     } else if constexpr (std::is_same_v<T, Model>) {
+        utils::FileData loadedFile = loadFileToMemory(resourcePath[0].string());
         auto pModel = std::make_unique<Model>();
+
         std::vector<Mesh> loadedMeshes;
-        Mesh::loadMeshes(*mGraphicsAPI_, resourcePath[0], loadedMeshes);
+        Mesh::parseMeshes(*mGraphicsAPI_, loadedFile, loadedMeshes);
         pModel->addMeshes(std::move(loadedMeshes));
         mModels_[resourceName] = std::move(pModel);
     } else if constexpr(std::is_same_v<T, Texture>) {
-        mTextures_[resourceName] = std::make_unique<Texture>(*mGraphicsAPI_, resourcePath[0], true);
+        // Texture
+        utils::FileData loadedFile = loadFileToMemory(resourcePath[0].string());
+        mTextures_[resourceName] = std::make_unique<Texture>(*mGraphicsAPI_, loadedFile, true);
     } else if constexpr (std::is_same_v<T, ShaderProgram>) {
         // mShaders_[resourceName] = std::make_unique<Shader>(resourcePath[0].c_str(),resourcePath[1].c_str());
     } else if constexpr (std::is_same_v<T, Audio>) {
-        mAudios_[resourceName] = std::make_unique<Audio>(resourcePath[0].string());
+        utils::FileData loadedFile = loadFileToMemory(resourcePath[0].string());
+        mAudios_[resourceName] = std::make_unique<Audio>(loadedFile);
     } else if constexpr (std::is_same_v<T, Font>) {
-        mFonts_[resourceName] = std::make_unique<Font>(*mGraphicsAPI_, resourcePath[0]);
+        utils::FileData loadedFile = loadFileToMemory(resourcePath[0].string());
+        mFonts_[resourceName] = std::make_unique<Font>(*mGraphicsAPI_, loadedFile);
     }
 }
 

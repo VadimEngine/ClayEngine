@@ -64,8 +64,6 @@ public:
     /** Get the Renderer for this App */
     Renderer& getRenderer();
 
-    std::vector<unsigned char> loadFile(const std::filesystem::path& filePath);
-
     // TODO USE THIS IN SCENES TO PASS TO RESOURCES
     IGraphicsAPI& getGraphicsAPI();
 

@@ -6,12 +6,20 @@
 #include <glm/vec2.hpp>
 // project
 #include "clay/graphics/common/IGraphicsAPI.h"
-
+#include "clay/utils/common/Utils.h"
 
 namespace clay {
 
 class Texture {
 public:
+
+    class ImageData {
+        unsigned char* pixels;
+        int width;
+        int height;
+        int channels;
+    };
+
     /**
      * @brief Create a Texture out of given pixel data
      *
@@ -20,14 +28,9 @@ public:
      * @param height height in pixels
      * @param channels channels per pixel
      */
-    Texture(IGraphicsAPI& graphicsAPI , const unsigned char* textureData, int width, int height, int channels, bool gammaCorrect = false);
+    Texture(IGraphicsAPI& graphicsAPI, const unsigned char* textureData, int width, int height, int channels, bool gammaCorrect = false);
 
-    /**
-     * @brief Load a texture from a given path
-     *
-     * @param path
-     */
-    explicit Texture(IGraphicsAPI& graphicsAPI, const std::filesystem::path& path, bool gammaCorrect = false);
+    Texture(IGraphicsAPI& graphicsAPI, utils::FileData& imageFile, bool gammaCorrect = false);
 
     /**
      * @brief Destructor. Frees the GL texture id
@@ -35,17 +38,6 @@ public:
     ~Texture();
 
     // TODO custom move/copy/= logic?
-
-    /**
-     * @brief Load a texture from a file and return the OpenGL Texture Id
-     *
-     * @param texturePath Texture file path
-     * @param width Pointer to store the width in pixels of the loaded texture
-     * @param height Pointer to store the height in pixels of the loaded texture
-     * @param channels Pointer to store number of channels per pixel
-     * @return unsigned int GL Texture Id
-     */
-    static unsigned int loadTexture(IGraphicsAPI& graphicsAPI, const std::filesystem::path& texturePath, int* width, int* height, int* channels, bool gammaCorrect = false);
 
     // static void saveImageAsBMP();
 

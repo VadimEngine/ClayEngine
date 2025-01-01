@@ -7,10 +7,14 @@
 
 namespace clay {
 
-void Mesh::loadMeshes(IGraphicsAPI& graphicsAPI, const std::filesystem::path& path, std::vector<Mesh>& meshList) {
+void Mesh::parseMeshes(IGraphicsAPI& graphicsAPI, utils::FileData& fileData, std::vector<Mesh>& meshList) {
     Assimp::Importer import;
-    const aiScene *scene = import.ReadFile(path.string(), aiProcess_Triangulate | aiProcess_GenSmoothNormals | aiProcess_CalcTangentSpace);
-
+    const aiScene* scene = import.ReadFileFromMemory(
+            fileData.data.get(),
+            fileData.size,
+            aiProcess_Triangulate | aiProcess_GenSmoothNormals | aiProcess_CalcTangentSpace,
+            "obj" // Pass a file extension if needed, e.g., "obj"
+    );
     if (!scene || scene->mFlags & AI_SCENE_FLAGS_INCOMPLETE || !scene->mRootNode) {
         LOG_E("ERROR::ASSIMP::%s", import.GetErrorString());
         return;

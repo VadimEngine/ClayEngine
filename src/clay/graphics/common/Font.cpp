@@ -11,16 +11,27 @@
 
 namespace clay {
 
-Font::Font(IGraphicsAPI& graphicsAPI, const std::filesystem::path& fontPath)
+Font::Font(IGraphicsAPI& graphicsAPI, utils::FileData& fileData)
 : mGraphicsAPI_(graphicsAPI) {
+    // Initialize the FreeType library
     FT_Library ft;
     if (FT_Init_FreeType(&ft)) {
-        LOG_E("ERROR::FREETYPE: Could not init FreeType Library");
+        LOG_E("ERROR::FREETYPE::Could not init FreeType Library");
+        return;
     }
 
+    // Create a face object from the memory buffer
     FT_Face face;
-    if (FT_New_Face(ft, fontPath.string().c_str(), 0, &face)) {
-        LOG_E("ERROR::FREETYPE: Failed to load font");
+    FT_Error error = FT_New_Memory_Face(ft,
+                                        reinterpret_cast<const FT_Byte*>(fileData.data.get()),
+                                        static_cast<FT_Long>(fileData.size),
+                                        0,
+                                        &face);
+
+    if (error) {
+        LOG_E("ERROR::FREETYPE::Failed to load font from memory. Error code: %d", error);
+        FT_Done_FreeType(ft);
+        return;
     }
 
     FT_Set_Pixel_Sizes(face, 0, 48);

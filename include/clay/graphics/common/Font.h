@@ -5,7 +5,8 @@
 // third party
 #include <glm/vec2.hpp>
 // project
-#include <clay/graphics/common/IGraphicsAPI.h>
+#include "clay/graphics/common/IGraphicsAPI.h"
+#include "clay/utils/common/Utils.h"
 
 namespace clay {
 
@@ -34,12 +35,7 @@ public:
     /** Character information from the loaded font */
     std::unordered_map<char, Character> mCharacterFrontInfo_;
 
-    /**
-     * Construct a new Font object from a tff file
-     *
-     * @param fontPath font tff file path
-     */
-    Font(IGraphicsAPI& graphicsAPI, const std::filesystem::path& fontPath);
+    Font(IGraphicsAPI& graphicsAPI, utils::FileData& fileData);
 
     ~Font();
 

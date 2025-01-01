@@ -5,10 +5,57 @@
 #include <sndfile.h>
 // class
 #include "clay/audio/Audio.h"
+#include "clay/application/Logger.h"
 
 namespace clay {
 
-int Audio::loadAudio(const std::filesystem::path& filepath) {
+// State for virtual I/O
+struct VirtualFile {
+    const unsigned char* data;
+    sf_count_t size;
+    sf_count_t pos;
+};
+
+sf_count_t vio_get_filelen(void* user_data) {
+    VirtualFile* vf = static_cast<VirtualFile*>(user_data);
+    return vf->size;
+}
+
+// Read function
+sf_count_t vio_read(void* ptr, sf_count_t count, void* user_data) {
+    VirtualFile* vf = static_cast<VirtualFile*>(user_data);
+    sf_count_t bytesToRead = std::min(count, vf->size - vf->pos);
+    std::memcpy(ptr, vf->data + vf->pos, bytesToRead);
+    vf->pos += bytesToRead;
+    return bytesToRead;
+}
+
+// Seek function
+sf_count_t vio_seek(sf_count_t offset, int whence, void* user_data) {
+    VirtualFile* vf = static_cast<VirtualFile*>(user_data);
+    sf_count_t newPos = vf->pos;
+
+    if (whence == SEEK_SET) newPos = offset;
+    else if (whence == SEEK_CUR) newPos += offset;
+    else if (whence == SEEK_END) newPos = vf->size + offset;
+
+    if (newPos < 0 || newPos > vf->size) return -1; // Out of bounds
+    vf->pos = newPos;
+    return vf->pos;
+}
+
+// Tell function
+sf_count_t vio_tell(void* user_data) {
+    VirtualFile* vf = static_cast<VirtualFile*>(user_data);
+    return vf->pos;
+}
+
+// No-op write function (reading only)
+sf_count_t vio_write(const void* ptr, sf_count_t count, void* user_data) {
+    return 0;
+}
+
+Audio::Audio(utils::FileData& fileData) {
     ALenum err, format;
     ALuint buffer;
     SNDFILE* sndfile;
@@ -16,17 +63,26 @@ int Audio::loadAudio(const std::filesystem::path& filepath) {
     short* membuf;
     sf_count_t num_frames;
     ALsizei num_bytes;
-
     // Open the audio file and check that it's usable.
-    sndfile = sf_open(filepath.string().c_str(), SFM_READ, &sfinfo);
+    SF_VIRTUAL_IO vio = {
+            vio_get_filelen, // Function to get the length of the file
+            vio_seek,        // Function to seek within the file
+            vio_read,        // Function to read from the file
+            vio_write,       // Function to write to the file (unused in this case)
+            vio_tell         // Function to get the current position in the file
+    };
+    VirtualFile vf = { fileData.data.get(), static_cast<sf_count_t>(fileData.size), 0 };
+
+    sndfile = sf_open_virtual(&vio, SFM_READ, &sfinfo, &vf);
     if (!sndfile) {
-        fprintf(stderr, "Could not open audio in %s: %s\n", filepath.string().c_str(), sf_strerror(sndfile));
-        return 0;
+        LOG_E("Error: %s", sf_strerror(NULL));
+        throw std::runtime_error("Error reading audio file buffer");
+        //return 0;
     }
+
     if (sfinfo.frames < 1 || sfinfo.frames >(sf_count_t)(INT_MAX / sizeof(short)) / sfinfo.channels) {
-        fprintf(stderr, "Bad sample count in %s (%" PRId64 ")\n", filepath, sfinfo.frames);
         sf_close(sndfile);
-        return 0;
+        throw std::runtime_error("Error bad audio sample");
     }
 
     // Get the sound format, and figure out the OpenAL format
@@ -44,9 +100,8 @@ int Audio::loadAudio(const std::filesystem::path& filepath) {
             format = AL_FORMAT_BFORMAT3D_16;
     }
     if (!format) {
-        fprintf(stderr, "Unsupported channel count: %d\n", sfinfo.channels);
-        sf_close(sndfile);
-        return 0;
+        LOG_E("Unsupported channel count: %d\n", sfinfo.channels);
+        throw std::runtime_error("Unsupported channel count");
     }
 
     // Decode the whole audio file to a buffer.
@@ -56,8 +111,8 @@ int Audio::loadAudio(const std::filesystem::path& filepath) {
     if (num_frames < 1) {
         free(membuf);
         sf_close(sndfile);
-        fprintf(stderr, "Failed to read samples in %s (%" PRId64 ")\n", filepath, num_frames);
-        return 0;
+        throw std::runtime_error("Failed to read sample");
+        //return 0;
     }
     num_bytes = (ALsizei)(num_frames * sfinfo.channels) * (ALsizei)sizeof(short);
 
@@ -72,18 +127,16 @@ int Audio::loadAudio(const std::filesystem::path& filepath) {
     // Check if an error occurred, and clean up if so.
     err = alGetError();
     if (err != AL_NO_ERROR) {
-        fprintf(stderr, "OpenAL Error: %s\n", alGetString(err));
-        if (buffer && alIsBuffer(buffer))
+        LOG_E("OpenAL Error: %s\n", alGetString(err));
+        if (buffer && alIsBuffer(buffer)) {
             alDeleteBuffers(1, &buffer);
-        return 0;
+        }
+        throw std::runtime_error("OpenAL error");
     }
 
-    return buffer;
+    mId_ = buffer;
 }
 
-Audio::Audio(const std::filesystem::path& filePath) {
-    mId_ = loadAudio(filePath);
-}
 
 Audio::~Audio() {
     alDeleteBuffers(1, &mId_);

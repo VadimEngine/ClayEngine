@@ -11,18 +11,20 @@
 #include <clay/graphics/common/IGraphicsAPI.h>
 // project
 #include "clay/graphics/common/ShaderProgram.h"
+#include "clay/utils/common/Utils.h"
 
 namespace clay {
 
 class Mesh {
 public:
+
     /**
      * Reads an obj file and populates the given list with the meshes
      *
      * @param path obj file path
      * @param meshList
      */
-    static void loadMeshes(IGraphicsAPI& graphicsAPI, const std::filesystem::path& path, std::vector<Mesh>& meshList);
+    static void parseMeshes(IGraphicsAPI& graphicsAPI, utils::FileData& fileData, std::vector<Mesh>& meshList);
 
     /** Mesh Vertex info*/
     struct Vertex {

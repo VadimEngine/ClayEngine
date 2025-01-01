@@ -163,18 +163,18 @@ void App::setAntiAliasing(unsigned int sampleSize) {
 void App::loadResources() {
     // Shaders
     {
-        auto vertexShaderFileData = loadFile(Resource::RESOURCE_PATH / "shaders/AssimpLight.vert");
-        auto fragmentShaderFileData = loadFile(Resource::RESOURCE_PATH / "shaders/AssimpLight.frag");
+        auto vertexShaderFileData = Resource::loadFileToMemory((Resource::RESOURCE_PATH / "shaders/AssimpLight.vert").string());
+        auto fragmentShaderFileData = Resource::loadFileToMemory((Resource::RESOURCE_PATH / "shaders/AssimpLight.frag").string());
 
         std::unique_ptr<ShaderProgram> shader = std::make_unique<ShaderProgram>(*mGraphicsAPI_);
         shader->addShader({
             ShaderCreateInfo::Type::VERTEX,
-            std::string(vertexShaderFileData.begin(), vertexShaderFileData.end()).c_str(),
-            vertexShaderFileData.size()
+            std::string(reinterpret_cast<char*>(vertexShaderFileData.data.get()), vertexShaderFileData.size).c_str(),
+            vertexShaderFileData.size
         });
         shader->addShader({
             ShaderCreateInfo::Type::FRAGMENT,
-            std::string(fragmentShaderFileData.begin(), fragmentShaderFileData.end()).c_str(),
+            std::string(reinterpret_cast<char*>(fragmentShaderFileData.data.get()), fragmentShaderFileData.size).c_str(),
         });
 
         shader->linkProgram();
@@ -182,19 +182,19 @@ void App::loadResources() {
         mResources_.addResource<ShaderProgram>(std::move(shader), "AssimpLight");
     }
     {
-        auto vertexShaderFileData = loadFile(Resource::RESOURCE_PATH / "shaders/Assimp.vert");
-        auto fragmentShaderFileData = loadFile(Resource::RESOURCE_PATH / "shaders/Assimp.frag");
+        auto vertexShaderFileData = Resource::loadFileToMemory((Resource::RESOURCE_PATH / "shaders/Assimp.vert").string());
+        auto fragmentShaderFileData = Resource::loadFileToMemory((Resource::RESOURCE_PATH / "shaders/Assimp.frag").string());
         // TODO use size so null string conversion for null terminator is not needed
         std::unique_ptr<ShaderProgram> shader = std::make_unique<ShaderProgram>(*mGraphicsAPI_);
         shader->addShader({
             ShaderCreateInfo::Type::VERTEX,
-            std::string(vertexShaderFileData.begin(), vertexShaderFileData.end()).c_str(),
-            vertexShaderFileData.size()
+            std::string(reinterpret_cast<char*>(vertexShaderFileData.data.get()), vertexShaderFileData.size).c_str(),
+            vertexShaderFileData.size
         });
         shader->addShader({
             ShaderCreateInfo::Type::FRAGMENT,
-            std::string(fragmentShaderFileData.begin(), fragmentShaderFileData.end()).c_str(),
-            fragmentShaderFileData.size()
+            std::string(reinterpret_cast<char*>(fragmentShaderFileData.data.get()), fragmentShaderFileData.size).c_str(),
+            fragmentShaderFileData.size
         });
 
         shader->linkProgram();
@@ -202,19 +202,19 @@ void App::loadResources() {
         mResources_.addResource<ShaderProgram>(std::move(shader), "Assimp");
     }
     {
-        auto vertexShaderFileData = loadFile(Resource::RESOURCE_PATH / "shaders/MVPTexShader.vert");
-        auto fragmentShaderFileData = loadFile(Resource::RESOURCE_PATH / "shaders/MVPTexShader.frag");
+        auto vertexShaderFileData = Resource::loadFileToMemory((Resource::RESOURCE_PATH / "shaders/MVPTexShader.vert").string());
+        auto fragmentShaderFileData = Resource::loadFileToMemory((Resource::RESOURCE_PATH / "shaders/MVPTexShader.frag").string());
         // TODO use size so null string conversion for null terminator is not needed
         std::unique_ptr<ShaderProgram> shader = std::make_unique<ShaderProgram>(*mGraphicsAPI_);
         shader->addShader({
             ShaderCreateInfo::Type::VERTEX,
-            std::string(vertexShaderFileData.begin(), vertexShaderFileData.end()).c_str(),
-            vertexShaderFileData.size()
+            std::string(reinterpret_cast<char*>(vertexShaderFileData.data.get()), vertexShaderFileData.size).c_str(),
+            vertexShaderFileData.size
         });
         shader->addShader({
             ShaderCreateInfo::Type::FRAGMENT,
-            std::string(fragmentShaderFileData.begin(), fragmentShaderFileData.end()).c_str(),
-            fragmentShaderFileData.size()
+            std::string(reinterpret_cast<char*>(fragmentShaderFileData.data.get()), fragmentShaderFileData.size).c_str(),
+            fragmentShaderFileData.size
         });
 
         shader->linkProgram();
@@ -222,19 +222,19 @@ void App::loadResources() {
         mResources_.addResource<ShaderProgram>(std::move(shader), "MVPTexShader");
     }
     {
-        auto vertexShaderFileData = loadFile(Resource::RESOURCE_PATH / "shaders/Text.vert");
-        auto fragmentShaderFileData = loadFile(Resource::RESOURCE_PATH / "shaders/Text.frag");
+        auto vertexShaderFileData = Resource::loadFileToMemory((Resource::RESOURCE_PATH / "shaders/Text.vert").string());
+        auto fragmentShaderFileData = Resource::loadFileToMemory((Resource::RESOURCE_PATH / "shaders/Text.frag").string());
         // TODO use size so null string conversion for null terminator is not needed
         std::unique_ptr<ShaderProgram> shader = std::make_unique<ShaderProgram>(*mGraphicsAPI_);
         shader->addShader({
             ShaderCreateInfo::Type::VERTEX,
-            std::string(vertexShaderFileData.begin(), vertexShaderFileData.end()).c_str(),
-            vertexShaderFileData.size()
+            std::string(reinterpret_cast<char*>(vertexShaderFileData.data.get()), vertexShaderFileData.size).c_str(),
+            vertexShaderFileData.size
         });
         shader->addShader({
             ShaderCreateInfo::Type::FRAGMENT,
-            std::string(fragmentShaderFileData.begin(), fragmentShaderFileData.end()).c_str(),
-            fragmentShaderFileData.size()
+            std::string(reinterpret_cast<char*>(fragmentShaderFileData.data.get()), fragmentShaderFileData.size).c_str(),
+            fragmentShaderFileData.size
         });
 
         shader->linkProgram();
@@ -242,19 +242,19 @@ void App::loadResources() {
         mResources_.addResource<ShaderProgram>(std::move(shader), "Text");
     }
     {
-        auto vertexShaderFileData = loadFile(Resource::RESOURCE_PATH / "shaders/MVPShader.vert");
-        auto fragmentShaderFileData = loadFile(Resource::RESOURCE_PATH / "shaders/MVPShader.frag");
+        auto vertexShaderFileData = Resource::loadFileToMemory((Resource::RESOURCE_PATH / "shaders/MVPShader.vert").string());
+        auto fragmentShaderFileData = Resource::loadFileToMemory((Resource::RESOURCE_PATH / "shaders/MVPShader.frag").string());
         // TODO use size so null string conversion for null terminator is not needed
         std::unique_ptr<ShaderProgram> shader = std::make_unique<ShaderProgram>(*mGraphicsAPI_);
         shader->addShader({
             ShaderCreateInfo::Type::VERTEX,
-            std::string(vertexShaderFileData.begin(), vertexShaderFileData.end()).c_str(),
-            vertexShaderFileData.size()
+            std::string(reinterpret_cast<char*>(vertexShaderFileData.data.get()), vertexShaderFileData.size).c_str(),
+            vertexShaderFileData.size
         });
         shader->addShader({
             ShaderCreateInfo::Type::FRAGMENT,
-            std::string(fragmentShaderFileData.begin(), fragmentShaderFileData.end()).c_str(),
-            fragmentShaderFileData.size()
+            std::string(reinterpret_cast<char*>(fragmentShaderFileData.data.get()), fragmentShaderFileData.size).c_str(),
+            fragmentShaderFileData.size
         });
 
         shader->linkProgram();
@@ -262,19 +262,19 @@ void App::loadResources() {
         mResources_.addResource<ShaderProgram>(std::move(shader), "MVPShader");
     }
     {
-        auto vertexShaderFileData = loadFile(Resource::RESOURCE_PATH / "shaders/TextureSurface.vert");
-        auto fragmentShaderFileData = loadFile(Resource::RESOURCE_PATH / "shaders/TextureSurface.frag");
+        auto vertexShaderFileData = Resource::loadFileToMemory((Resource::RESOURCE_PATH / "shaders/TextureSurface.vert").string());
+        auto fragmentShaderFileData = Resource::loadFileToMemory((Resource::RESOURCE_PATH / "shaders/TextureSurface.frag").string());
         // TODO use size so null string conversion for null terminator is not needed
         std::unique_ptr<ShaderProgram> shader = std::make_unique<ShaderProgram>(*mGraphicsAPI_);
         shader->addShader({
             ShaderCreateInfo::Type::VERTEX,
-            std::string(vertexShaderFileData.begin(), vertexShaderFileData.end()).c_str(),
-            vertexShaderFileData.size()
+            std::string(reinterpret_cast<char*>(vertexShaderFileData.data.get()), vertexShaderFileData.size).c_str(),
+            vertexShaderFileData.size
         });
         shader->addShader({
             ShaderCreateInfo::Type::FRAGMENT,
-            std::string(fragmentShaderFileData.begin(), fragmentShaderFileData.end()).c_str(),
-            fragmentShaderFileData.size()
+            std::string(reinterpret_cast<char*>(fragmentShaderFileData.data.get()), fragmentShaderFileData.size).c_str(),
+            fragmentShaderFileData.size
         });
 
         shader->linkProgram();
@@ -282,19 +282,19 @@ void App::loadResources() {
         mResources_.addResource<ShaderProgram>(std::move(shader), "TextureSurface");
     }
     {
-        auto vertexShaderFileData = loadFile(Resource::RESOURCE_PATH / "shaders/Blur.vert");
-        auto fragmentShaderFileData = loadFile(Resource::RESOURCE_PATH / "shaders/Blur.frag");
+        auto vertexShaderFileData = Resource::loadFileToMemory((Resource::RESOURCE_PATH / "shaders/Blur.vert").string());
+        auto fragmentShaderFileData = Resource::loadFileToMemory((Resource::RESOURCE_PATH / "shaders/Blur.frag").string());
         // TODO use size so null string conversion for null terminator is not needed
         std::unique_ptr<ShaderProgram> shader = std::make_unique<ShaderProgram>(*mGraphicsAPI_);
         shader->addShader({
             ShaderCreateInfo::Type::VERTEX,
-            std::string(vertexShaderFileData.begin(), vertexShaderFileData.end()).c_str(),
-            vertexShaderFileData.size()
+            std::string(reinterpret_cast<char*>(vertexShaderFileData.data.get()), vertexShaderFileData.size).c_str(),
+            vertexShaderFileData.size
         });
         shader->addShader({
             ShaderCreateInfo::Type::FRAGMENT,
-            std::string(fragmentShaderFileData.begin(), fragmentShaderFileData.end()).c_str(),
-            fragmentShaderFileData.size()
+            std::string(reinterpret_cast<char*>(fragmentShaderFileData.data.get()), fragmentShaderFileData.size).c_str(),
+            fragmentShaderFileData.size
         });
 
         shader->linkProgram();
@@ -302,19 +302,19 @@ void App::loadResources() {
         mResources_.addResource<ShaderProgram>(std::move(shader), "Blur");
     }
     {
-        auto vertexShaderFileData = loadFile(Resource::RESOURCE_PATH / "shaders/BloomFinal.vert");
-        auto fragmentShaderFileData = loadFile(Resource::RESOURCE_PATH / "shaders/BloomFinal.frag");
+        auto vertexShaderFileData = Resource::loadFileToMemory((Resource::RESOURCE_PATH / "shaders/BloomFinal.vert").string());
+        auto fragmentShaderFileData = Resource::loadFileToMemory((Resource::RESOURCE_PATH / "shaders/BloomFinal.frag").string());
         // TODO use size so null string conversion for null terminator is not needed
         std::unique_ptr<ShaderProgram> shader = std::make_unique<ShaderProgram>(*mGraphicsAPI_);
         shader->addShader({
             ShaderCreateInfo::Type::VERTEX,
-            std::string(vertexShaderFileData.begin(), vertexShaderFileData.end()).c_str(),
-            vertexShaderFileData.size()
+            std::string(reinterpret_cast<char*>(vertexShaderFileData.data.get()), vertexShaderFileData.size).c_str(),
+            vertexShaderFileData.size
         });
         shader->addShader({
             ShaderCreateInfo::Type::FRAGMENT,
-            std::string(fragmentShaderFileData.begin(), fragmentShaderFileData.end()).c_str(),
-            fragmentShaderFileData.size()
+            std::string(reinterpret_cast<char*>(fragmentShaderFileData.data.get()), fragmentShaderFileData.size).c_str(),
+            fragmentShaderFileData.size
         });
 
         shader->linkProgram();
@@ -505,25 +505,6 @@ Renderer& App::getRenderer() {
 
 IGraphicsAPI& App::getGraphicsAPI() {
     return *mGraphicsAPI_;
-}
-
-std::vector<unsigned char> App::loadFile(const std::filesystem::path& filePath) {
-    std::ifstream file(filePath, std::ios::binary | std::ios::ate);
-    if (!file) {
-        throw std::runtime_error("Could not open file: " + filePath.string());
-    }
-
-    std::streamsize fileSize = file.tellg();
-    if (fileSize < 0) {
-        throw std::runtime_error("Error reading file size: " + filePath.string());
-    }
-
-    std::vector<unsigned char> buffer(static_cast<size_t>(fileSize));
-    file.seekg(0, std::ios::beg);
-    if (!file.read(reinterpret_cast<char*>(buffer.data()), fileSize)) {
-        throw std::runtime_error("Error reading file contents: " + filePath.string());
-    }
-    return buffer;
 }
 
 } // namespace clay

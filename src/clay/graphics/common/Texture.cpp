@@ -17,19 +17,9 @@ Texture::Texture(IGraphicsAPI& graphicsAPI, const unsigned char* textureData, in
     mTextureId_ = genGLTexture(graphicsAPI, textureData, width, height, channels, gammaCorrect);
 }
 
-Texture::Texture(IGraphicsAPI& graphicsAPI, const std::filesystem::path& path, bool gammaCorrect) 
-: mGraphicsAPI_(graphicsAPI) {
-    mTextureId_ = loadTexture(graphicsAPI, path, &mWidth_, &mHeight_, &mChannels_, gammaCorrect);
-}
-
-Texture::~Texture() {
-    // TODO FIX ERROR WHEN THIS IS CALLED
-    mGraphicsAPI_.deleteTexture(1, &mTextureId_);
-}
-
-unsigned int Texture::loadTexture(IGraphicsAPI& graphicsAPI, const std::filesystem::path& texturePath, int* width, int* height, int* channels, bool gammaCorrect) {
-    // Load image file
-    unsigned char* textureData = SOIL_load_image(texturePath.string().c_str(), width, height, channels, SOIL_LOAD_AUTO);
+Texture::Texture(IGraphicsAPI& graphicsAPI, utils::FileData& imageFile, bool gammaCorrect) 
+: mGraphicsAPI_(graphicsAPI){
+    unsigned char* textureData = SOIL_load_image_from_memory(imageFile.data.get(), imageFile.size, &mWidth_, &mHeight_, &mChannels_, SOIL_LOAD_AUTO);
 
     if (textureData == nullptr) {
         LOG_E("ERROR LOADING TEXTURE: %s", textureData);
@@ -40,10 +30,13 @@ unsigned int Texture::loadTexture(IGraphicsAPI& graphicsAPI, const std::filesyst
         throw std::runtime_error("Texture load failed");
     }
 
-    unsigned textureId = genGLTexture(graphicsAPI, textureData, *width, *height, *channels, gammaCorrect);
-
+    mTextureId_ = genGLTexture(mGraphicsAPI_, textureData, mWidth_, mHeight_, mChannels_, gammaCorrect);
     SOIL_free_image_data(textureData);
-    return textureId;
+}
+
+Texture::~Texture() {
+    // TODO FIX ERROR WHEN THIS IS CALLED
+    mGraphicsAPI_.deleteTexture(1, &mTextureId_);
 }
 
 unsigned int Texture::getId() const {

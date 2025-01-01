@@ -1,6 +1,7 @@
 #pragma once
 // standard lib
 #include <filesystem>
+#include <functional>
 #include <memory>
 #include <string>
 #include <unordered_map>
@@ -13,11 +14,14 @@
 #include "clay/graphics/common/SpriteSheet.h"
 #include "clay/graphics/common/Texture.h"
 #include "clay/graphics/common/IGraphicsAPI.h"
+#include "clay/utils/common/Utils.h"
 
 namespace clay {
 
 class Resource {
 public:
+    static std::function<utils::FileData(const std::string&)> loadFileToMemory;
+
     /** Path to resource folder */
     static std::filesystem::path RESOURCE_PATH;
 
@@ -86,7 +90,6 @@ public:
      * Release all the resources in this container. (This not need to be called
      * when deleting a Resource Object since the destructor will manage that itself)
      */
-    /** Release all resources */
     void releaseAll();
 };
 } // namespace clay

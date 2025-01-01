@@ -7,7 +7,7 @@
 // project
 #include "clay/application/Logger.h"
 // class
-#include "clay/utils/Utils.h"
+#include "clay/utils/common/Utils.h"
 
 namespace clay::utils {
     size_t Vec2Hash::operator()(const glm::ivec2& v) const {
