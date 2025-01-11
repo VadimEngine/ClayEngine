@@ -8,7 +8,7 @@
 // third party
 #include <glm/vec2.hpp>
 // project
-#include "clay/application/common/IInputhandler.h"
+#include "clay/application/common/IInputHandler.h"
 
 namespace clay {
 
