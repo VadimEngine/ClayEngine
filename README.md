@@ -1,5 +1,5 @@
 # Clay Engine
-Early Alpha Clay Engine cross-platform static library for developing games in C++. Currently supports an entity component system for game objects that are rendered in custom Scenes using OpenGL. Works on windows and Linux (Tested on Arch and Fedora)
+Early Alpha Clay Engine cross-platform static library for developing games in C++. Currently supports an entity component system for game objects that are rendered in custom Scenes using OpenGL or OpenGLES got VR. Works on windows and Linux (Tested on Arch and Fedora) and on VR (Tested on Meta Quest 3)
 
 ### Third Party Libraries
 This libraries uses the following third party libraries:
@@ -42,13 +42,13 @@ The Clay Static library can be manually built with the following commands:
 - Run test (if build with -DCLAY_BUILD_TESTS=ON):
     - `./build/test/Debug/ClayEngineTest.exe`
 
-In your CMakeLists.txt, the library can be added simply with the following changes and allow Cmake to do all the building and linking
-```
+Alternatively, in your CMakeLists.txt, the library can be added simply with the following changes and allow Cmake to do all the building and linking
+```cmake
 set(CLAY_PLATFORM_VR ON CACHE BOOL "Set Platform to VR" FORCE) # If Building for VR
-set(CLAY_ENABLE_OPENGL_ES ON CACHE BOOL "Set Platform to Desktop" FORCE) # If using OpenGLES
+set(CLAY_ENABLE_OPENGL_ES ON CACHE BOOL Enable OpenGLES" FORCE) # If using OpenGLES
 
-set(CLAY_PLATFORM_DESKTOP ON CACHE BOOL "Set Platform to Desktop" FORCE)
-set(CLAY_ENABLE_OPENGL ON CACHE BOOL "Set Platform to Desktop" FORCE)
+set(CLAY_PLATFORM_DESKTOP ON CACHE BOOL "Set Platform to Desktop" FORCE) # If Building for Desktop (Windows or linux)
+set(CLAY_ENABLE_OPENGL ON CACHE BOOL "Enable OpenGL" FORCE) # If using OpenGL
 
 # Add ClayEngine
 add_subdirectory(${CMAKE_SOURCE_DIR}/thirdparty/clay)
@@ -56,4 +56,4 @@ add_subdirectory(${CMAKE_SOURCE_DIR}/thirdparty/clay)
 
 A desktop demo project for using this library can be seen [here](https://github.com/VadimEngine/ClayEngineDemo)
 
-A VR Oculus demo project for using this library can be seen [here](https://github.com/VadimEngine/ClayEngineDemoVR)
+A VR Meta Quest demo project for using this library can be seen [here](https://github.com/VadimEngine/ClayEngineDemoVR)
