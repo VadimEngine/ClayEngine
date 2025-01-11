@@ -1,5 +1,7 @@
 // standard lib
-#include <climits>
+#include <climits> // linux
+#include <inttypes.h> // linux
+#include <cstring> // linux
 // third party
 #include <AL/alext.h>
 #include <sndfile.h>

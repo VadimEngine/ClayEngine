@@ -33,6 +33,8 @@ public:
     /** Get the current Gain */
     float getGain() const;
 
+    bool isInitialized() const;
+
 private:
     /** Sound Device*/
     std::unique_ptr<SoundDevice> mpSoundDevice_;

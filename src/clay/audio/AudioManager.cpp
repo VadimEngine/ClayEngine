@@ -42,4 +42,9 @@ float AudioManager::getGain() const {
     }
 }
 
+bool AudioManager::isInitialized() const {
+    return mAudioInitialized_;
+}
+
+
 } // namespace clay

@@ -477,10 +477,12 @@ void AppDesktop::loadResources() {
         );
     }
     // Audio
-    mResources_.loadResource<Audio>({Resources::RESOURCE_PATH / "audio/beep_deep_1.wav"}, "Blip_Deep");
-    mResources_.loadResource<Audio>({Resources::RESOURCE_PATH / "audio/Blip_1.wav"}, "Blip1");
-    mResources_.loadResource<Audio>({Resources::RESOURCE_PATH / "audio/button_click_1.wav"}, "Button_click");
-    mResources_.loadResource<Audio>({Resources::RESOURCE_PATH / "audio/PatakasWorld.wav"}, "PatakasWorld");
+    if (mAudioManger_.isInitialized()) {
+        mResources_.loadResource<Audio>({Resources::RESOURCE_PATH / "audio/beep_deep_1.wav"}, "Blip_Deep");
+        mResources_.loadResource<Audio>({Resources::RESOURCE_PATH / "audio/Blip_1.wav"}, "Blip1");
+        mResources_.loadResource<Audio>({Resources::RESOURCE_PATH / "audio/button_click_1.wav"}, "Button_click");
+        mResources_.loadResource<Audio>({Resources::RESOURCE_PATH / "audio/PatakasWorld.wav"}, "PatakasWorld");
+    }
     // Fonts
     mResources_.loadResource<Font>({Resources::RESOURCE_PATH / "fonts/Consolas.ttf"}, "Consolas");
 

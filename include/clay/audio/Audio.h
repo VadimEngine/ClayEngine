@@ -1,7 +1,6 @@
 #pragma once
 // standard lib
 #include <filesystem>
-#include <inttypes.h>
 // third party
 // project
 #include "clay/utils/common/Utils.h"
