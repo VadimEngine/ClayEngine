@@ -5,7 +5,7 @@
 // class
 #include "clay/graphics/opengl/GraphicsAPIOpenGL.h"
 // project
-#include "clay/application/Logger.h"
+#include "clay/utils/common/Logger.h"
 // third party
 #define GLEW_STATIC
 #include <GL/glew.h>

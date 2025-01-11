@@ -1,9 +1,8 @@
 // standard lib
 #include <vector>
 // third party
-#include <SOIL.h>
 // project
-#include "clay/application/Logger.h"
+#include "clay/utils/common/Logger.h"
 // class
 #include "clay/graphics/common/Texture.h"
 
@@ -17,21 +16,12 @@ Texture::Texture(IGraphicsAPI& graphicsAPI, const unsigned char* textureData, in
     mTextureId_ = genGLTexture(graphicsAPI, textureData, width, height, channels, gammaCorrect);
 }
 
-Texture::Texture(IGraphicsAPI& graphicsAPI, utils::FileData& imageFile, bool gammaCorrect) 
-: mGraphicsAPI_(graphicsAPI){
-    unsigned char* textureData = SOIL_load_image_from_memory(imageFile.data.get(), imageFile.size, &mWidth_, &mHeight_, &mChannels_, SOIL_LOAD_AUTO);
-
-    if (textureData == nullptr) {
-        LOG_E("ERROR LOADING TEXTURE: %s", textureData);
-        const char* errorMessage = SOIL_last_result();
-        if (errorMessage != nullptr) {
-            LOG_E("SOIL error: %s", errorMessage)
-        }
-        throw std::runtime_error("Texture load failed");
-    }
-
-    mTextureId_ = genGLTexture(mGraphicsAPI_, textureData, mWidth_, mHeight_, mChannels_, gammaCorrect);
-    SOIL_free_image_data(textureData);
+Texture::Texture(IGraphicsAPI& graphicsAPI, utils::ImageData& imageData, bool gammaCorrect)
+: mGraphicsAPI_(graphicsAPI) {
+    mWidth_ = imageData.width;
+    mHeight_ = imageData.height;
+    mChannels_ = imageData.channels;
+    mTextureId_ = genGLTexture(graphicsAPI, imageData.pixels, imageData.width, imageData.height, imageData.channels, gammaCorrect);
 }
 
 Texture::~Texture() {

@@ -1,12 +1,12 @@
 // ClayEngine
-#include "clay/application/App.h"
-#include "clay/application/Scene.h"
+#include "clay/application/desktop/AppDesktop.h"
+#include "clay/application/common/BaseScene.h"
 // class
 #include "clay/entity/Entity.h"
 
 namespace clay {
 
-Entity::Entity(Scene& scene)
+Entity::Entity(BaseScene& scene)
     : mScene_(scene) {}
 
 Entity::~Entity() {}

@@ -12,6 +12,13 @@ namespace clay::utils {
         std::size_t size;
     }; 
 
+    struct ImageData {
+        unsigned char* pixels;
+        int width;
+        int height;
+        int channels;
+    };
+
 
 
     /** Hash for glm::ivec2 */

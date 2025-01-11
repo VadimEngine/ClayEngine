@@ -28,3 +28,6 @@
 [submodule "thirdparty/googletest"]
 	path = thirdparty/googletest
 	url = https://github.com/google/googletest.git
+[submodule "thirdparty/OpenXR-SDK-Source"]
+	path = thirdparty/OpenXR-SDK-Source
+	url = https://github.com/KhronosGroup/OpenXR-SDK-Source

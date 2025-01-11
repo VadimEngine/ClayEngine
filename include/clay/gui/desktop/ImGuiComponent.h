@@ -1,4 +1,7 @@
 #pragma once
+
+#ifdef CLAY_PLATFORM_DESKTOP
+
 // standard lib
 #include <stdexcept>
 // third party
@@ -63,3 +66,5 @@ private:
 };
 
 } // namespace clay
+
+#endif

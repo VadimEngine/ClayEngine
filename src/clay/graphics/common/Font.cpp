@@ -4,8 +4,7 @@
 #include FT_FREETYPE_H
 #include <glm/gtc/type_ptr.hpp>
 // project
-#include "clay/application/Logger.h"
-
+#include "clay/utils/common/Logger.h"
 // class
 #include "clay/graphics/common/Font.h"
 

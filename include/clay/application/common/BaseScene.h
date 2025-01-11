@@ -2,27 +2,27 @@
 // third party
 #include <glm/vec4.hpp>
 // project
-#include "clay/application/InputHandler.h"
-#include "clay/application/Resource.h"
+#include "clay/application/common/IInputHandler.h"
+#include "clay/application/common/Resources.h"
 #include "clay/entity/Entity.h"
 #include "clay/graphics/common/Camera.h"
 #include "clay/graphics/common/Renderer.h"
 
 namespace clay {
 
-// Forward declare App
-class App;
+// Forward declare IApp
+class IApp;
 
-class Scene {
+class BaseScene {
 public:
     /**
      * Constructor
      * @param theApp Parent app handling this Scene
      */
-    Scene(App& theApp);
+    BaseScene(IApp& theApp);
 
     /** Destructor */
-    virtual ~Scene() = default;
+    virtual ~BaseScene() = default;
 
     /**
      * Update scene content
@@ -56,7 +56,7 @@ public:
     glm::vec4 getBackgroundColor() const;
 
     /** Get this Scene's parent App */
-    clay::App& getApp();
+    clay::IApp& getApp();
 
     /** Get the current focused Camera */
     Camera* getFocusCamera();
@@ -74,7 +74,7 @@ public:
     bool isRunning() const;
 
     /** @brief Get this scene's resources */
-    Resource& getResources();
+    Resources& getResources();
 
     /**
      * On keyboard key press handler
@@ -88,30 +88,31 @@ public:
      */
     virtual void onKeyRelease(unsigned int code);
 
+    // TODO remove desktop from here. Have 1 method that takes in all events
     /**
      * On Mouse button press handler
      * @param mouseEvent Mouse event details
      */
-    virtual void onMousePress(const InputHandler::MouseEvent& mouseEvent);
+    virtual void onMousePress(const IInputHandler::MouseEvent& mouseEvent);
 
     /**
      * On Mouse Button release handler
      * @param mouseEvent Mouse event details
      */
-    virtual void onMouseRelease(const InputHandler::MouseEvent& mouseEvent);
+    virtual void onMouseRelease(const IInputHandler::MouseEvent& mouseEvent);
 
     /**
      * @brief One mouse wheel event handler
      *
      * @param mouseEvent Mouse event
      */
-    virtual void onMouseWheel(const InputHandler::MouseEvent& mouseEvent);
+    virtual void onMouseWheel(const IInputHandler::MouseEvent& mouseEvent);
 
 protected:
     /** Parent app handling this Scene*/
-    App& mApp_;
+    IApp& mApp_;
     /** Resource for this Scene */
-    Resource mResources_;
+    Resources mResources_;
     /** Camera for this scene */
     std::unique_ptr<Camera> mpSceneCamera_;
     /** The current focused camera the scene is rendered through */

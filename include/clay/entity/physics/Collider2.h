@@ -6,7 +6,7 @@
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
 // project
-#include "clay/application/Logger.h"
+#include "clay/utils/common/Logger.h"
 #include "clay/entity/physics/PhysicsComponentBase.h"
 #include "clay/graphics/common/Renderer.h"
 

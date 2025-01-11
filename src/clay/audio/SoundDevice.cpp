@@ -1,7 +1,7 @@
 // standard lib
 // third party
 // project
-#include <clay/application/Logger.h>
+#include "clay/utils/common/Logger.h"
 // class
 #include "clay/audio/SoundDevice.h"
 

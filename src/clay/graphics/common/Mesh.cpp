@@ -1,7 +1,7 @@
 // third party
 #include <glm/gtc/matrix_transform.hpp>
 // project
-#include "clay/application/Logger.h"
+#include "clay/utils/common/Logger.h"
 // class
 #include "clay/graphics/common/Mesh.h"
 

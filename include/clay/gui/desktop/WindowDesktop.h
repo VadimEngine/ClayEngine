@@ -1,4 +1,7 @@
 #pragma once
+
+#ifdef CLAY_PLATFORM_DESKTOP
+
 // standard lib
 #include <string>
 #include <stdexcept>
@@ -6,37 +9,38 @@
 #include <GLFW/glfw3.h>
 #include <glm/vec2.hpp>
 // project
-#include "clay/application/InputHandler.h"
+#include "clay/application/desktop/InputHandlerDesktop.h"
+#include "clay/gui/common/IWindow.h"
 
 namespace clay {
 
-class Window {
+class WindowDesktop: public IWindow {
 public:
     /** Constructor */
-    Window(const std::string& windowLbl = "", int width = SCR_WIDTH, int height = SCR_HEIGHT);
+    WindowDesktop(const std::string& windowLbl = "", int width = SCR_WIDTH, int height = SCR_HEIGHT);
 
     /** Destructor */
-    ~Window();
+    ~WindowDesktop();
 
     /**
      * Update the window (mainly polls for inputs)
      * @param dt Time since last update in seconds
      */
-    void update(float dt);
+    void update(float dt) override;
 
     /** Render the window content */
-    void render();
+    void render() override;
 
     /**
      * @brief Set if the window should be displayed
      */
-    void setWindowDisplay(bool show);
+    void enableDisplay(bool show) override;
 
     /** Get the GLFW window */
     GLFWwindow* getGLFWWindow() const;
 
     /** If the Window is currently running */
-    bool isRunning() const;
+    bool isRunning() const override;
 
     /**
      * Enable/Disable VSync
@@ -48,10 +52,10 @@ public:
     int getGLFWSwapInterval() const;
 
     /** Get the screen dimension of this window*/
-    glm::ivec2 getWindowDimensions() const;
+    glm::ivec2 getDimensions() const override;
 
     /** Get the input handler listening to this Window's inputs */
-    InputHandler& getInputHandler();
+    IInputHandler* getInputHandler() override;
 
 private:
     /** Default Screen Width */
@@ -61,9 +65,11 @@ private:
     /** GLFW window this window wraps */
     GLFWwindow* mpGLFWWindow_ = nullptr;
     /** Input handler listening to inputs on this window*/
-    InputHandler mInputHandler_;
+    InputHandlerDesktop mInputHandler_;
     /** GLFW swap interval for VSync */
     unsigned int mSwapInterval_ = 1;
 };
 
 } // namespace clay
+
+#endif

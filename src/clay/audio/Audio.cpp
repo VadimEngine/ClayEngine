@@ -5,7 +5,7 @@
 #include <sndfile.h>
 // class
 #include "clay/audio/Audio.h"
-#include "clay/application/Logger.h"
+#include "clay/utils/common/Logger.h"
 
 namespace clay {
 

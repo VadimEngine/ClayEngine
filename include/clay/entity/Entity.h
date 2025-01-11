@@ -16,12 +16,12 @@
 
 namespace clay {
 
-class Scene;
+class BaseScene;
 
 class Entity {
 public:
     /** Constructor */
-    Entity(Scene& scene);
+    Entity(BaseScene& scene);
 
     /** Destructor */
     virtual ~Entity();
@@ -151,7 +151,7 @@ public:
 
 protected:
     /** Scene this Entity is in*/
-    Scene& mScene_;
+    BaseScene& mScene_;
     /** Collider TODO fix this*/
     Collider2* mCollider_ = nullptr;
     /** Entity Position */

@@ -3,7 +3,7 @@
 #include <AL/alext.h>
 #include <sndfile.h>
 // project
-#include "clay/application/Logger.h"
+#include "clay/utils/common/Logger.h"
 // class
 #include "clay/audio/AudioManager.h"
 

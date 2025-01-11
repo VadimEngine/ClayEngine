@@ -1,30 +1,41 @@
+#ifdef CLAY_PLATFORM_DESKTOP
 // standard lib
-#include <numbers>
+// #include <numbers>
 #include <fstream>
 // third party
 // project
 #include "clay/graphics/opengl/GraphicsAPIOpenGL.h"
-#include "clay/application/Logger.h"
+#include "clay/utils/common/Logger.h"
+#include "clay/utils/desktop/UtilsDesktop.h"
 // class
-#include "clay/application/App.h"
-#include "clay/gui/ImGuiComponent.h" // include after app
+#include "clay/application/desktop/AppDesktop.h"
+#include "clay/gui/desktop/ImGuiComponent.h" // include after app
 
 namespace clay {
 
-bool App::sOpenGLInitialized_ = false;
+bool AppDesktop::sOpenGLInitialized_ = false;
 
-App::App()
- : mWindow_("OpenGL Application", 800, 600) {
+AppDesktop::AppDesktop() {}
+
+AppDesktop::~AppDesktop() {
+    // Clean Application resources
+    ImGuiComponent::deinitialize();
+    glfwTerminate();
+    // Play "0" audio to clear audio buffer
+    mAudioManger_.playSound(0);
+}
+
+void AppDesktop::initialize() {
     // Initialize OpenGL and imgui
     initializeOpenGL(); // remove this?
     mGraphicsAPI_ = new GraphicsAPIOpenGL();
     mResources_.mGraphicsAPI_ = mGraphicsAPI_;
-    ImGuiComponent::initializeImGui(mWindow_.getGLFWWindow());
+    ImGuiComponent::initializeImGui(((WindowDesktop*)mpWindow_.get())->getGLFWWindow());
     // Load/build Application resources
     loadResources();
     // Renderer and Scene (must be called after OpenGL is initialized)
     mpRenderer_ = std::make_unique<Renderer>(
-        glm::vec2{800, 600},
+        mpWindow_->getDimensions(),
         *(mResources_.getResource<ShaderProgram>("TextureSurface")),
         *(mResources_.getResource<ShaderProgram>("Text")),
         *(mResources_.getResource<ShaderProgram>("MVPShader")),
@@ -35,16 +46,8 @@ App::App()
     );
 }
 
-App::~App() {
-    // Clean Application resources
-    ImGuiComponent::deinitialize();
-    glfwTerminate();
-    // Play "0" audio to clear audio buffer
-    mAudioManger_.playSound(0);
-}
-
-void App::run() {
-    mWindow_.setWindowDisplay(true);
+void AppDesktop::run() {
+    mpWindow_->enableDisplay(true);
     // Update and render while application is running
     while (isRunning()) {
         update();
@@ -52,12 +55,12 @@ void App::run() {
     }
 }
 
-void App::update() {
+void AppDesktop::update() {
     // Calculate time since last update (in seconds)
     std::chrono::duration<float> dt = (std::chrono::steady_clock::now() - mLastTime_);
     mLastTime_ = std::chrono::steady_clock::now();
     // Update application content
-    mWindow_.update(dt.count());
+    mpWindow_->update(dt.count());
     // Update list in reverse order and delete any marked for removal
     for (auto it = mScenes_.rbegin(); it != mScenes_.rend();) {
         if ((*it)->isRemove()) {
@@ -68,35 +71,35 @@ void App::update() {
             ++it;
         }
     }
-    InputHandler& handler = getWindow().getInputHandler();
+    InputHandlerDesktop* handler = (InputHandlerDesktop*)mpWindow_->getInputHandler();
 
     // Propagate key events to the scenes
-    while (const auto keyEvent = handler.getKeyEvent()) {
+    while (const auto keyEvent = handler->getKeyEvent()) {
         for (auto it = mScenes_.rbegin(); it != mScenes_.rend(); ++it) {
-            if (keyEvent.value().getType() == InputHandler::KeyEvent::Type::PRESS) {
+            if (keyEvent.value().getType() == IInputHandler::KeyEvent::Type::PRESS) {
                 (*it)->onKeyPress(keyEvent.value().getCode());
-            } else if (keyEvent.value().getType() == InputHandler::KeyEvent::Type::RELEASE) {
+            } else if (keyEvent.value().getType() == IInputHandler::KeyEvent::Type::RELEASE) {
                 (*it)->onKeyRelease(keyEvent.value().getCode());
             }
         }
     }
 
     // Propagate mouse events to scenes
-    while (const auto mouseEvent = handler.getMouseEvent()) {
+    while (const auto mouseEvent = handler->getMouseEvent()) {
         for (auto it = mScenes_.rbegin(); it != mScenes_.rend(); ++it) {
-            if (mouseEvent.value().getType() == InputHandler::MouseEvent::Type::PRESS) {
+            if (mouseEvent.value().getType() == IInputHandler::MouseEvent::Type::PRESS) {
                 (*it)->onMousePress(mouseEvent.value());
-            } else if (mouseEvent.value().getType() == InputHandler::MouseEvent::Type::RELEASE) {
+            } else if (mouseEvent.value().getType() == IInputHandler::MouseEvent::Type::RELEASE) {
                 (*it)->onMouseRelease(mouseEvent.value());
-            } else if (mouseEvent.value().getType() == InputHandler::MouseEvent::Type::SCROLL_UP ||
-                mouseEvent.value().getType() == InputHandler::MouseEvent::Type::SCROLL_DOWN) {
+            } else if (mouseEvent.value().getType() == IInputHandler::MouseEvent::Type::SCROLL_UP ||
+                mouseEvent.value().getType() == IInputHandler::MouseEvent::Type::SCROLL_DOWN) {
                 (*it)->onMouseWheel(mouseEvent.value());
             }
         }
     }
 }
 
-void App::render() {
+void AppDesktop::render() {
     // Set background color from scene
     if (!mScenes_.empty()) {
         glm::vec4 sceneBackgroundColor = mScenes_.front()->getBackgroundColor();
@@ -127,44 +130,48 @@ void App::render() {
        (*it)->renderGUI();
     }
 
-    mWindow_.render();
+    mpWindow_->render();
 }
 
-bool App::isRunning() const {
+bool AppDesktop::isRunning() const {
     // TODO more running conditions. For now running is when the window is open
-    return mWindow_.isRunning();
+    return mpWindow_->isRunning();
 }
 
-void App::quit() {
+void AppDesktop::quit() {
     // TODO do any saving
     // Set window to close
-    glfwSetWindowShouldClose(mWindow_.getGLFWWindow(), true);
+    glfwSetWindowShouldClose(((WindowDesktop*)mpWindow_.get())->getGLFWWindow(), true);
 }
 
-void App::setScene(Scene* newScene) {
-    mScenes_.push_back(std::unique_ptr<Scene>(newScene));
+void AppDesktop::setScene(BaseScene* newScene) {
+    mScenes_.push_back(std::unique_ptr<BaseScene>(newScene));
 }
 
-Window& App::getWindow() {
-    return mWindow_;
+IWindow* AppDesktop::getWindow() {
+    return mpWindow_.get();
 }
 
-void App::setAntiAliasing(unsigned int sampleSize) {
-    // Set sample size
-    glfwWindowHint(GLFW_SAMPLES, sampleSize);
-    // Enable/disable anti-aliasing based on sample size
-    if (sampleSize != 0) {
-        mGraphicsAPI_->enable(IGraphicsAPI::Capability::MULTISAMPLE);
-    } else {
-        mGraphicsAPI_->disable(IGraphicsAPI::Capability::MULTISAMPLE);
-    }
+void AppDesktop::setWindow(std::unique_ptr<IWindow> pWindow) {
+    mpWindow_ = std::move(pWindow);
 }
 
-void App::loadResources() {
+void AppDesktop::setAntiAliasing(unsigned int sampleSize) {
+   // Set sample size
+   glfwWindowHint(GLFW_SAMPLES, sampleSize);
+   // Enable/disable anti-aliasing based on sample size
+   if (sampleSize != 0) {
+       mGraphicsAPI_->enable(IGraphicsAPI::Capability::MULTISAMPLE);
+   } else {
+       mGraphicsAPI_->disable(IGraphicsAPI::Capability::MULTISAMPLE);
+   }
+}
+
+void AppDesktop::loadResources() {
     // Shaders
     {
-        auto vertexShaderFileData = Resource::loadFileToMemory((Resource::RESOURCE_PATH / "shaders/AssimpLight.vert").string());
-        auto fragmentShaderFileData = Resource::loadFileToMemory((Resource::RESOURCE_PATH / "shaders/AssimpLight.frag").string());
+        auto vertexShaderFileData = Resources::loadFileToMemory((Resources::RESOURCE_PATH / "shaders/AssimpLight.vert").string());
+        auto fragmentShaderFileData = Resources::loadFileToMemory((Resources::RESOURCE_PATH / "shaders/AssimpLight.frag").string());
 
         std::unique_ptr<ShaderProgram> shader = std::make_unique<ShaderProgram>(*mGraphicsAPI_);
         shader->addShader({
@@ -182,8 +189,8 @@ void App::loadResources() {
         mResources_.addResource<ShaderProgram>(std::move(shader), "AssimpLight");
     }
     {
-        auto vertexShaderFileData = Resource::loadFileToMemory((Resource::RESOURCE_PATH / "shaders/Assimp.vert").string());
-        auto fragmentShaderFileData = Resource::loadFileToMemory((Resource::RESOURCE_PATH / "shaders/Assimp.frag").string());
+        auto vertexShaderFileData = Resources::loadFileToMemory((Resources::RESOURCE_PATH / "shaders/Assimp.vert").string());
+        auto fragmentShaderFileData = Resources::loadFileToMemory((Resources::RESOURCE_PATH / "shaders/Assimp.frag").string());
         // TODO use size so null string conversion for null terminator is not needed
         std::unique_ptr<ShaderProgram> shader = std::make_unique<ShaderProgram>(*mGraphicsAPI_);
         shader->addShader({
@@ -202,8 +209,8 @@ void App::loadResources() {
         mResources_.addResource<ShaderProgram>(std::move(shader), "Assimp");
     }
     {
-        auto vertexShaderFileData = Resource::loadFileToMemory((Resource::RESOURCE_PATH / "shaders/MVPTexShader.vert").string());
-        auto fragmentShaderFileData = Resource::loadFileToMemory((Resource::RESOURCE_PATH / "shaders/MVPTexShader.frag").string());
+        auto vertexShaderFileData = Resources::loadFileToMemory((Resources::RESOURCE_PATH / "shaders/MVPTexShader.vert").string());
+        auto fragmentShaderFileData = Resources::loadFileToMemory((Resources::RESOURCE_PATH / "shaders/MVPTexShader.frag").string());
         // TODO use size so null string conversion for null terminator is not needed
         std::unique_ptr<ShaderProgram> shader = std::make_unique<ShaderProgram>(*mGraphicsAPI_);
         shader->addShader({
@@ -222,8 +229,8 @@ void App::loadResources() {
         mResources_.addResource<ShaderProgram>(std::move(shader), "MVPTexShader");
     }
     {
-        auto vertexShaderFileData = Resource::loadFileToMemory((Resource::RESOURCE_PATH / "shaders/Text.vert").string());
-        auto fragmentShaderFileData = Resource::loadFileToMemory((Resource::RESOURCE_PATH / "shaders/Text.frag").string());
+        auto vertexShaderFileData = Resources::loadFileToMemory((Resources::RESOURCE_PATH / "shaders/Text.vert").string());
+        auto fragmentShaderFileData = Resources::loadFileToMemory((Resources::RESOURCE_PATH / "shaders/Text.frag").string());
         // TODO use size so null string conversion for null terminator is not needed
         std::unique_ptr<ShaderProgram> shader = std::make_unique<ShaderProgram>(*mGraphicsAPI_);
         shader->addShader({
@@ -242,8 +249,8 @@ void App::loadResources() {
         mResources_.addResource<ShaderProgram>(std::move(shader), "Text");
     }
     {
-        auto vertexShaderFileData = Resource::loadFileToMemory((Resource::RESOURCE_PATH / "shaders/MVPShader.vert").string());
-        auto fragmentShaderFileData = Resource::loadFileToMemory((Resource::RESOURCE_PATH / "shaders/MVPShader.frag").string());
+        auto vertexShaderFileData = Resources::loadFileToMemory((Resources::RESOURCE_PATH / "shaders/MVPShader.vert").string());
+        auto fragmentShaderFileData = Resources::loadFileToMemory((Resources::RESOURCE_PATH / "shaders/MVPShader.frag").string());
         // TODO use size so null string conversion for null terminator is not needed
         std::unique_ptr<ShaderProgram> shader = std::make_unique<ShaderProgram>(*mGraphicsAPI_);
         shader->addShader({
@@ -262,8 +269,8 @@ void App::loadResources() {
         mResources_.addResource<ShaderProgram>(std::move(shader), "MVPShader");
     }
     {
-        auto vertexShaderFileData = Resource::loadFileToMemory((Resource::RESOURCE_PATH / "shaders/TextureSurface.vert").string());
-        auto fragmentShaderFileData = Resource::loadFileToMemory((Resource::RESOURCE_PATH / "shaders/TextureSurface.frag").string());
+        auto vertexShaderFileData = Resources::loadFileToMemory((Resources::RESOURCE_PATH / "shaders/TextureSurface.vert").string());
+        auto fragmentShaderFileData = Resources::loadFileToMemory((Resources::RESOURCE_PATH / "shaders/TextureSurface.frag").string());
         // TODO use size so null string conversion for null terminator is not needed
         std::unique_ptr<ShaderProgram> shader = std::make_unique<ShaderProgram>(*mGraphicsAPI_);
         shader->addShader({
@@ -282,8 +289,8 @@ void App::loadResources() {
         mResources_.addResource<ShaderProgram>(std::move(shader), "TextureSurface");
     }
     {
-        auto vertexShaderFileData = Resource::loadFileToMemory((Resource::RESOURCE_PATH / "shaders/Blur.vert").string());
-        auto fragmentShaderFileData = Resource::loadFileToMemory((Resource::RESOURCE_PATH / "shaders/Blur.frag").string());
+        auto vertexShaderFileData = Resources::loadFileToMemory((Resources::RESOURCE_PATH / "shaders/Blur.vert").string());
+        auto fragmentShaderFileData = Resources::loadFileToMemory((Resources::RESOURCE_PATH / "shaders/Blur.frag").string());
         // TODO use size so null string conversion for null terminator is not needed
         std::unique_ptr<ShaderProgram> shader = std::make_unique<ShaderProgram>(*mGraphicsAPI_);
         shader->addShader({
@@ -302,8 +309,8 @@ void App::loadResources() {
         mResources_.addResource<ShaderProgram>(std::move(shader), "Blur");
     }
     {
-        auto vertexShaderFileData = Resource::loadFileToMemory((Resource::RESOURCE_PATH / "shaders/BloomFinal.vert").string());
-        auto fragmentShaderFileData = Resource::loadFileToMemory((Resource::RESOURCE_PATH / "shaders/BloomFinal.frag").string());
+        auto vertexShaderFileData = Resources::loadFileToMemory((Resources::RESOURCE_PATH / "shaders/BloomFinal.vert").string());
+        auto fragmentShaderFileData = Resources::loadFileToMemory((Resources::RESOURCE_PATH / "shaders/BloomFinal.frag").string());
         // TODO use size so null string conversion for null terminator is not needed
         std::unique_ptr<ShaderProgram> shader = std::make_unique<ShaderProgram>(*mGraphicsAPI_);
         shader->addShader({
@@ -322,14 +329,17 @@ void App::loadResources() {
         mResources_.addResource<ShaderProgram>(std::move(shader), "BloomFinal");
     }
     // Textures
-    mResources_.loadResource<Texture>(
-        {Resource::RESOURCE_PATH / "Sprites.png"},
-         "SpriteSheet"
-    );
-    mResources_.loadResource<Texture>(
-        {Resource::RESOURCE_PATH / "V.png"},
-         "SampleTexture"
-    );
+    {
+        auto spritesFileData = Resources::loadFileToMemory((Resources::RESOURCE_PATH / "Sprites.png").string());
+        auto imageData = utils::fileDataToImageData(spritesFileData);
+        mResources_.addResource(std::move(std::make_unique<Texture>(*mGraphicsAPI_, imageData, true)), "SpriteSheet");
+    }
+    {
+        auto vFileData = Resources::loadFileToMemory((Resources::RESOURCE_PATH / "V.png").string());
+        auto imageData = utils::fileDataToImageData(vFileData);
+        mResources_.addResource(std::move(std::make_unique<Texture>(*mGraphicsAPI_, imageData, true)), "SampleTexture");
+    }
+
     // Single white pixel
     std::vector<unsigned char> whitePixel{0xFF, 0xFF, 0xFF};
     mResources_.addResource(std::move(std::make_unique<Texture>(*mGraphicsAPI_, whitePixel.data(), 1, 1, 3)), "Blank");
@@ -420,7 +430,7 @@ void App::loadResources() {
         "RectPlane"
     );
     mResources_.loadResource<Mesh>(
-        {Resource::RESOURCE_PATH / "Sphere.obj"},
+        {Resources::RESOURCE_PATH / "Sphere.obj"},
         "Sphere"
     );
     // Circle plane
@@ -432,7 +442,7 @@ void App::loadResources() {
         float radius = .5f;
         float x, y, z;
         for (int i = 0; i < segments; ++i) {
-            float theta = 2.0f * std::numbers::pi_v<float> * float(i) / float(segments);
+            float theta = 2.0f * 3.14159265358979323846264338327f * float(i) / float(segments);
             x = radius * cosf(theta);
             y = radius * sinf(theta);
             z = 0.0f;
@@ -467,12 +477,12 @@ void App::loadResources() {
         );
     }
     // Audio
-    mResources_.loadResource<Audio>({Resource::RESOURCE_PATH / "audio/beep_deep_1.wav"}, "Blip_Deep");
-    mResources_.loadResource<Audio>({Resource::RESOURCE_PATH / "audio/Blip_1.wav"}, "Blip1");
-    mResources_.loadResource<Audio>({Resource::RESOURCE_PATH / "audio/button_click_1.wav"}, "Button_click");
-    mResources_.loadResource<Audio>({Resource::RESOURCE_PATH / "audio/PatakasWorld.wav"}, "PatakasWorld");
+    mResources_.loadResource<Audio>({Resources::RESOURCE_PATH / "audio/beep_deep_1.wav"}, "Blip_Deep");
+    mResources_.loadResource<Audio>({Resources::RESOURCE_PATH / "audio/Blip_1.wav"}, "Blip1");
+    mResources_.loadResource<Audio>({Resources::RESOURCE_PATH / "audio/button_click_1.wav"}, "Button_click");
+    mResources_.loadResource<Audio>({Resources::RESOURCE_PATH / "audio/PatakasWorld.wav"}, "PatakasWorld");
     // Fonts
-    mResources_.loadResource<Font>({Resource::RESOURCE_PATH / "fonts/Consolas.ttf"}, "Consolas");
+    mResources_.loadResource<Font>({Resources::RESOURCE_PATH / "fonts/Consolas.ttf"}, "Consolas");
 
     // SpriteSheet
     mResources_.addResource(
@@ -484,27 +494,29 @@ void App::loadResources() {
     );
 }
 
-void App::initializeOpenGL() {
+void AppDesktop::initializeOpenGL() {
     // Only initialize if this if the first time
     if (!sOpenGLInitialized_) {
         sOpenGLInitialized_ = true;
     }
 }
 
-AudioManager& App::getAudioManger() {
+AudioManager& AppDesktop::getAudioManger() {
     return mAudioManger_;
 }
 
-Resource& App::getResources() {
+Resources& AppDesktop::getResources() {
     return mResources_;
 }
 
-Renderer& App::getRenderer() {
+Renderer& AppDesktop::getRenderer() {
     return *mpRenderer_.get();
 }
 
-IGraphicsAPI& App::getGraphicsAPI() {
-    return *mGraphicsAPI_;
+IGraphicsAPI* AppDesktop::getGraphicsAPI() {
+    return mGraphicsAPI_;
 }
 
 } // namespace clay
+
+#endif

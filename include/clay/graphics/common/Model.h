@@ -8,7 +8,7 @@
 #include <assimp/postprocess.h>
 #include <assimp/scene.h>
 // project
-#include "clay/application/Logger.h"
+#include "clay/utils/common/Logger.h"
 #include "clay/graphics/common/Mesh.h"
 #include "clay/graphics/common/ShaderProgram.h"
 

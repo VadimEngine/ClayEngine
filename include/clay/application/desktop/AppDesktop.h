@@ -1,4 +1,6 @@
 #pragma once
+#ifdef CLAY_PLATFORM_DESKTOP
+
 // standard lib
 #include <chrono>
 #include <list>
@@ -6,21 +8,25 @@
 // project
 #include "clay/graphics/common/IGraphicsAPI.h"
 #include "clay/graphics/common/ShaderProgram.h"
-#include "clay/application/Resource.h"
-#include "clay/application/Scene.h"
+#include "clay/application/common/Resources.h"
+#include "clay/application/common/BaseScene.h"
 #include "clay/audio/AudioManager.h"
 #include "clay/graphics/common/Renderer.h"
-#include "clay/gui/Window.h"
+#include "clay/gui/desktop/WindowDesktop.h"
+#include "clay/gui/common/IWindow.h"
+#include "clay/application/common/IApp.h"
 
 namespace clay {
 
-class App {
+class AppDesktop: public IApp {
 public:
     /** Constructor */
-    App();
+    AppDesktop();
 
     /** Destructor */
-    ~App();
+    ~AppDesktop();
+
+    void initialize();
 
     /** Start and do the run loop */
     void run();
@@ -44,7 +50,7 @@ public:
      * Set the current Scene of the application
      * @param newScene The new Scene
      */
-    void setScene(Scene* newScene);
+    void setScene(BaseScene* newScene);
 
     /**
      * Set Anti-Aliasing sample size. If the size is 0 then anti aliasing is disabled
@@ -53,19 +59,21 @@ public:
     void setAntiAliasing(unsigned int sampleSize);
 
     /** Get Application Window */
-    Window& getWindow();
+    IWindow* getWindow();
+
+    void setWindow(std::unique_ptr<IWindow> pWindow);
 
     /** Get the audio manager for this application */
     AudioManager& getAudioManger();
 
     /** Get application resources */
-    Resource& getResources();
+    Resources& getResources();
 
     /** Get the Renderer for this App */
     Renderer& getRenderer();
 
     // TODO USE THIS IN SCENES TO PASS TO RESOURCES
-    IGraphicsAPI& getGraphicsAPI();
+    IGraphicsAPI* getGraphicsAPI();
 
 private:
     /** Load/Build the common resources for the scenes in this application */
@@ -78,16 +86,18 @@ private:
     /** Time of last update call */
     std::chrono::steady_clock::time_point mLastTime_;
     /** The window for this application*/
-    Window mWindow_;
+    std::unique_ptr<IWindow> mpWindow_;
     /** The current Scenes of the application. List to allow controlled scene deleting */
-    std::list<std::unique_ptr<Scene>> mScenes_;
+    std::list<std::unique_ptr<BaseScene>> mScenes_;
     /** Renderer used to render the scenes */
     std::unique_ptr<Renderer> mpRenderer_;
     /** Audio manager */
     AudioManager mAudioManger_;
     /** Resource for this application that can be shared with child scenes */
-    Resource mResources_;
+    Resources mResources_;
 
     IGraphicsAPI* mGraphicsAPI_ = nullptr;
 };
 } // namespace clay
+
+#endif

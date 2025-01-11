@@ -14,11 +14,11 @@ public:
 
     // virtual bool isColliding(const glm::vec3 rayOrigin, glm::vec3 rayDir) const = 0;
 
-    void update(float dt);
+    void update(float dt) override;
 
     void render(const Renderer& theRenderer);
 
-    std::optional<glm::vec3> getCollisionMTV(const Collider& other) const;
+    std::optional<glm::vec3> getCollisionMTV(const Collider& other) const override;
 
 };
 

@@ -12,14 +12,6 @@ namespace clay {
 
 class Texture {
 public:
-
-    class ImageData {
-        unsigned char* pixels;
-        int width;
-        int height;
-        int channels;
-    };
-
     /**
      * @brief Create a Texture out of given pixel data
      *
@@ -30,7 +22,7 @@ public:
      */
     Texture(IGraphicsAPI& graphicsAPI, const unsigned char* textureData, int width, int height, int channels, bool gammaCorrect = false);
 
-    Texture(IGraphicsAPI& graphicsAPI, utils::FileData& imageFile, bool gammaCorrect = false);
+    Texture(IGraphicsAPI& graphicsAPI, utils::ImageData& imageData, bool gammaCorrect = false);
 
     /**
      * @brief Destructor. Frees the GL texture id

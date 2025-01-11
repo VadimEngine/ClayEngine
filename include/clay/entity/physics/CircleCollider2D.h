@@ -12,7 +12,7 @@ public:
 
     bool isColliding(const Collider& other) const override;
 
-    std::optional<glm::vec3> getCollisionMTV(const Collider& other) const;
+    std::optional<glm::vec3> getCollisionMTV(const Collider& other) const override;
 };
 
 } // namespace clay

@@ -1,7 +1,7 @@
 // class
 #include "clay/graphics/common/ShaderProgram.h"
 // project
-#include "clay/application/Logger.h"
+#include "clay/utils/common/Logger.h"
 
 
 namespace clay {
@@ -30,7 +30,7 @@ void ShaderProgram::addShader(const ShaderCreateInfo& shaderInfo) {
 
 void ShaderProgram::linkProgram() {
     mGraphicsAPI_.linkProgram(mProgramId_);
-
+    // TODO avoid Invalid uniformBlockIndex error
     // Bind the Camera UBO
     const unsigned int uniformBlockIndex = mGraphicsAPI_.getUniformBlockIndex(mProgramId_, "Camera");
     mGraphicsAPI_.uniformBlockBinding(mProgramId_, uniformBlockIndex, 0);

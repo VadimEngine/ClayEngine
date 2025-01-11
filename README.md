@@ -5,13 +5,15 @@ Early Alpha Clay Engine cross-platform static library for developing games in C+
 This libraries uses the following third party libraries:
 
 - assimp
-    - For loading 3d models
+    - For loading 3d models and converting them to renderable components 
 - freetype
     - For loading and rendering fonts and text
 - GLEW
     - For managing and using OpenGL extensions
 - GLFW
     - For creating windows, receiving input, and managing OpenGL contexts, 
+- GLM
+    - For vector/matrix/quaternion and other graphics related math
 - googletest
     - for unit test
 - imgui
@@ -19,14 +21,16 @@ This libraries uses the following third party libraries:
 - OpenAL
     - For playing audio
 - sndfile
-    - For loading audio files
+    - For converting audio files into audio data useable by OpenAL
 - SOIL
-    - For loading/saving image files such as pngs or bmp
+    - For loading/saving image files such as pngs or bmp and converting image files into pixel data
+- OpenXR-SDK-Source
+    - For using this engine on VR platforms
 
-All the libraries are included in `./ThirdParty` directory as submodules.
+All the libraries are included in `./thirdparty` directory as submodules.
 
 # Instructions 
-The Clay Static library can be built with the following commands:
+The Clay Static library can be manually built with the following commands:
 
 - Initialize all third party submodules
     - `git submodule update --init --recursive`  
@@ -35,10 +39,21 @@ The Clay Static library can be built with the following commands:
     - `cmake -S . -B build -DCLAY_BUILD_TESTS=ON`
     - `cmake --build ./build/`
 
-- Clean build directory for a clean build
-    - `./tools/clean-build.sh`
-
 - Run test (if build with -DCLAY_BUILD_TESTS=ON):
     - `./build/test/Debug/ClayEngineTest.exe`
 
-A demo project for using this library can be seen [here](https://github.com/VadimEngine/ClayEngineDemo)
+In your CMakeLists.txt, the library can be added simply with the following changes and allow Cmake to do all the building and linking
+```
+set(CLAY_PLATFORM_VR ON CACHE BOOL "Set Platform to VR" FORCE) # If Building for VR
+set(CLAY_ENABLE_OPENGL_ES ON CACHE BOOL "Set Platform to Desktop" FORCE) # If using OpenGLES
+
+set(CLAY_PLATFORM_DESKTOP ON CACHE BOOL "Set Platform to Desktop" FORCE)
+set(CLAY_ENABLE_OPENGL ON CACHE BOOL "Set Platform to Desktop" FORCE)
+
+# Add ClayEngine
+add_subdirectory(${CMAKE_SOURCE_DIR}/thirdparty/clay)
+```
+
+A desktop demo project for using this library can be seen [here](https://github.com/VadimEngine/ClayEngineDemo)
+
+A VR Oculus demo project for using this library can be seen [here](https://github.com/VadimEngine/ClayEngineDemoVR)

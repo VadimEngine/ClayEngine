@@ -18,7 +18,7 @@
 
 namespace clay {
 
-class Resource {
+class Resources {
 public:
     static std::function<utils::FileData(const std::string&)> loadFileToMemory;
 
@@ -43,10 +43,10 @@ public:
     IGraphicsAPI* mGraphicsAPI_;
 
     /** Constructor default */
-    Resource();
+    Resources();
 
     /** Destructor default */
-    ~Resource();
+    ~Resources();
 
     /**
      * Load the resource from given paths

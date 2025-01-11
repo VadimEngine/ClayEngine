@@ -1,0 +1,1 @@
+#include "clay/application/common/IApp.h"
