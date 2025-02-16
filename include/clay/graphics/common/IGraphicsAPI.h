@@ -24,7 +24,9 @@ public:
 
     enum class Capability {
         MULTISAMPLE,
-        FRAMEBUFFER_SRGB
+        FRAMEBUFFER_SRGB,
+        DEPTH_TEST,
+        STENCIL_TEST
     };
 
     enum class FrameBufferTarget {
@@ -160,6 +162,17 @@ public:
         FILL
     };
 
+    enum class TestFunction {
+        NEVER,
+        LESS,
+        LEQUAL,
+        GREATER,
+        GEQUAL,
+        EQUAL,
+        NOTEQUAL,
+        ALWAYS
+    };
+
     virtual ~IGraphicsAPI() = default;
 
     virtual unsigned int createShader(ShaderCreateInfo::Type) = 0;
@@ -265,6 +278,9 @@ public:
 
     virtual void drawBuffer(unsigned int bufferId) = 0;
 
+    virtual void stencilMask(unsigned int mask) = 0;
+
+    virtual void stencilFunc(TestFunction func, unsigned int mask) = 0;
 };
 
 } // namespace clay

@@ -289,6 +289,22 @@ void Renderer::renderSprite(unsigned int textureId, const glm::mat4& modelMat, c
     mRectPlane_.render(mSpriteShader_);
 }
 
+void Renderer::renderSprite(unsigned int textureId, ShaderProgram& shader, const glm::mat4& modelMat, const glm::vec4& theColor) const {
+    shader.bind();
+    mGraphicsAPI_.activeTexture(0);
+    mGraphicsAPI_.bindTexture(IGraphicsAPI::TextureTarget::TEXTURE_2D, textureId);
+
+    shader.setMat4("uModel", modelMat);
+
+    // Draw the whole texture
+    shader.setInt("uTexture", 0);
+    shader.setVec2("uSubImageTopLeft", {0.f, 0.f});
+    shader.setVec2("uSubImageSize", {1.f, 1.f});
+    shader.setVec4("uColor", theColor);
+
+    mRectPlane_.render(shader);
+}
+
 void Renderer::renderSprite(SpriteSheet::Sprite& theSprite, const glm::mat4& modelMat, const glm::vec4& theColor) const {
     mSpriteShader_.bind();
     mGraphicsAPI_.activeTexture(0);
@@ -306,6 +322,25 @@ void Renderer::renderSprite(SpriteSheet::Sprite& theSprite, const glm::mat4& mod
     mSpriteShader_.setVec4("uColor", theColor);
 
     mRectPlane_.render(mSpriteShader_);
+}
+
+void Renderer::renderSprite(SpriteSheet::Sprite& theSprite, ShaderProgram& shader, const glm::mat4& modelMat, const glm::vec4& theColor) const {
+    shader.bind();
+    mGraphicsAPI_.activeTexture(0);
+    mGraphicsAPI_.bindTexture(IGraphicsAPI::TextureTarget::TEXTURE_2D, theSprite.parentSpriteSheet.getTextureId());
+
+    shader.setMat4("uModel", modelMat);
+    shader.setInt("uTexture", 0);
+
+    float subImageTopLeftX = static_cast<float>(theSprite.gridIndex.x * theSprite.spriteSize.x) / theSprite.parentSpriteSheet.getSheetSize()[0];
+    float subImageTopLeftY = static_cast<float>(theSprite.gridIndex.y * theSprite.spriteSize.y) / theSprite.parentSpriteSheet.getSheetSize()[1];
+    shader.setVec2("uSubImageTopLeft", {subImageTopLeftX, subImageTopLeftY});
+    float normalWidth = (float)theSprite.spriteSize[0] / (float)theSprite.parentSpriteSheet.getSheetSize()[0];
+    float normalHeight = (float)theSprite.spriteSize[1] / (float)theSprite.parentSpriteSheet.getSheetSize()[1];
+    shader.setVec2("uSubImageSize", {normalWidth, normalHeight});
+    // shader.setVec4("uColor", theColor);
+
+    mRectPlane_.render(shader);
 }
 
 void Renderer::renderText(const std::string& text, const glm::vec2& position, const Font& font, float scale, const glm::vec3& color) {
@@ -470,6 +505,64 @@ void Renderer::renderTextNormalized(const std::string& text, const glm::mat4& mo
     mGraphicsAPI_.bindTexture(IGraphicsAPI::TextureTarget::TEXTURE_2D, 0);
 }
 
+void Renderer::renderTextNormalized(const std::string& text, ShaderProgram& shader, const glm::mat4& modelMat, const Font& font, const glm::vec3& scale, const glm::vec3& color) {
+    // activate corresponding render state	
+    shader.bind();
+    shader.setVec3("textColor", color);
+    mGraphicsAPI_.activeTexture(0);
+    mGraphicsAPI_.bindVertexArray(font.getVAO());
+
+    // Calculate the total width of the text
+    float totalWidth = 0.0f;
+    for (const char& c : text) {
+        const Font::Character* ch = font.getCharInfo(c);
+        if (ch != nullptr) {
+            totalWidth += (ch->advance >> 6) * scale.x;
+        }
+    }
+
+    float startX = -totalWidth / 2.0f; // Center horizontally around the origin
+
+    // iterate through all characters
+    for (const char& c : text) {
+        const Font::Character* ch = font.getCharInfo(c);
+
+        if (ch != nullptr) {
+            float xpos = startX + ch->bearing.x * scale.x;
+            float ypos = - (ch->size.y - ch->bearing.y) * scale.y; // Adjust for Y-axis to center vertically around the origin
+
+            float w = ch->size.x * scale.x;
+            float h = ch->size.y * scale.y;
+            // update VBO for each character
+            float vertices[6][4] = {
+                { xpos,     ypos + h,   0.0f, 0.0f },
+                { xpos,     ypos,       0.0f, 1.0f },
+                { xpos + w, ypos,       1.0f, 1.0f },
+
+                { xpos,     ypos + h,   0.0f, 0.0f },
+                { xpos + w, ypos,       1.0f, 1.0f },
+                { xpos + w, ypos + h,   1.0f, 0.0f }
+            };
+            // render glyph texture over quad
+            mGraphicsAPI_.bindTexture(IGraphicsAPI::TextureTarget::TEXTURE_2D, ch->textureId);
+            // update content of VBO memory
+            mGraphicsAPI_.bindBuffer(IGraphicsAPI::BufferTarget::ARRAY_BUFFER, font.getVBO());
+            mGraphicsAPI_.bufferSubData(IGraphicsAPI::BufferTarget::ARRAY_BUFFER, 0, sizeof(vertices), vertices);
+
+            mGraphicsAPI_.bindBuffer(IGraphicsAPI::BufferTarget::ARRAY_BUFFER, 0);
+            // Apply the model matrix to the shader
+            shader.setMat4("uModel", modelMat);
+
+            // render quad
+            mGraphicsAPI_.drawArrays(IGraphicsAPI::PrimitiveTopology::TRIANGLE_LIST, 0, 6);
+            // now advance cursors for next glyph (note that advance is number of 1/64 pixels)
+            startX += (ch->advance >> 6) * scale.x; // bitshift by 6 to get value in pixels (2^6 = 64 (divide amount of 1/64th pixels by 64 to get amount of pixels))
+        }
+    }
+    mGraphicsAPI_.bindVertexArray(0);
+    mGraphicsAPI_.bindTexture(IGraphicsAPI::TextureTarget::TEXTURE_2D, 0);
+}
+
 void Renderer::renderRectangleSimple(const glm::mat4& modelMat, const glm::vec4& theColor) const {
     // TODO fix this
     mMVPShader_.bind();
@@ -575,16 +668,22 @@ void Renderer::enableGammaCorrect(bool enable) {
     mGammaCorrect_ = enable;
 }
 
-void Renderer::clearBuffers(const glm::vec4& color0, const glm::vec4 color1) {
+void Renderer::clearBuffers(const glm::vec4& defaultColor, const glm::vec4& hdrColor0, const glm::vec4 hdrColor1) {
+    // clear default frame buffer
+    mGraphicsAPI_.bindFrameBuffer(IGraphicsAPI::FrameBufferTarget::FRAMEBUFFER, 0);
+    mGraphicsAPI_.clearColor(defaultColor.r, defaultColor.g, defaultColor.b, defaultColor.a);
+    mGraphicsAPI_.clearBuffers({IGraphicsAPI::ClearBufferTarget::COLOR, IGraphicsAPI::ClearBufferTarget::DEPTH, IGraphicsAPI::ClearBufferTarget::STENCIL});
+
+    // clear HDR buffer
     mGraphicsAPI_.bindFrameBuffer(IGraphicsAPI::FrameBufferTarget::FRAMEBUFFER, hdrFBO_);
 
     mGraphicsAPI_.drawBuffer(0);
-    mGraphicsAPI_.clearColor(color0.r, color0.g, color0.b, color0.a);
-    mGraphicsAPI_.clearBuffers({IGraphicsAPI::ClearBufferTarget::COLOR, IGraphicsAPI::ClearBufferTarget::DEPTH});
+    mGraphicsAPI_.clearColor(hdrColor0.r, hdrColor0.g, hdrColor0.b, hdrColor0.a);
+    mGraphicsAPI_.clearBuffers({IGraphicsAPI::ClearBufferTarget::COLOR, IGraphicsAPI::ClearBufferTarget::DEPTH, IGraphicsAPI::ClearBufferTarget::STENCIL});
 
     mGraphicsAPI_.drawBuffer(1);
-    mGraphicsAPI_.clearColor(color1.r, color1.g, color1.b, color1.a);
-    mGraphicsAPI_.clearBuffers({IGraphicsAPI::ClearBufferTarget::COLOR, IGraphicsAPI::ClearBufferTarget::DEPTH});
+    mGraphicsAPI_.clearColor(hdrColor1.r, hdrColor1.g, hdrColor1.b, hdrColor1.a);
+    mGraphicsAPI_.clearBuffers({IGraphicsAPI::ClearBufferTarget::COLOR, IGraphicsAPI::ClearBufferTarget::DEPTH, IGraphicsAPI::ClearBufferTarget::STENCIL});
 }
 
 void Renderer::enableWireFrame(bool enabled) const {

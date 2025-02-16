@@ -26,7 +26,7 @@ void Resources::loadResource(const std::vector<std::filesystem::path>& resourceP
             std::unique_ptr<Mesh> meshPtr = std::make_unique<Mesh>(std::move(loadedMeshes[0]));
             mMeshes_[resourceName] = std::move(meshPtr);
         } else {
-            LOG_E("%s contains %ld meshes", resourceName.c_str(), loadedMeshes.size());
+            LOG_E("%s contains %zu meshes", resourceName.c_str(), loadedMeshes.size());
             throw std::runtime_error("Invalid number of Meshes in Mesh Resource");
         }
     } else if constexpr (std::is_same_v<T, Model>) {

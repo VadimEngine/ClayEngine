@@ -116,6 +116,9 @@ public:
 
     void drawBuffer(unsigned int bufferId) override;
 
+    void stencilMask(unsigned int mask) override;
+
+    void stencilFunc(TestFunction func, unsigned int mask) override;
 };
 
 

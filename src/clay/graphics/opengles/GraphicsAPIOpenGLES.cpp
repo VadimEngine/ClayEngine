@@ -1601,13 +1601,45 @@ void GraphicsAPIOpenGLES::drawBuffer(unsigned int bufferId) {
     //GL_CALL(glDrawBuffer(GL_COLOR_ATTACHMENT0 + bufferId));
 }
 
+void GraphicsAPIOpenGLES::stencilMask(unsigned int mask) {
+    glStencilMask(mask);
+}
 
+void GraphicsAPIOpenGLES::stencilFunc(TestFunction func, unsigned int mask) {
+    GLenum glFunc = 0;
 
+    switch (func) {
+        case TestFunction::NEVER:
+            glFunc = GL_NEVER;
+            break;
+        case TestFunction::LESS:
+            glFunc = GL_LESS;
+            break;   
+        case TestFunction::LEQUAL:
+            glFunc = GL_LEQUAL;
+            break;
+        case TestFunction::GREATER:
+            glFunc = GL_GREATER;
+            break;
+        case TestFunction::GEQUAL:
+            glFunc = GL_GEQUAL;
+            break;
+        case TestFunction::EQUAL:
+            glFunc = GL_EQUAL;
+            break;
+        case TestFunction::NOTEQUAL:
+            glFunc = GL_NOTEQUAL;
+            break;
+        case TestFunction::ALWAYS:
+            glFunc = GL_ALWAYS;
+            break;
+        default:
+            throw std::runtime_error("Invalid TestFunction");
+    }
 
+    glStencilFunc(glFunc, 1, mask);
+}
 
-
-
-    
 } // namespace clay
 
 #endif

@@ -872,6 +872,10 @@ public:
     void polygonMode(IGraphicsAPI::PolygonModeFace face, IGraphicsAPI::PolygonModeType mode) override;
 
     void drawBuffer(unsigned int bufferId) override;
+
+    void stencilMask(unsigned int mask) override;
+
+    void stencilFunc(TestFunction func, unsigned int mask) override;
 };
 
 } // namespace clay

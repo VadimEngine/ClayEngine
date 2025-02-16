@@ -61,7 +61,7 @@ public:
      * Set the Rotation vector
      * @param newRotation New Rotation vector in radians
      */
-    void setRotation(const glm::vec3& newRotation);
+    void setOrientation(const glm::quat& newRotation);
 
     /**
      * Adjust the FOV with the given amount
@@ -82,7 +82,7 @@ public:
     glm::mat4 getViewMatrix() const;
 
     /** Get camera rotations */
-    glm::vec3 getRotation() const;
+    glm::quat getOrientation() const;
 
     /** Get camera position */
     glm::vec3 getPosition() const;
@@ -144,10 +144,8 @@ private:
 
     float mNear_ = 0.05f;
     float mFar_ = 100.0f;
-    glm::quat mOrientation_; // TODO use quaternions
+    glm::quat mOrientation_;
 
-    /** World up vector */
-    glm::vec3 mWorldUp_;
     /** Camera Position */
     glm::vec3 mPosition_;
     /** Camera forward vector */
@@ -160,12 +158,10 @@ private:
     float mFOV_ = 45.0f;
     /** Aspect ratio for perspective matrix */
     float mAspectRatio_ = 1.f;
-    /** Camera rotation vector in radians (TODO try quaternions) */
-    glm::vec3 mRotation_ = glm::vec3(0.0, 0.0f, 0.0f);
     /** The camera's mode */
     CameraMode mMode_ = CameraMode::PERSPECTIVE;
     /** Speed the camera moves */
-    float mMoveSpeed_ = 20.f;
+    float mMoveSpeed_ = 10.f;
     /** Speed the camera rotates */
     float mRotationSpeed_ = 40.f;
     /** Speed the camera Zooms (adjust the FOV) */

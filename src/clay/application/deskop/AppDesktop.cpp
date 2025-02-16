@@ -105,31 +105,31 @@ void AppDesktop::render() {
         glm::vec4 sceneBackgroundColor = mScenes_.front()->getBackgroundColor();
         mGraphicsAPI_->clearColor(sceneBackgroundColor.r, sceneBackgroundColor.g, sceneBackgroundColor.b, sceneBackgroundColor.a);
         mpRenderer_->clearBuffers(
-            {sceneBackgroundColor.r, sceneBackgroundColor.g, sceneBackgroundColor.b, sceneBackgroundColor.a},
+            sceneBackgroundColor,
+            {0,0,0,1},
             {0,0,0,1}
         );
     } else {
         mpRenderer_->clearBuffers(
             {0,0,0,1},
+            {0,0,0,1},
             {0,0,0,1}
         );
     }
-    mGraphicsAPI_->bindFrameBuffer(IGraphicsAPI::FrameBufferTarget::FRAMEBUFFER, mpRenderer_->getHDRFBO());
-    mpRenderer_->setBloom(false);
-    mGraphicsAPI_->enable(IGraphicsAPI::Capability::FRAMEBUFFER_SRGB);
-    //glEnable(GL_FRAMEBUFFER_SRGB); // for gamma correction
+
+    mGraphicsAPI_->bindFrameBuffer(IGraphicsAPI::FrameBufferTarget::FRAMEBUFFER, 0);
+
     // Render list in reverse order
     for (auto it = mScenes_.rbegin(); it != mScenes_.rend(); ++it) {
        (*it)->render(*mpRenderer_);
     }
-    mpRenderer_->renderHDR();
 
     // render guis on top (avoid gamma correction)
     mGraphicsAPI_->disable(IGraphicsAPI::Capability::FRAMEBUFFER_SRGB);
     for (auto it = mScenes_.rbegin(); it != mScenes_.rend(); ++it) {
        (*it)->renderGUI();
     }
-
+    // swap buffers
     mpWindow_->render();
 }
 
@@ -328,6 +328,26 @@ void AppDesktop::loadResources() {
         // add to resource
         mResources_.addResource<ShaderProgram>(std::move(shader), "BloomFinal");
     }
+    {
+        auto vertexShaderFileData = Resources::loadFileToMemory((Resources::RESOURCE_PATH / "shaders/Solid.vert").string());
+        auto fragmentShaderFileData = Resources::loadFileToMemory((Resources::RESOURCE_PATH / "shaders/Solid.frag").string());
+        // TODO use size so null string conversion for null terminator is not needed
+        std::unique_ptr<ShaderProgram> shader = std::make_unique<ShaderProgram>(*mGraphicsAPI_);
+        shader->addShader({
+            ShaderCreateInfo::Type::VERTEX,
+            std::string(reinterpret_cast<char*>(vertexShaderFileData.data.get()), vertexShaderFileData.size).c_str(),
+            vertexShaderFileData.size
+        });
+        shader->addShader({
+            ShaderCreateInfo::Type::FRAGMENT,
+            std::string(reinterpret_cast<char*>(fragmentShaderFileData.data.get()), fragmentShaderFileData.size).c_str(),
+            fragmentShaderFileData.size
+        });
+
+        shader->linkProgram();
+        // add to resource
+        mResources_.addResource<ShaderProgram>(std::move(shader), "Solid");
+    }
     // Textures
     {
         auto spritesFileData = Resources::loadFileToMemory((Resources::RESOURCE_PATH / "Sprites.png").string());
@@ -485,6 +505,7 @@ void AppDesktop::loadResources() {
     }
     // Fonts
     mResources_.loadResource<Font>({Resources::RESOURCE_PATH / "fonts/Consolas.ttf"}, "Consolas");
+    mResources_.loadResource<Font>({Resources::RESOURCE_PATH / "fonts/runescape_uf.ttf"}, "Runescape");
 
     // SpriteSheet
     mResources_.addResource(

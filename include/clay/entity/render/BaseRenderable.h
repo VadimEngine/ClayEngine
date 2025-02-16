@@ -18,6 +18,8 @@ public:
      */
     virtual void render(const Renderer& theRenderer, const glm::mat4& parentModelMat) const = 0;
 
+    virtual void render(const Renderer& theRenderer, const glm::mat4& parentModelMat, ShaderProgram& shader) const = 0;
+
     /**
      * Set if this Renderable is enabled
      * @param isEnabled New enabled value
@@ -80,6 +82,11 @@ protected:
     glm::vec4 mColor_ = {1.0f, 1.0f, 1.0f, 1.0f};
     /** If this Renderable is enabled (should be rendered)*/
     bool mEnabled_ = true;
+
+    bool mEnableHighlight_ = false;
+    ShaderProgram* mStencilShader_ = nullptr;
+    float mStencilScale = 1.0f;
+    glm::vec4 mStencilColor;
 };
 
 } // namespace clay

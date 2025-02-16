@@ -26,6 +26,8 @@ public:
      */
     void render(const Renderer& theRenderer, const glm::mat4& parentModelMat) const override;
 
+    void render(const Renderer& theRenderer, const glm::mat4& parentModelMat, ShaderProgram& shader) const override;
+
     /** Get the Model for this Renderable */
     const Model* getModel() const;
 

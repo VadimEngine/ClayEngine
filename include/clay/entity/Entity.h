@@ -39,6 +39,8 @@ public:
      */
     virtual void render(const Renderer& theRenderer) const;
 
+    virtual void render(const Renderer& theRenderer, ShaderProgram& shader) const;
+
     /** Get this Entity's position */
     glm::vec3 getPosition() const;
 

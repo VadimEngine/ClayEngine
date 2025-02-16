@@ -23,6 +23,8 @@ public:
      */
     void render(const Renderer& theRenderer, const glm::mat4& parentModelMat) const override;
 
+    void render(const Renderer& theRenderer, const glm::mat4& parentModelMat, ShaderProgram& shader) const override;
+
     /**
      * Set the Sprite this Renderable will draw
      * @param pSprite the Sprite

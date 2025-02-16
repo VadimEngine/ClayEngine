@@ -50,12 +50,16 @@ public:
      */
     void renderSprite(unsigned int textureId, const glm::mat4& modelMat, const glm::vec4& theColor = {1,1,1,1}) const;
 
+    void renderSprite(unsigned int textureId, ShaderProgram& shader, const glm::mat4& modelMat, const glm::vec4& theColor = {1,1,1,1}) const;
+
     /**
      * Render the given Sprite from a sprite sheet with the applied camera and model transforms.
      * @param theSprite The sprite to render
      * @param modelMat Model matrix to transform the sprite by
      */
     void renderSprite(SpriteSheet::Sprite& theSprite, const glm::mat4& modelMat, const glm::vec4& theColor = {1,1,1,1}) const;
+
+    void renderSprite(SpriteSheet::Sprite& theSprite, ShaderProgram& shader, const glm::mat4& modelMat, const glm::vec4& theColor = {1,1,1,1}) const;
 
     /**
      * Render text at the given location. TODO scale.x scale.y
@@ -76,6 +80,8 @@ public:
      * @param color Text color
      */
     void renderTextNormalized(const std::string& text, const glm::mat4& modelMat, const Font& font, const glm::vec3& scale, const glm::vec3& color);
+
+    void renderTextNormalized(const std::string& text, ShaderProgram& shader, const glm::mat4& modelMat, const Font& font, const glm::vec3& scale, const glm::vec3& color);
 
     /**
      * Render text centered at the given location.
@@ -138,7 +144,7 @@ public:
      * @param color0 clear color for scene buffer
      * @param color1 clear color for bloom buffer
      */
-    void clearBuffers(const glm::vec4& color0, const glm::vec4 color1);
+    void clearBuffers(const glm::vec4& defaultColor, const glm::vec4& hdrColor0, const glm::vec4 hdrColor);
 
     void enableWireFrame(bool enabled) const;
 

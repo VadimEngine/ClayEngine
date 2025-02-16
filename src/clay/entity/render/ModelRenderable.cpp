@@ -24,7 +24,7 @@ void ModelRenderable::render(const Renderer& theRenderer, const glm::mat4& paren
 
     // Bind all textures to the Texture Units
     for (const auto& [slot, texInfo] : mTextureByUnit_) {
-        const auto& [texId, uniformName] = texInfo; // Unpack the pair
+        const auto& [texId, uniformName] = texInfo;
         mpShader_->setTexture(uniformName, texId, slot);
     }
 
@@ -46,6 +46,46 @@ void ModelRenderable::render(const Renderer& theRenderer, const glm::mat4& paren
         mpShader_->setBool("uWireframeMode", false);
     }
     mpModel_->render(*mpShader_);
+}
+
+void ModelRenderable::render(const Renderer& theRenderer, const glm::mat4& parentModelMat, ShaderProgram& shader) const {
+    // translation matrix for position
+    glm::mat4 translationMat = glm::translate(glm::mat4(1.0f), mPosition_);
+    //rotation matrix
+    glm::mat4 rotationMat = glm::rotate(glm::mat4(1), glm::radians(mRotation_.x), glm::vec3(1.0f, 0.0f, 0.0f));
+    rotationMat = glm::rotate(rotationMat, glm::radians(mRotation_.y), glm::vec3(0.0f, 1.0f, 0.0f));
+    rotationMat = glm::rotate(rotationMat, glm::radians(mRotation_.z), glm::vec3(0.0f, 0.0f, 1.0f));
+    // scale matrix
+    glm::mat4 scaleMat = glm::scale(glm::mat4(1.0f), mScale_);
+
+    glm::mat4 localModelMat = translationMat * rotationMat * scaleMat;
+
+    shader.bind();
+
+    // Bind all textures to the Texture Units
+    for (const auto& [slot, texInfo] : mTextureByUnit_) {
+        const auto& [texId, uniformName] = texInfo; // Unpack the pair
+        shader.setTexture(uniformName, texId, slot);
+    }
+
+    shader.setMat4("uModel", parentModelMat * localModelMat);
+    shader.setVec4("uColor", mColor_);
+    // TODO this only applies for some shaders
+    shader.setVec2("uSubImageTopLeft", mSubTextureTopLeft);
+    shader.setVec2("uSubImageSize", mSubTextureSize);
+
+    if (renderWireframe_) {
+        // Enable wire frame
+        theRenderer.enableWireFrame(true);
+        shader.setBool("uWireframeMode",true);
+        // Render wire frame
+        mpModel_->render(shader);
+
+        theRenderer.enableWireFrame(false);
+        // revert back to non-wireframe
+        shader.setBool("uWireframeMode", false);
+    }
+    mpModel_->render(shader);
 }
 
 const Model* ModelRenderable::getModel() const {

@@ -5,10 +5,10 @@ namespace clay {
 
 Camera::Camera(const glm::vec3& position) {
     mPosition_ = position;
-    mForward_ = glm::vec3(0.0f, 0.0f, 1.0f);
+    mForward_ = glm::vec3(0.0f, 0.0f, -1.0f);
     mUp_ = glm::vec3(0.0f, 1.0f, 0.0f);
-    mWorldUp_ = glm::vec3(0.0f, 1.0f, 0.0f);
-    mRight_ = glm::normalize(glm::cross(mForward_, mWorldUp_));
+    mRight_ = glm::normalize(glm::cross(mForward_, glm::vec3(0.0f, 1.0f, 0.0f)));
+    mOrientation_ = glm::quat(1.0f, 0.0f, 0.0f, 0.0f); // Identity quaternion
     updateCameraVectors();
 }
 
@@ -21,7 +21,8 @@ void Camera::move(const glm::vec3& dir, const float step) {
 }
 
 void Camera::rotate(const glm::vec3& axis, const float angle) {
-    mRotation_ += (axis * angle);
+    glm::quat rotation = glm::angleAxis(glm::radians(angle), glm::normalize(axis));
+    mOrientation_ = glm::normalize(rotation * mOrientation_); // Apply rotation
     updateCameraVectors();
 }
 
@@ -37,8 +38,8 @@ void Camera::setPosition(const glm::vec3& newPosition) {
     mPosition_ = newPosition;
 }
 
-void Camera::setRotation(const glm::vec3& newRotation) {
-    mRotation_ = newRotation;
+void Camera::setOrientation(const glm::quat& newOrientation) {
+    mOrientation_ = glm::normalize(newOrientation);
     updateCameraVectors();
 }
 
@@ -57,7 +58,6 @@ glm::mat4 Camera::getProjectionMatrix() const {
     if (mMode_ == CameraMode::PERSPECTIVE) {
         return glm::perspective(glm::radians(mFOV_), mAspectRatio_, 0.1f, 100.0f);
     } else if (mMode_ == CameraMode::ORTHOGONAL) {
-        // 4 x 3
         return glm::ortho(-2.0f, +2.0f, -1.5f, +1.5f, 0.1f, 100.0f);
     }
     return glm::mat4(1);
@@ -67,8 +67,8 @@ glm::mat4 Camera::getViewMatrix() const {
     return glm::lookAt(mPosition_, mPosition_ + mForward_, mUp_);
 }
 
-glm::vec3 Camera::getRotation() const {
-    return mRotation_;
+glm::quat Camera::getOrientation() const {
+    return mOrientation_;
 }
 
 glm::vec3 Camera::getPosition() const {
@@ -86,7 +86,6 @@ glm::vec3 Camera::getRight() const {
 glm::vec3 Camera::getUp() const {
     return mUp_;
 }
-
 
 float Camera::getFOV() const {
     return mFOV_;
@@ -125,22 +124,12 @@ float Camera::getZoomSpeed() const {
 }
 
 void Camera::updateCameraVectors() {
-    // Start with a default forward vector (looking down the negative Z-axis)
-    glm::vec3 forward = glm::vec3(0.0f, 0.0f, -1.0f);
+    // Convert quaternion orientation to a rotation matrix
+    glm::mat4 rotationMatrix = glm::mat4_cast(mOrientation_);
 
-    // Create the rotation matrix and apply rotations for yaw (Y-axis), pitch (X-axis), and roll (Z-axis)
-    glm::mat4 rotationMatrix = glm::rotate(glm::mat4(1.0f), glm::radians(mRotation_.y), glm::vec3(0.0f, 1.0f, 0.0f)); // Yaw
-    rotationMatrix = glm::rotate(rotationMatrix, glm::radians(mRotation_.x), glm::vec3(1.0f, 0.0f, 0.0f)); // Pitch
-    rotationMatrix = glm::rotate(rotationMatrix, glm::radians(mRotation_.z), glm::vec3(0.0f, 0.0f, 1.0f)); // Roll
-
-    // Apply the rotation to the forward vector
-    forward = glm::vec3(rotationMatrix * glm::vec4(forward, 1.0f));
-
-    // Normalize the forward vector
-    mForward_ = glm::normalize(forward);
-
-    // Re-calculate Right and Up vectors based on the new forward vector
-    mRight_ = glm::normalize(glm::cross(mForward_, mWorldUp_));
+    // Apply rotation to the default forward vector
+    mForward_ = glm::normalize(glm::vec3(rotationMatrix * glm::vec4(0.0f, 0.0f, -1.0f, 0.0f)));
+    mRight_ = glm::normalize(glm::vec3(rotationMatrix * glm::vec4(1.0f, 0.0f, 0.0f, 0.0f)));
     mUp_ = glm::normalize(glm::cross(mRight_, mForward_));
 }
 
