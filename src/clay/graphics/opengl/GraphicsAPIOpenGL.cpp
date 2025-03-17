@@ -41,10 +41,7 @@ GraphicsAPIOpenGL::GraphicsAPIOpenGL() {
     glEnable(GL_BLEND); // Needed for text rendering
     glDepthFunc(GL_LEQUAL); // Set Depth test to replace the current fragment if the z is less then OR equal
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA); // Enable alpha drawing
-
     glEnable(GL_STENCIL_TEST);
-    glStencilFunc(GL_NOTEQUAL, 1, 0xFF);
-    glStencilOp(GL_KEEP, GL_KEEP, GL_REPLACE);
 }
 
 GraphicsAPIOpenGL::~GraphicsAPIOpenGL() {}
@@ -390,7 +387,6 @@ void GraphicsAPIOpenGL::bufferData(IGraphicsAPI::BufferTarget target, size_t siz
     }
 
     GL_CALL(glBufferData(glTarget, size, data, glUsage));
-
 }
 
 void GraphicsAPIOpenGL::enableVertexAttribArray(unsigned int index) {
@@ -985,7 +981,7 @@ void GraphicsAPIOpenGL::polygonMode(PolygonModeFace face, PolygonModeType mode) 
             break;
     }
 
-    glPolygonMode(GL_FRONT_AND_BACK, glMode);
+    GL_CALL(glPolygonMode(GL_FRONT_AND_BACK, glMode));
 }
 
 void GraphicsAPIOpenGL::drawBuffer(unsigned int bufferId) {
@@ -994,7 +990,7 @@ void GraphicsAPIOpenGL::drawBuffer(unsigned int bufferId) {
 }
 
 void GraphicsAPIOpenGL::stencilMask(unsigned int mask) {
-    glStencilMask(mask);
+    GL_CALL(glStencilMask(mask));
 }
 
 void GraphicsAPIOpenGL::stencilFunc(TestFunction func, unsigned int mask) {
@@ -1029,7 +1025,154 @@ void GraphicsAPIOpenGL::stencilFunc(TestFunction func, unsigned int mask) {
             throw std::runtime_error("Invalid TestFunction");
     }
 
-    glStencilFunc(glFunc, 1, mask);
+    GL_CALL(glStencilFunc(glFunc, 1, mask));
+}
+
+void GraphicsAPIOpenGL::stencilOp(StencilAction sFail, StencilAction dpfail, StencilAction dppass) {
+    GLenum glsFail;
+    GLenum gldpFail;
+    GLenum gldpPass;
+
+    switch (sFail) {
+        case StencilAction::KEEP:
+            glsFail = GL_KEEP;
+            break;
+        case StencilAction::ZERO:
+            glsFail = GL_ZERO;
+            break;
+        case StencilAction::REPLACE:
+            glsFail = GL_REPLACE;
+            break;
+        case StencilAction::INCR:
+            glsFail = GL_INCR;
+            break;
+        case StencilAction::INCR_WRAP:
+            glsFail = GL_INCR_WRAP;
+            break;
+        case StencilAction::DECR:
+            glsFail = GL_DECR;
+            break;
+        case StencilAction::DECR_WRAP:
+            glsFail = GL_DECR_WRAP;
+            break;
+        case StencilAction::INVERT:
+            glsFail = GL_INVERT;
+            break;
+        default:
+            throw std::runtime_error("Invalid sFail Action");
+    }
+
+    switch (dpfail) {
+        case StencilAction::KEEP:
+            gldpFail = GL_KEEP;
+            break;
+        case StencilAction::ZERO:
+            gldpFail = GL_ZERO;
+            break;
+        case StencilAction::REPLACE:
+            gldpFail = GL_REPLACE;
+            break;
+        case StencilAction::INCR:
+            gldpFail = GL_INCR;
+            break;
+        case StencilAction::INCR_WRAP:
+            gldpFail = GL_INCR_WRAP;
+            break;
+        case StencilAction::DECR:
+            gldpFail = GL_DECR;
+            break;
+        case StencilAction::DECR_WRAP:
+            gldpFail = GL_DECR_WRAP;
+            break;
+        case StencilAction::INVERT:
+            gldpFail = GL_INVERT;
+            break;
+        default:
+            throw std::runtime_error("Invalid sFail Action");
+    }
+
+    switch (dppass) {
+        case StencilAction::KEEP:
+            gldpPass = GL_KEEP;
+            break;
+        case StencilAction::ZERO:
+            gldpPass = GL_ZERO;
+            break;
+        case StencilAction::REPLACE:
+            gldpPass = GL_REPLACE;
+            break;
+        case StencilAction::INCR:
+            gldpPass = GL_INCR;
+            break;
+        case StencilAction::INCR_WRAP:
+            gldpPass = GL_INCR_WRAP;
+            break;
+        case StencilAction::DECR:
+            gldpPass = GL_DECR;
+            break;
+        case StencilAction::DECR_WRAP:
+            gldpPass = GL_DECR_WRAP;
+            break;
+        case StencilAction::INVERT:
+            gldpPass = GL_INVERT;
+            break;
+        default:
+            throw std::runtime_error("Invalid sFail Action");
+    }
+    GL_CALL(glStencilOp(glsFail, gldpFail, gldpPass));
+}
+
+void GraphicsAPIOpenGL::cullFace(PolygonModeFace faceMode) {
+    GLenum glFaceMode;
+
+    switch (faceMode) {
+        case PolygonModeFace::FRONT:
+            glFaceMode = GL_FRONT;
+            break;
+        case PolygonModeFace::BACK:
+            glFaceMode = GL_BACK;
+            break;
+        case PolygonModeFace::FRONT_AND_BACK:
+            glFaceMode = GL_FRONT_AND_BACK ;
+            break;
+    }
+
+    GL_CALL(glCullFace(glFaceMode));
+}
+
+void GraphicsAPIOpenGL::depthMask(bool flag) {
+    GLboolean glFlag;
+    if (flag) {
+        glFlag = GL_TRUE;
+    } else {
+        glFlag = GL_FALSE;
+    }
+    GL_CALL(glDepthMask(glFlag));
+}
+
+void GraphicsAPIOpenGL::generateMipMap() {
+    GL_CALL(glGenerateMipmap(GL_TEXTURE_2D));
+}
+
+void GraphicsAPIOpenGL::bindBufferBase(BufferTarget target, unsigned int index, unsigned int buffer) {
+    GLenum glTarget;
+    switch (target) {
+        case BufferTarget::ATOMIC_COUNTER_BUFFER:
+            glTarget = GL_ATOMIC_COUNTER_BUFFER;
+            break;
+        case BufferTarget::TRANSFORM_FEEDBACK_BUFFER:
+            glTarget = GL_TRANSFORM_FEEDBACK_BUFFER;
+            break;
+        case BufferTarget::UNIFORM_BUFFER:
+            glTarget = GL_UNIFORM_BUFFER ;
+            break;
+        case BufferTarget::SHADER_STORAGE_BUFFER:
+            glTarget = GL_SHADER_STORAGE_BUFFER;
+            break;
+        default:
+            throw std::runtime_error("Invalid BufferTarget");
+    }
+    GL_CALL(glBindBufferBase(glTarget, index, buffer));
 }
 
 } // namespace clay

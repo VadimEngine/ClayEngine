@@ -15,6 +15,8 @@ namespace clay::utils {
 
     clay::utils::ImageData fileDataToImageData(utils::FileData& imageFile);
 
+    utils::ImageData loadImageFileToMemory_desktop(const std::string& filePath);
+
 }// namespace clay::utils
 
 #endif

@@ -1,15 +1,14 @@
 #pragma once
 // standard lib
 #include <vector>
-#include <filesystem>
 // third party
 #include <assimp/Importer.hpp>
 #include <assimp/scene.h>
 #include <assimp/postprocess.h>
 #include <glm/vec2.hpp>
 #include <glm/vec3.hpp>
-#include <clay/graphics/common/IGraphicsAPI.h>
 // project
+#include "clay/graphics/common/IGraphicsAPI.h"
 #include "clay/graphics/common/ShaderProgram.h"
 #include "clay/utils/common/Utils.h"
 

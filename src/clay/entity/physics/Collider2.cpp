@@ -22,10 +22,10 @@ bool Collider2::isColliding(const Collider2* other) const {
     return false;
 }
 
-void Collider2::render(const Renderer& theRenderer) {
+void Collider2::render(clay::IGraphicsContext& gContext) {
     glm::mat4 translationMatrix = glm::translate(glm::mat4(1.0f), mPosition_);
-
-    theRenderer.renderRectangleSimple(translationMatrix, {1,1,1,1});
+    // TODO Remove this class
+    //gContext.renderer.renderRectangleSimple(translationMatrix, {1,1,1,1});
 }
 
 std::optional<glm::vec3> Collider2::getCollisionNormal(Collider2* otherCollider) const {

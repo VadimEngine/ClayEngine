@@ -44,7 +44,7 @@ The Clay Static library can be manually built with the following commands:
 
 Alternatively, in your CMakeLists.txt, the library can be added simply with the following changes and allow Cmake to do all the building and linking
 ```cmake
-set(CLAY_PLATFORM_VR ON CACHE BOOL "Set Platform to VR" FORCE) # If Building for VR
+set(CLAY_PLATFORM_XR ON CACHE BOOL "Set Platform to VR" FORCE) # If Building for VR
 set(CLAY_ENABLE_OPENGL_ES ON CACHE BOOL Enable OpenGLES" FORCE) # If using OpenGLES
 
 set(CLAY_PLATFORM_DESKTOP ON CACHE BOOL "Set Platform to Desktop" FORCE) # If Building for Desktop (Windows or linux)

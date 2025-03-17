@@ -1,18 +1,20 @@
+#ifdef CLAY_ENABLE_OPENGL
+
 // standard lib
 // third party
 #include <glm/gtc/type_ptr.hpp>
 #include <glm/gtx/string_cast.hpp>
 // project
 // class
-#include "clay/graphics/common/Renderer.h"
+#include "clay/graphics/opengl/RendererOpenGL.h"
 
 namespace clay {
 
-const int Renderer::MAX_LIGHTS = 16;
+const int RendererOpenGL::MAX_LIGHTS = 16;
 
-Renderer::Renderer(const glm::vec2& screenDim, ShaderProgram& spriteShader, ShaderProgram& text2Shader,
-                   ShaderProgram& mvpShader, Mesh& rectPlane, ShaderProgram& frameBufferShader, 
-                   ShaderProgram& bloomFinalShader, IGraphicsAPI& graphicsAPI)
+RendererOpenGL::RendererOpenGL(const glm::vec2& screenDim, ShaderProgram& spriteShader, ShaderProgram& text2Shader,
+                               ShaderProgram& mvpShader, Mesh& rectPlane, ShaderProgram& frameBufferShader,
+                               ShaderProgram& bloomFinalShader, IGraphicsAPI& graphicsAPI)
     : mSpriteShader_(spriteShader),
     mMVPShader_(mvpShader),
     mTextShader_(text2Shader),
@@ -194,11 +196,12 @@ Renderer::Renderer(const glm::vec2& screenDim, ShaderProgram& spriteShader, Shad
     }
     // by default, disable bloom
     setBloom(false);
+    mCurrentUBO_ = mCameraUBO_;
 }
 
-Renderer::~Renderer() {}
+RendererOpenGL::~RendererOpenGL() {}
 
-void Renderer::setCamera(const Camera* camera) {
+void RendererOpenGL::setCamera(const Camera* camera) {
     mGraphicsAPI_.bindBuffer(IGraphicsAPI::BufferTarget::UNIFORM_BUFFER, mCameraUBO_);
 
     if (camera != nullptr) {
@@ -211,7 +214,7 @@ void Renderer::setCamera(const Camera* camera) {
     mGraphicsAPI_.bindBuffer(IGraphicsAPI::BufferTarget::UNIFORM_BUFFER, 0);
 }
 
-void Renderer::setLightSources(const std::vector<std::unique_ptr<LightSource>>& lights) const {
+void RendererOpenGL::setLightSources(const std::vector<std::unique_ptr<LightSource>>& lights) const {
     mGraphicsAPI_.bindBuffer(IGraphicsAPI::BufferTarget::UNIFORM_BUFFER, mLightUBO_);
 
     // Prepare data for the UBO
@@ -242,7 +245,7 @@ void Renderer::setLightSources(const std::vector<std::unique_ptr<LightSource>>& 
     mGraphicsAPI_.bindBuffer(IGraphicsAPI::BufferTarget::UNIFORM_BUFFER, 0);
 }
 
-void Renderer::setLightSources(const std::vector<LightSource*>& lights) const {
+void RendererOpenGL::setLightSources(const std::vector<LightSource*>& lights) const {
     mGraphicsAPI_.bindBuffer(IGraphicsAPI::BufferTarget::UNIFORM_BUFFER, mLightUBO_);
 
     // Prepare data for the UBO
@@ -273,7 +276,7 @@ void Renderer::setLightSources(const std::vector<LightSource*>& lights) const {
     mGraphicsAPI_.bindBuffer(IGraphicsAPI::BufferTarget::UNIFORM_BUFFER, 0);
 }
 
-void Renderer::renderSprite(unsigned int textureId, const glm::mat4& modelMat, const glm::vec4& theColor) const {
+void RendererOpenGL::renderSprite(unsigned int textureId, const glm::mat4& modelMat, const glm::vec4& theColor) const {
     mSpriteShader_.bind();
     mGraphicsAPI_.activeTexture(0);
     mGraphicsAPI_.bindTexture(IGraphicsAPI::TextureTarget::TEXTURE_2D, textureId);
@@ -289,7 +292,7 @@ void Renderer::renderSprite(unsigned int textureId, const glm::mat4& modelMat, c
     mRectPlane_.render(mSpriteShader_);
 }
 
-void Renderer::renderSprite(unsigned int textureId, ShaderProgram& shader, const glm::mat4& modelMat, const glm::vec4& theColor) const {
+void RendererOpenGL::renderSprite(unsigned int textureId, ShaderProgram& shader, const glm::mat4& modelMat, const glm::vec4& theColor) const {
     shader.bind();
     mGraphicsAPI_.activeTexture(0);
     mGraphicsAPI_.bindTexture(IGraphicsAPI::TextureTarget::TEXTURE_2D, textureId);
@@ -305,7 +308,7 @@ void Renderer::renderSprite(unsigned int textureId, ShaderProgram& shader, const
     mRectPlane_.render(shader);
 }
 
-void Renderer::renderSprite(SpriteSheet::Sprite& theSprite, const glm::mat4& modelMat, const glm::vec4& theColor) const {
+void RendererOpenGL::renderSprite(SpriteSheet::Sprite& theSprite, const glm::mat4& modelMat, const glm::vec4& theColor) const {
     mSpriteShader_.bind();
     mGraphicsAPI_.activeTexture(0);
     mGraphicsAPI_.bindTexture(IGraphicsAPI::TextureTarget::TEXTURE_2D, theSprite.parentSpriteSheet.getTextureId());
@@ -324,7 +327,7 @@ void Renderer::renderSprite(SpriteSheet::Sprite& theSprite, const glm::mat4& mod
     mRectPlane_.render(mSpriteShader_);
 }
 
-void Renderer::renderSprite(SpriteSheet::Sprite& theSprite, ShaderProgram& shader, const glm::mat4& modelMat, const glm::vec4& theColor) const {
+void RendererOpenGL::renderSprite(SpriteSheet::Sprite& theSprite, ShaderProgram& shader, const glm::mat4& modelMat, const glm::vec4& theColor) const {
     shader.bind();
     mGraphicsAPI_.activeTexture(0);
     mGraphicsAPI_.bindTexture(IGraphicsAPI::TextureTarget::TEXTURE_2D, theSprite.parentSpriteSheet.getTextureId());
@@ -343,7 +346,7 @@ void Renderer::renderSprite(SpriteSheet::Sprite& theSprite, ShaderProgram& shade
     mRectPlane_.render(shader);
 }
 
-void Renderer::renderText(const std::string& text, const glm::vec2& position, const Font& font, float scale, const glm::vec3& color) {
+void RendererOpenGL::renderText(const std::string& text, const glm::vec2& position, const Font& font, float scale, const glm::vec3& color) {
     float xPos = position.x;	
     mTextShader_.bind();
     // TODO alpha color
@@ -387,7 +390,7 @@ void Renderer::renderText(const std::string& text, const glm::vec2& position, co
     }
 }
 
-void Renderer::renderTextCentered(const std::string& text, const glm::vec2& position, const Font& font, float scale, const glm::vec4& color) {
+void RendererOpenGL::renderTextCentered(const std::string& text, const glm::vec2& position, const Font& font, float scale, const glm::vec4& color) {
     // activate corresponding render state	
     mTextShader_.bind();
     mTextShader_.setVec3("textColor", color);
@@ -447,7 +450,7 @@ void Renderer::renderTextCentered(const std::string& text, const glm::vec2& posi
     mGraphicsAPI_.bindTexture(IGraphicsAPI::TextureTarget::TEXTURE_2D, 0);
 }
 
-void Renderer::renderTextNormalized(const std::string& text, const glm::mat4& modelMat, const Font& font, const glm::vec3& scale, const glm::vec3& color) {
+void RendererOpenGL::renderTextNormalized(const std::string& text, const glm::mat4& modelMat, const Font& font, const glm::vec3& scale, const glm::vec3& color) {
     // activate corresponding render state	
     mTextShader_.bind();
     mTextShader_.setVec3("textColor", color);
@@ -505,7 +508,7 @@ void Renderer::renderTextNormalized(const std::string& text, const glm::mat4& mo
     mGraphicsAPI_.bindTexture(IGraphicsAPI::TextureTarget::TEXTURE_2D, 0);
 }
 
-void Renderer::renderTextNormalized(const std::string& text, ShaderProgram& shader, const glm::mat4& modelMat, const Font& font, const glm::vec3& scale, const glm::vec3& color) {
+void RendererOpenGL::renderTextNormalized(const std::string& text, ShaderProgram& shader, const glm::mat4& modelMat, const Font& font, const glm::vec3& scale, const glm::vec3& color) {
     // activate corresponding render state	
     shader.bind();
     shader.setVec3("textColor", color);
@@ -563,7 +566,7 @@ void Renderer::renderTextNormalized(const std::string& text, ShaderProgram& shad
     mGraphicsAPI_.bindTexture(IGraphicsAPI::TextureTarget::TEXTURE_2D, 0);
 }
 
-void Renderer::renderRectangleSimple(const glm::mat4& modelMat, const glm::vec4& theColor) const {
+void RendererOpenGL::renderRectangleSimple(const glm::mat4& modelMat, const glm::vec4& theColor) const {
     // TODO fix this
     mMVPShader_.bind();
     mMVPShader_.setMat4("uModel", modelMat);
@@ -573,7 +576,7 @@ void Renderer::renderRectangleSimple(const glm::mat4& modelMat, const glm::vec4&
     mGraphicsAPI_.bindVertexArray(0);
 }
 
-void Renderer::renderLineSimple(const glm::vec3& startPoint, const glm::vec3& endPoint, const glm::mat4& modelMat, const glm::vec4& theColor) const {
+void RendererOpenGL::renderLineSimple(const glm::vec3& startPoint, const glm::vec3& endPoint, const glm::mat4& modelMat, const glm::vec4& theColor) const {
     // TODO fix this
     // Update vertices
     float vertices[] = {
@@ -595,11 +598,11 @@ void Renderer::renderLineSimple(const glm::vec3& startPoint, const glm::vec3& en
     mGraphicsAPI_.bindVertexArray(0);
 }
 
-unsigned int Renderer::getHDRFBO() const {
+unsigned int RendererOpenGL::getHDRFBO() const {
     return hdrFBO_;
 }
 
-void Renderer::renderHDR() {
+void RendererOpenGL::renderHDR() {
     mBlurShader_.bind();  // Use the shader to render the quad
     mBlurShader_.setInt("image", 0); // Texture unit 0
     mGraphicsAPI_.bindVertexArray(mFrameVAO_);
@@ -646,7 +649,7 @@ void Renderer::renderHDR() {
     mGraphicsAPI_.bindVertexArray(0);
 }
 
-void Renderer::setBloom(bool enable) {
+void RendererOpenGL::setBloom(bool enable) {
     if (enable) {
         mGraphicsAPI_.bindFrameBuffer(IGraphicsAPI::FrameBufferTarget::FRAMEBUFFER, getHDRFBO());
         mGraphicsAPI_.drawBuffers(2, mAttachments_);
@@ -656,19 +659,19 @@ void Renderer::setBloom(bool enable) {
     }
 }
 
-void Renderer::setExposure(float newExposure) {
+void RendererOpenGL::setExposure(float newExposure) {
     mExposure_ = newExposure;
 }
 
-float Renderer::getExposure() const {
+float RendererOpenGL::getExposure() const {
     return mExposure_;
 }
 
-void Renderer::enableGammaCorrect(bool enable) {
+void RendererOpenGL::enableGammaCorrect(bool enable) {
     mGammaCorrect_ = enable;
 }
 
-void Renderer::clearBuffers(const glm::vec4& defaultColor, const glm::vec4& hdrColor0, const glm::vec4 hdrColor1) {
+void RendererOpenGL::clearBuffers(const glm::vec4& defaultColor, const glm::vec4& hdrColor0, const glm::vec4 hdrColor1) {
     // clear default frame buffer
     mGraphicsAPI_.bindFrameBuffer(IGraphicsAPI::FrameBufferTarget::FRAMEBUFFER, 0);
     mGraphicsAPI_.clearColor(defaultColor.r, defaultColor.g, defaultColor.b, defaultColor.a);
@@ -686,7 +689,7 @@ void Renderer::clearBuffers(const glm::vec4& defaultColor, const glm::vec4& hdrC
     mGraphicsAPI_.clearBuffers({IGraphicsAPI::ClearBufferTarget::COLOR, IGraphicsAPI::ClearBufferTarget::DEPTH, IGraphicsAPI::ClearBufferTarget::STENCIL});
 }
 
-void Renderer::enableWireFrame(bool enabled) const {
+void RendererOpenGL::enableWireFrame(bool enabled) const {
     if (enabled) {
         mGraphicsAPI_.polygonMode(IGraphicsAPI::PolygonModeFace::FRONT_AND_BACK, IGraphicsAPI::PolygonModeType::LINE);
     } else {
@@ -694,5 +697,6 @@ void Renderer::enableWireFrame(bool enabled) const {
     }
 }
 
-
 } // namespace clay
+
+#endif

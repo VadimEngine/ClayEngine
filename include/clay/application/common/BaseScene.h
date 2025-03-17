@@ -6,7 +6,8 @@
 #include "clay/application/common/Resources.h"
 #include "clay/entity/Entity.h"
 #include "clay/graphics/common/Camera.h"
-#include "clay/graphics/common/Renderer.h"
+#include "clay/graphics/common/IRenderer.h"
+#include "clay/graphics/common/IGraphicsContext.h"
 
 namespace clay {
 
@@ -34,12 +35,12 @@ public:
      * Render this scene
      * @param renderer Rendering helper
      */
-    virtual void render(Renderer& renderer) = 0;
+    virtual void render(IGraphicsContext& gContext) = 0;
 
     /**
      * Render just the gui for this scene
      */
-    virtual void renderGUI() = 0;
+    virtual void renderGUI() = 0; // TODO remove this, have scene handle this
 
     /** Build/load resources for this scene */
     virtual void assembleResources();
@@ -56,7 +57,7 @@ public:
     glm::vec4 getBackgroundColor() const;
 
     /** Get this Scene's parent App */
-    clay::IApp& getApp();
+    IApp& getApp();
 
     /** Get the current focused Camera */
     Camera* getFocusCamera();
@@ -76,37 +77,7 @@ public:
     /** @brief Get this scene's resources */
     Resources& getResources();
 
-    /**
-     * On keyboard key press handler
-     * @param code key code for pressed key
-     */
-    virtual void onKeyPress(unsigned int code);
-
-    /**
-     * On keyboard key release handler
-     * @param code key code for released key
-     */
-    virtual void onKeyRelease(unsigned int code);
-
-    // TODO remove desktop from here. Have 1 method that takes in all events
-    /**
-     * On Mouse button press handler
-     * @param mouseEvent Mouse event details
-     */
-    virtual void onMousePress(const IInputHandler::MouseEvent& mouseEvent);
-
-    /**
-     * On Mouse Button release handler
-     * @param mouseEvent Mouse event details
-     */
-    virtual void onMouseRelease(const IInputHandler::MouseEvent& mouseEvent);
-
-    /**
-     * @brief One mouse wheel event handler
-     *
-     * @param mouseEvent Mouse event
-     */
-    virtual void onMouseWheel(const IInputHandler::MouseEvent& mouseEvent);
+    virtual void onInputEvent(InputEvent& e);
 
 protected:
     /** Parent app handling this Scene*/

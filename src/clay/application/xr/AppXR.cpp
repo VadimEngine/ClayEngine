@@ -1,78 +1,18 @@
-#ifdef CLAY_PLATFORM_VR
+#ifdef CLAY_PLATFORM_XR
 // third party
 #include <android/asset_manager.h>
 #include <android/bitmap.h>
 #include <android/imagedecoder.h>
 // project
+#include "clay/graphics/xr/GraphicsContextXR.h"
 #include "clay/gui/xr/ImGuiComponentXR.h"
-#include "clay/graphics/opengles/GraphicsContextXR.h"
+#include "clay/utils/xr/UtilsXR.h"
 // class
 #include "clay/application/xr/AppXR.h"
 
 namespace clay {
 
-std::vector<char> loadAsset(AAssetManager* assetManager, const std::string& path) {
-    AAsset* asset = AAssetManager_open(assetManager, path.c_str(), AASSET_MODE_BUFFER);
-    if (!asset) {
-        throw std::runtime_error("Failed to load asset: " + std::string(path));
-    }
-
-    // Get the asset's size and read the data into memory
-    size_t fileSize = AAsset_getLength(asset);
-    std::vector<char> fileData(fileSize);
-    AAsset_read(asset, fileData.data(), fileSize);
-    AAsset_close(asset);
-
-    return fileData;
-}
-
-void loadImageAsset(AAssetManager* assetManager,
-                    const char* filePath,
-                    uint8_t** outPixels, // try uint8_t*& instead
-                    int& outWidth,
-                    int& outHeight,
-                    AndroidBitmapFormat& outFormat) {
-    AAsset* asset = AAssetManager_open(assetManager, filePath, AASSET_MODE_STREAMING);
-
-    if (!asset) {
-        throw std::runtime_error("Failed to open asset file: " + std::string(filePath));
-    }
-
-    AImageDecoder* decoder = nullptr;
-    int result = AImageDecoder_createFromAAsset(asset, &decoder);
-    if (result != ANDROID_IMAGE_DECODER_SUCCESS) {
-        AAsset_close(asset);
-        throw std::runtime_error("Failed to create image decoder for file: " + std::string(filePath));
-    }
-
-    const AImageDecoderHeaderInfo* info = AImageDecoder_getHeaderInfo(decoder);
-    outWidth = AImageDecoderHeaderInfo_getWidth(info);
-    outHeight = AImageDecoderHeaderInfo_getHeight(info);
-    outFormat = (AndroidBitmapFormat) AImageDecoderHeaderInfo_getAndroidBitmapFormat(info);
-    size_t stride = AImageDecoder_getMinimumStride(decoder);
-    size_t size = outHeight * stride;
-
-    *outPixels = (uint8_t*)malloc(size);
-    if (!*outPixels) {
-        AImageDecoder_delete(decoder);
-        AAsset_close(asset);
-        throw std::runtime_error("Failed to allocate memory for pixel data.");
-    }
-
-    result = AImageDecoder_decodeImage(decoder, *outPixels, stride, size);
-    if (result != ANDROID_IMAGE_DECODER_SUCCESS) {
-        free(*outPixels);
-        AImageDecoder_delete(decoder);
-        AAsset_close(asset);
-        throw std::runtime_error("Failed to decode image from asset.");
-    }
-
-    // Cleanup
-    AImageDecoder_delete(decoder);
-    AAsset_close(asset);
-}
-
-static int32_t handleInputEvent(struct android_app* app, AInputEvent* inputEvent) {
+static int32_t handleInputEvent(struct android_app* /*app*/, AInputEvent* inputEvent) {
     return ImGui_ImplAndroid_HandleInputEvent(inputEvent);
 }
 
@@ -102,7 +42,7 @@ void AppXR::AndroidAppHandleCmd(struct android_app* app, int32_t cmd) {
         }
         case APP_CMD_INIT_WINDOW: {
             appState->nativeWindow = app->window;
-            clay::ImGuiComponentXR::initialize(app->window);
+            ImGuiComponentXR::initialize(app->window);
             break;
         }
         case APP_CMD_TERM_WINDOW: {
@@ -127,7 +67,6 @@ AppXR::AppXR(android_app* pAndroidApp): mpAndroidApp_(pAndroidApp) {
     createReferenceSpace();
     createSwapchains();
     mInputHandler_.initialize(mXRInstance_, mSession_, mLocalSpace_, mHeadSpace_);
-    createResources();
 }
 
 AppXR::~AppXR() {
@@ -136,7 +75,17 @@ AppXR::~AppXR() {
     destroyResources();
     destroySession();
     destroyInstance();
-    clay::ImGuiComponentXR::deinitialize();
+    ImGuiComponentXR::deinitialize();
+}
+
+void AppXR::initialize() {
+    mRenderer_ = std::make_unique<RendererOpenGLES>(
+        glm::vec2{mViewConfigurationViews_[0].recommendedImageRectWidth, mViewConfigurationViews_[0].recommendedImageRectWidth},
+        *mGraphicsAPI_,
+        *mResources_.getResource<ShaderProgram>("TextShader"),
+        *mResources_.getResource<ShaderProgram>("TextureFlipShader"),
+        *mResources_.getResource<Mesh>("RectPlane")
+    );
 }
 
 void AppXR::run() {
@@ -149,12 +98,11 @@ void AppXR::run() {
     }
 }
 
-void AppXR::setScene(SceneXR* newScene) {
-    //mScene_ = newScene;
-    mScenes_.push_back(newScene);
+void AppXR::setScene(BaseScene* newScene) {
+    mScenes_.emplace_back(newScene);
 }
 
-clay::InputHandlerXR& AppXR::getInputHandler() {
+InputHandlerXR& AppXR::getInputHandler() {
     return mInputHandler_;
 }
 
@@ -162,12 +110,73 @@ AAssetManager* AppXR::getAssetManager() {
     return mpAndroidApp_->activity->assetManager;
 }
 
-clay::AudioManager& AppXR::getAudioManager() {
+AudioManager& AppXR::getAudioManager() {
     return mAudioManger_;
 }
 
-clay::Resources& AppXR::getResources() {
+Resources& AppXR::getResources() {
     return mResources_;
+}
+
+utils::FileData AppXR::loadFileToMemory_XR(const std::string& filePath) {
+    auto* assetManager = getAssetManager();
+    AAsset* asset = AAssetManager_open(assetManager, filePath.c_str(), AASSET_MODE_BUFFER);
+    if (!asset) {
+        throw std::runtime_error("Failed to open asset: " + std::string(filePath));
+    }
+    size_t fileSize = AAsset_getLength(asset);
+
+    auto buffer = std::make_unique<unsigned char[]>(fileSize);
+    AAsset_read(asset, buffer.get(), fileSize);
+    AAsset_close(asset);
+
+    return {std::move(buffer), static_cast<std::size_t>(fileSize)};
+}
+
+utils::ImageData AppXR::loadImageFileToMemory_XR(const std::string& filePath) {
+    auto* assetManager = getAssetManager();
+    AAsset* asset = AAssetManager_open(assetManager, filePath.c_str(), AASSET_MODE_STREAMING);
+
+    if (!asset) {
+        throw std::runtime_error("Failed to open asset file: " + std::string(filePath));
+    }
+
+    AImageDecoder* decoder = nullptr;
+    int result = AImageDecoder_createFromAAsset(asset, &decoder);
+    if (result != ANDROID_IMAGE_DECODER_SUCCESS) {
+        AAsset_close(asset);
+        throw std::runtime_error("Failed to create image decoder for file: " + filePath);
+    }
+
+    clay::utils::ImageData imageData{};
+
+    const AImageDecoderHeaderInfo* info = AImageDecoder_getHeaderInfo(decoder);
+    imageData.width = AImageDecoderHeaderInfo_getWidth(info);
+    imageData.height = AImageDecoderHeaderInfo_getHeight(info);
+
+    if ((AndroidBitmapFormat) AImageDecoderHeaderInfo_getAndroidBitmapFormat(info) == AndroidBitmapFormat::ANDROID_BITMAP_FORMAT_RGBA_8888) {
+        imageData.channels = 4;
+    } else {
+        throw std::runtime_error("Unsupported Image format: " + filePath);
+    }
+
+    const size_t stride = AImageDecoder_getMinimumStride(decoder);
+    const size_t size = imageData.height * stride;
+
+    imageData.pixels = std::make_unique<unsigned char[]>(size);
+
+    result = AImageDecoder_decodeImage(decoder, imageData.pixels.get(), stride, size);
+    if (result != ANDROID_IMAGE_DECODER_SUCCESS) {
+        AImageDecoder_delete(decoder);
+        AAsset_close(asset);
+        throw std::runtime_error("Failed to decode image from asset.");
+    }
+
+    // Cleanup
+    AImageDecoder_delete(decoder);
+    AAsset_close(asset);
+
+    return imageData;
 }
 
 void AppXR::createInstance() {
@@ -208,7 +217,6 @@ void AppXR::createInstance() {
 
     // Check the requested Instance Extensions against the ones from the OpenXR runtime.
     // If an extension is found add it to Active Instance Extensions.
-    // Log error if the Instance Extension is not found.
     for (auto &requestedInstanceExtension : mInstanceExtensions) {
         bool found = false;
         for (auto &extensionProperty : extensionProperties) {
@@ -314,9 +322,9 @@ void AppXR::createSession() {
     // Create an XrSessionCreateInfo structure.
     XrSessionCreateInfo sessionCI{XR_TYPE_SESSION_CREATE_INFO};
 
-    // Create a std::unique_ptr<GraphicsAPI_...> from the instance and system.
     // This call sets up a graphics API that's suitable for use with OpenXR.
-    mGraphicsAPI_ = std::make_unique<clay::GraphicsAPIOpenGLES>(mXRInstance_, mSystemID_);
+    mGraphicsAPI_ = std::make_unique<GraphicsAPIOpenGLES>(mXRInstance_, mSystemID_);
+    mResources_.mGraphicsAPI_ = mGraphicsAPI_.get();
     glEnable(GL_BLEND);
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
     glEnable(GL_DEPTH_TEST);
@@ -404,22 +412,22 @@ void AppXR::createSwapchains() {
         // Get the number of images in the color/depth swapchain and allocate Swapchain image data via GraphicsAPI to store the returned array.
         uint32_t colorSwapchainImageCount = 0;
         OPENXR_CHECK(xrEnumerateSwapchainImages(colorSwapchainInfo.swapchain, 0, &colorSwapchainImageCount, nullptr), "Failed to enumerate Color Swapchain Images.")
-        XrSwapchainImageBaseHeader* colorSwapchainImages = mGraphicsAPI_->allocateSwapchainImageData(colorSwapchainInfo.swapchain, clay::GraphicsAPIOpenGLES::SwapchainType::COLOR, colorSwapchainImageCount);
+        XrSwapchainImageBaseHeader* colorSwapchainImages = mGraphicsAPI_->allocateSwapchainImageData(colorSwapchainInfo.swapchain, GraphicsAPIOpenGLES::SwapchainType::COLOR, colorSwapchainImageCount);
         OPENXR_CHECK(xrEnumerateSwapchainImages(colorSwapchainInfo.swapchain, colorSwapchainImageCount, &colorSwapchainImageCount, colorSwapchainImages), "Failed to enumerate Color Swapchain Images.")
 
         uint32_t depthSwapchainImageCount = 0;
         OPENXR_CHECK(xrEnumerateSwapchainImages(depthSwapchainInfo.swapchain, 0, &depthSwapchainImageCount, nullptr), "Failed to enumerate Depth Swapchain Images.")
-        XrSwapchainImageBaseHeader* depthSwapchainImages = mGraphicsAPI_->allocateSwapchainImageData(depthSwapchainInfo.swapchain, clay::GraphicsAPIOpenGLES::SwapchainType::DEPTH, depthSwapchainImageCount);
+        XrSwapchainImageBaseHeader* depthSwapchainImages = mGraphicsAPI_->allocateSwapchainImageData(depthSwapchainInfo.swapchain, GraphicsAPIOpenGLES::SwapchainType::DEPTH, depthSwapchainImageCount);
         OPENXR_CHECK(xrEnumerateSwapchainImages(depthSwapchainInfo.swapchain, depthSwapchainImageCount, &depthSwapchainImageCount, depthSwapchainImages), "Failed to enumerate Depth Swapchain Images.")
 
         // Per image in the swapchains, fill out a GraphicsAPI::ImageViewCreateInfo structure and create a color/depth image view.
         for (uint32_t j = 0; j < colorSwapchainImageCount; j++) {
-            clay::GraphicsAPIOpenGLES::ImageViewCreateInfo imageViewCI{};
+            GraphicsAPIOpenGLES::ImageViewCreateInfo imageViewCI{};
             imageViewCI.image = mGraphicsAPI_->getSwapchainImage(colorSwapchainInfo.swapchain, j);
-            imageViewCI.type = clay::GraphicsAPIOpenGLES::ImageViewCreateInfo::Type::RTV;
-            imageViewCI.view = clay::GraphicsAPIOpenGLES::ImageViewCreateInfo::View::TYPE_2D;
+            imageViewCI.type = GraphicsAPIOpenGLES::ImageViewCreateInfo::Type::RTV;
+            imageViewCI.view = GraphicsAPIOpenGLES::ImageViewCreateInfo::View::TYPE_2D;
             imageViewCI.format = colorSwapchainInfo.swapchainFormat;
-            imageViewCI.aspect = clay::GraphicsAPIOpenGLES::ImageViewCreateInfo::Aspect::COLOR_BIT;
+            imageViewCI.aspect = GraphicsAPIOpenGLES::ImageViewCreateInfo::Aspect::COLOR_BIT;
             imageViewCI.baseMipLevel = 0;
             imageViewCI.levelCount = 1;
             imageViewCI.baseArrayLayer = 0;
@@ -427,12 +435,12 @@ void AppXR::createSwapchains() {
             colorSwapchainInfo.imageViews.push_back(mGraphicsAPI_->createImageView(imageViewCI));
         }
         for (uint32_t j = 0; j < depthSwapchainImageCount; j++) {
-            clay::GraphicsAPIOpenGLES::ImageViewCreateInfo imageViewCI{};
+            GraphicsAPIOpenGLES::ImageViewCreateInfo imageViewCI{};
             imageViewCI.image = mGraphicsAPI_->getSwapchainImage(depthSwapchainInfo.swapchain, j);
-            imageViewCI.type = clay::GraphicsAPIOpenGLES::ImageViewCreateInfo::Type::DSV;
-            imageViewCI.view = clay::GraphicsAPIOpenGLES::ImageViewCreateInfo::View::TYPE_2D;
+            imageViewCI.type = GraphicsAPIOpenGLES::ImageViewCreateInfo::Type::DSV;
+            imageViewCI.view = GraphicsAPIOpenGLES::ImageViewCreateInfo::View::TYPE_2D;
             imageViewCI.format = depthSwapchainInfo.swapchainFormat;
-            imageViewCI.aspect = clay::GraphicsAPIOpenGLES::ImageViewCreateInfo::Aspect::DEPTH_BIT;
+            imageViewCI.aspect = GraphicsAPIOpenGLES::ImageViewCreateInfo::Aspect::DEPTH_BIT;
             imageViewCI.baseMipLevel = 0;
             imageViewCI.levelCount = 1;
             imageViewCI.baseArrayLayer = 0;
@@ -442,146 +450,7 @@ void AppXR::createSwapchains() {
     }
 }
 
-void AppXR::createResources() {
-    // mResources_ add resources here
-    auto* assetManager = getAssetManager();
-    {
-        auto simpleVertFile = loadAsset(assetManager,"Shaders/SimpleVert.vert");
-        auto simpleFragFile = loadAsset(assetManager,"Shaders/SimpleFrag.frag");
-        std::unique_ptr<clay::ShaderProgram> shader = std::make_unique<clay::ShaderProgram>(*mGraphicsAPI_);
-        shader->addShader({
-            clay::ShaderCreateInfo::Type::VERTEX,
-            std::string(reinterpret_cast<char*>(simpleVertFile.data()), simpleVertFile.size()).c_str(),
-            simpleVertFile.size()
-        });
-        shader->addShader({
-          clay::ShaderCreateInfo::Type::FRAGMENT,
-          std::string(reinterpret_cast<char*>(simpleFragFile.data()), simpleFragFile.size()).c_str(),
-        });
-        shader->linkProgram();
-        mResources_.addResource<clay::ShaderProgram>(std::move(shader), "SimpleShader");
-    }
-    {
-        auto simpleVertFile = loadAsset(assetManager,"Shaders/TextVert.vert");
-        auto simpleFragFile = loadAsset(assetManager,"Shaders/TextFrag.frag");
-        std::unique_ptr<clay::ShaderProgram> shader = std::make_unique<clay::ShaderProgram>(*mGraphicsAPI_);
-        shader->addShader({
-          clay::ShaderCreateInfo::Type::VERTEX,
-          std::string(reinterpret_cast<char*>(simpleVertFile.data()), simpleVertFile.size()).c_str(),
-          simpleVertFile.size()
-        });
-        shader->addShader({
-          clay::ShaderCreateInfo::Type::FRAGMENT,
-          std::string(reinterpret_cast<char*>(simpleFragFile.data()), simpleFragFile.size()).c_str(),
-        });
-        shader->linkProgram();
-        mResources_.addResource<clay::ShaderProgram>(std::move(shader), "TextShader");
-    }
-    {
-        auto simpleVertFile = loadAsset(assetManager,"Shaders/TextureVert.vert");
-        auto simpleFragFile = loadAsset(assetManager,"Shaders/TextureFrag.frag");
-        std::unique_ptr<clay::ShaderProgram> shader = std::make_unique<clay::ShaderProgram>(*mGraphicsAPI_);
-        shader->addShader({
-            clay::ShaderCreateInfo::Type::VERTEX,
-            std::string(reinterpret_cast<char*>(simpleVertFile.data()), simpleVertFile.size()).c_str(),
-            simpleVertFile.size()
-        });
-        shader->addShader({
-          clay::ShaderCreateInfo::Type::FRAGMENT,
-          std::string(reinterpret_cast<char*>(simpleFragFile.data()), simpleFragFile.size()).c_str(),
-        });
-        shader->linkProgram();
-        mResources_.addResource<clay::ShaderProgram>(std::move(shader), "TextureShader");
-    }
-
-    {
-        auto assetFileData = loadAsset(assetManager, "Models/Plane.obj");
-
-        clay::utils::FileData clayMeshData;
-        clayMeshData.size = assetFileData.size();
-        clayMeshData.data = std::make_unique<unsigned char[]>(clayMeshData.size);
-        std::copy(assetFileData.begin(), assetFileData.end(), clayMeshData.data.get());
-
-        std::vector<clay::Mesh> meshList;
-        clay::Mesh::parseMeshes(*mGraphicsAPI_, clayMeshData, meshList);
-        std::unique_ptr<clay::Mesh> meshPtr = std::make_unique<clay::Mesh>(std::move(meshList[0]));
-
-        mResources_.addResource<clay::Mesh>(std::move(meshPtr), "Plane");
-    }
-    {
-        auto assetFileData = loadAsset(assetManager, "Models/Cube.obj");
-
-        clay::utils::FileData clayMeshData;
-        clayMeshData.size = assetFileData.size();
-        clayMeshData.data = std::make_unique<unsigned char[]>(clayMeshData.size);
-        std::copy(assetFileData.begin(), assetFileData.end(), clayMeshData.data.get());
-
-        std::vector<clay::Mesh> meshList;
-        clay::Mesh::parseMeshes(*mGraphicsAPI_, clayMeshData, meshList);
-        std::unique_ptr<clay::Mesh> meshPtr = std::make_unique<clay::Mesh>(std::move(meshList[0]));
-
-        mResources_.addResource<clay::Mesh>(std::move(meshPtr), "Cube");
-    }
-    {
-        auto assetFileData =loadAsset(assetManager, "Models/Sphere.obj");
-
-        clay::utils::FileData clayMeshData;
-        clayMeshData.size = assetFileData.size();
-        clayMeshData.data = std::make_unique<unsigned char[]>(clayMeshData.size);
-        std::copy(assetFileData.begin(), assetFileData.end(), clayMeshData.data.get());
-
-        std::vector<clay::Mesh> meshList;
-        clay::Mesh::parseMeshes(*mGraphicsAPI_, clayMeshData, meshList);
-        std::unique_ptr<clay::Mesh> meshPtr = std::make_unique<clay::Mesh>(std::move(meshList[0]));
-
-        mResources_.addResource<clay::Mesh>(std::move(meshPtr), "Sphere");
-    }
-    {
-        // load the audio file
-        auto assetFileData = loadAsset(assetManager, "Audio/beep_deep_1.wav");
-
-        clay::utils::FileData clayAudioFile;
-        // TODO find a way to better convert loadAsset file to a clay::utils::FileData (vector vs unique_ptr)
-        clayAudioFile.size = assetFileData.size();
-        clayAudioFile.data = std::make_unique<unsigned char[]>(clayAudioFile.size);
-        std::copy(assetFileData.begin(), assetFileData.end(), clayAudioFile.data.get());
-
-        std::unique_ptr<clay::Audio> deepBeepAudio = std::make_unique<clay::Audio>(clayAudioFile);
-
-        mResources_.addResource<clay::Audio>(std::move(deepBeepAudio), "DeepBeep");
-    }
-    {
-        auto assetFileData = loadAsset(assetManager, "Fonts/Consolas.ttf");
-        clay::utils::FileData clayFontFile;
-        clayFontFile.size = assetFileData.size();
-        clayFontFile.data = std::make_unique<unsigned char[]>(clayFontFile.size);
-        std::copy(assetFileData.begin(), assetFileData.end(), clayFontFile.data.get());
-
-        std::unique_ptr<clay::Font> consolasFontClay = std::make_unique<clay::Font>(
-            *mGraphicsAPI_, clayFontFile
-        );
-        mResources_.addResource<clay::Font>(std::move(consolasFontClay), "Consolas");
-    }
-    {
-        // load texture
-        unsigned char *pixels = nullptr;
-        int width;
-        int height;
-        AndroidBitmapFormat format;
-
-        loadImageAsset(
-            assetManager,
-            "Textures/V.png",
-            reinterpret_cast<uint8_t **>(&pixels),
-            width,
-            height,
-            format
-        );
-
-        std::unique_ptr<clay::Texture> vTexture = std::make_unique<clay::Texture>(*mGraphicsAPI_,pixels, width, height, 4);
-        mResources_.addResource<clay::Texture>(std::move(vTexture), "VTexture");
-    }
-}
+void AppXR::createResources() {}
 
 void AppXR::pollSystemEvents() {
     // Checks whether Android has requested that application should by destroyed.
@@ -623,7 +492,7 @@ void AppXR::pollEvents() {
                 // Log that an instance loss is pending and shutdown the application.
             case XR_TYPE_EVENT_DATA_INSTANCE_LOSS_PENDING: {
                 auto* instanceLossPending = reinterpret_cast<XrEventDataInstanceLossPending*>(&eventData);
-                LOG_E("OPENXR: Instance Loss Pending at: %lli", instanceLossPending->lossTime);
+                LOG_E("OPENXR: Instance Loss Pending at: %li", instanceLossPending->lossTime);
                 mSessionRunning_ = false;
                 mApplicationRunning_ = false;
                 break;
@@ -745,8 +614,8 @@ void AppXR::destroySwapchains() {
         mGraphicsAPI_->freeSwapchainImageData(depthSwapchainInfo.swapchain);
 
         // Destroy the swapchains.
-        OPENXR_CHECK(xrDestroySwapchain(colorSwapchainInfo.swapchain), "Failed to destroy Color Swapchain")
-        OPENXR_CHECK(xrDestroySwapchain(depthSwapchainInfo.swapchain), "Failed to destroy Depth Swapchain")
+        OPENXR_CHECK(xrDestroySwapchain(colorSwapchainInfo.swapchain), "Failed to destroy Color Swapchain");
+        OPENXR_CHECK(xrDestroySwapchain(depthSwapchainInfo.swapchain), "Failed to destroy Depth Swapchain");
     }
 }
 
@@ -760,7 +629,7 @@ void AppXR::destroyResources() {
     //mScene_ = nullptr;
 }
 
-void AppXR::destroySession(){
+void AppXR::destroySession() {
     OPENXR_CHECK(xrDestroySession(mSession_), "Failed to destroy Session.")
 }
 
@@ -797,7 +666,7 @@ bool AppXR::renderLayer(RenderLayerInfo &renderLayerInfo) {
         {XR_TYPE_COMPOSITION_LAYER_PROJECTION_VIEW}
     );
 
-    // update scene before render TODO use real dt and not in a render method
+    // update scene before render TODO use real dt
     for (auto it = mScenes_.rbegin(); it != mScenes_.rend();) {
         if ((*it)->isRemove()) {
             // Erase and update the iterator
@@ -807,8 +676,6 @@ bool AppXR::renderLayer(RenderLayerInfo &renderLayerInfo) {
             ++it;
         }
     }
-
-    clay::GraphicsContextXR gContext{};
 
     // Per view in the view configuration: (one for each eye)
     for (uint32_t i = 0; i < viewCount; i++) {
@@ -820,6 +687,7 @@ bool AppXR::renderLayer(RenderLayerInfo &renderLayerInfo) {
         // The timeout is infinite.
         uint32_t colorImageIndex = 0;
         uint32_t depthImageIndex = 0;
+
         XrSwapchainImageAcquireInfo acquireInfo{XR_TYPE_SWAPCHAIN_IMAGE_ACQUIRE_INFO};
         OPENXR_CHECK(
             xrAcquireSwapchainImage(
@@ -827,16 +695,16 @@ bool AppXR::renderLayer(RenderLayerInfo &renderLayerInfo) {
                 &acquireInfo,
                 &colorImageIndex
                 ),
-                "Failed to acquire Image from the Color Swapchian"
-        )
+                "Failed to acquire Image from the Color Swapchain"
+        );
         OPENXR_CHECK(
             xrAcquireSwapchainImage(
                 depthSwapchainInfo.swapchain,
                 &acquireInfo,
                 &depthImageIndex
             ),
-            "Failed to acquire Image from the Depth Swapchian"
-        )
+            "Failed to acquire Image from the Depth Swapchain"
+        );
 
         XrSwapchainImageWaitInfo waitInfo = {XR_TYPE_SWAPCHAIN_IMAGE_WAIT_INFO};
         waitInfo.timeout = XR_INFINITE_DURATION;
@@ -858,8 +726,8 @@ bool AppXR::renderLayer(RenderLayerInfo &renderLayerInfo) {
         // Get the width and height and construct the viewport and scissors.
         const uint32_t &width = mViewConfigurationViews_[i].recommendedImageRectWidth;
         const uint32_t &height = mViewConfigurationViews_[i].recommendedImageRectHeight;
-        clay::GraphicsAPIOpenGLES::Viewport viewport = {0.0f, 0.0f, (float)width, (float)height, 0.0f, 1.0f};
-        clay::GraphicsAPIOpenGLES::Rect2D scissor = {{(int32_t)0, (int32_t)0}, {width, height}};
+        GraphicsAPIOpenGLES::Viewport viewport = {0.0f, 0.0f, (float)width, (float)height, 0.0f, 1.0f};
+        GraphicsAPIOpenGLES::Rect2D scissor = {{(int32_t)0, (int32_t)0}, {width, height}};
 
         // Fill out the XrCompositionLayerProjectionView structure specifying the pose and fov from the view.
         // This also associates the swapchain image with this layer projection view.
@@ -889,7 +757,7 @@ bool AppXR::renderLayer(RenderLayerInfo &renderLayerInfo) {
             mGraphicsAPI_->clearColor(colorSwapchainInfo.imageViews[colorImageIndex], 0.0f, 0.0f, 0.0f, 1.0f);
         }
         mGraphicsAPI_->clearDepth(depthSwapchainInfo.imageViews[depthImageIndex], 1.0f);
-
+        mGraphicsAPI_->clearStencil(depthSwapchainInfo.imageViews[depthImageIndex], 0.0f);
         mGraphicsAPI_->setRenderAttachments(
                 &colorSwapchainInfo.imageViews[colorImageIndex],
                 1,
@@ -901,10 +769,30 @@ bool AppXR::renderLayer(RenderLayerInfo &renderLayerInfo) {
 
         mGraphicsAPI_->setViewports(&viewport, 1);
         mGraphicsAPI_->setScissors(&scissor, 1);
-        gContext.view = views[i];
+
+        const Camera* pCamera = mScenes_.front()->getFocusCamera();
+        const glm::mat4 glmProj = utils::computeProjectionMatrix(views[i].fov, pCamera->getNear(), pCamera->getFar());
+        const glm::mat4 glmViewWorldLocked = utils::computeWorldLockViewMatrix(
+            views[i].pose,
+            pCamera->getPosition(),
+            pCamera->getOrientation(),
+            mInputHandler_.getHeadPose()
+        );
+        const glm::mat4 glmViewHeadLocked = utils::computeHeadLockViewMatrix(views[i].pose);
+
+        mRenderer_->updateCameraHeadLockedUBO(
+            glmViewHeadLocked,
+            glmProj
+        );
+        mRenderer_->updateCameraWorldLockedUBO(
+            glmViewWorldLocked,
+            glmProj
+        );
+
+        GraphicsContextXR context{views[i], *mGraphicsAPI_, *mRenderer_};
         // for now, just render the first scene in the list
         if (!mScenes_.empty()) {
-            mScenes_.front()->render(gContext);
+            mScenes_.front()->render(context);
         }
         mGraphicsAPI_->endRendering();
 
@@ -923,8 +811,13 @@ bool AppXR::renderLayer(RenderLayerInfo &renderLayerInfo) {
     return true;
 }
 
+IGraphicsAPI* AppXR::getGraphicsAPI() {
+    return mGraphicsAPI_.get();
+}
 
-
+IWindow* AppXR::getWindow() {
+    return &mWindow_;
+}
 
 } // namespace clay
 

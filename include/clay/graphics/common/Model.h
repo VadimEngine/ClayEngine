@@ -1,6 +1,5 @@
 #pragma once
 // standard lib
-#include <filesystem>
 #include <string>
 #include <vector>
 // third party
@@ -36,7 +35,7 @@ public:
      * Load and add a mesh to the model
      * @param meshPath Path to load mesh from
      */
-    void loadMesh(const std::filesystem::path& meshPath);
+    void loadMesh(const std::string& meshPath);
 
     /**
      * Draw the Model meshes

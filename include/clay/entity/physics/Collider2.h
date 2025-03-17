@@ -8,7 +8,7 @@
 // project
 #include "clay/utils/common/Logger.h"
 #include "clay/entity/physics/PhysicsComponentBase.h"
-#include "clay/graphics/common/Renderer.h"
+#include "clay/graphics/common/IRenderer.h"
 
 namespace clay {
 
@@ -41,7 +41,7 @@ public:
 
     ~Collider2();
 
-    void render(const Renderer& theRenderer);
+    void render(clay::IGraphicsContext& gContext);
 
     /**
      * Update this rigid body and related Entity

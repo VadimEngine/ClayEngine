@@ -19,7 +19,7 @@ void Model::addMeshes(std::vector<Mesh>&& meshes) {
     mMeshes_ = std::move(meshes);
 }
 
-void Model::loadMesh(const std::filesystem::path& meshPath) {
+void Model::loadMesh(const std::string& meshPath) {
     // Mesh::loadMeshes(meshPath, mMeshes_);
 }
 

@@ -1,5 +1,5 @@
 #pragma once
-#ifdef CLAY_PLATFORM_VR
+#ifdef CLAY_PLATFORM_XR
 // third party
 #include "imgui.h"
 #include "imgui_impl_android.h"

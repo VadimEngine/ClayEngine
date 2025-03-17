@@ -36,7 +36,7 @@
 {                                                                                                   \
     XrResult result = (x);                                                                          \
     if (!XR_SUCCEEDED(result)) {                                                                    \
-        LOG_E("OPENXR Error: %d", int(result));                                                     \
+        LOG_E("OPENXR Error: %d %s", int(result), y);                                               \
     }                                                                                               \
 }
 
@@ -317,7 +317,8 @@ public:
 
     enum class SwapchainType : uint8_t {
         COLOR,
-        DEPTH
+        DEPTH,
+        STENCIL
     };
     struct ImageViewCreateInfo {
         void* image;
@@ -698,9 +699,15 @@ public:
 
     std::vector<int64_t> getSupportedColorSwapchainFormats();
 
+    std::vector<int64_t> getSupportedStencilSwapchainFormats();
+
+
+
     void* createImageView(const ImageViewCreateInfo &imageViewCI);
 
     int64_t selectDepthSwapchainFormat(const std::vector<int64_t> &formats);
+
+    int64_t selectStencilSwapchainFormat(const std::vector<int64_t> &formats);
 
     GLenum getGLTextureTarget(const ImageCreateInfo &imageCI);
 
@@ -714,7 +721,7 @@ public:
 
     void setBufferData(void* buffer, size_t offset, size_t size, void* data);
 
-    void setRenderAttachments(void** colorViews, size_t colorViewCount, void* depthStencilView, uint32_t width, uint32_t height, void* pipeline);
+    void setRenderAttachments(void** colorViews, size_t colorViewCount, void* depthView, uint32_t width, uint32_t height, void* pipeline);
 
     void* getGraphicsBinding();
 
@@ -731,6 +738,8 @@ public:
     void clearColor(void* imageView, float r, float g, float b, float a);
 
     void clearDepth(void* imageView, float d);
+
+    void clearStencil(void* imageView, int s);
 
     void* createBuffer(const BufferCreateInfo &bufferCI);
 
@@ -876,6 +885,17 @@ public:
     void stencilMask(unsigned int mask) override;
 
     void stencilFunc(TestFunction func, unsigned int mask) override;
+
+    void stencilOp(StencilAction sFail, StencilAction dpfail, StencilAction dppass) override;
+
+    void cullFace(PolygonModeFace faceMode) override;
+
+    void depthMask(bool flag) override;
+
+    void generateMipMap() override;
+
+    void bindBufferBase(BufferTarget target, unsigned int index, unsigned int buffer) override;
+
 };
 
 } // namespace clay

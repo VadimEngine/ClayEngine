@@ -21,6 +21,7 @@ namespace clay {
 class Resources {
 public:
     static std::function<utils::FileData(const std::string&)> loadFileToMemory;
+    static std::function<utils::ImageData(const std::string&)> loadImageFileToMemory;
 
     /** Path to resource folder */
     static std::filesystem::path RESOURCE_PATH;
@@ -56,7 +57,7 @@ public:
      * @param resourceName Name to save the resource as for retrieval
      */
     template<typename T>
-    void loadResource(const std::vector<std::filesystem::path>& resourcePaths, const std::string& resourceName);
+    void loadResource(const std::vector<std::string>& resourcePaths, const std::string& resourceName);
 
     /**
      * Add a resource and transfer ownership to this resource container. Generally std::move should be used here

@@ -1,33 +1,34 @@
 #include "clay/application/common/IInputHandler.h"
 
 namespace clay {
+#ifdef CLAY_PLATFORM_DESKTOP
 
-IInputHandler::KeyEvent::KeyEvent(Type type, unsigned int code)
-    : mType_(type), mCode_(code) {
+KeyEvent::KeyEvent(Type type, unsigned int code)
+    : InputEvent(InputEvent::EventType::KEY), mKeyType_(type), mCode_(code) {
 }
 
-IInputHandler::KeyEvent::KeyEvent::Type IInputHandler::KeyEvent::getType() const {
-    return mType_;
+KeyEvent::KeyEvent::Type KeyEvent::getType() const {
+    return mKeyType_;
 }
 
-unsigned int IInputHandler::KeyEvent::getCode() const {
+unsigned int KeyEvent::getCode() const {
     return mCode_;
 }
 
-IInputHandler::MouseEvent::MouseEvent(Type type, Button button, const glm::ivec2& position)
-    : mType_(type), button(button), mPosition_(position) {
+MouseEvent::MouseEvent(MouseEvent::Type type, Button button, const glm::ivec2& position)
+    : InputEvent(InputEvent::EventType::MOUSE), mMouseType_(type), button(button), mPosition_(position) {
 }
 
-IInputHandler::MouseEvent::Type IInputHandler::MouseEvent::getType() const {
-    return mType_;
+MouseEvent::Type MouseEvent::getType() const {
+    return mMouseType_;
 }
 
-IInputHandler::MouseEvent::Button IInputHandler::MouseEvent::getButton() const {
+MouseEvent::Button MouseEvent::getButton() const {
     return button;
 }
 
-glm::ivec2 IInputHandler::MouseEvent::getPosition() const {
+glm::ivec2 MouseEvent::getPosition() const {
     return mPosition_;
 }
-
+#endif
 } // namespace clay

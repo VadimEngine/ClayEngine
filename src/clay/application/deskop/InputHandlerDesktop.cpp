@@ -11,13 +11,13 @@ InputHandlerDesktop::~InputHandlerDesktop() {}
 
 void InputHandlerDesktop::onKeyPressed(int keyCode) {
     mKeyStates_[keyCode] = true;
-    mKeyEventQueue_.push(IInputHandler::KeyEvent(IInputHandler::KeyEvent::Type::PRESS, keyCode));
+    mKeyEventQueue_.push(KeyEvent(KeyEvent::Type::PRESS, keyCode));
     trimBuffer(mKeyEventQueue_);
 }
 
 void InputHandlerDesktop::onKeyReleased(int keyCode) {
     mKeyStates_[keyCode] = false;
-    mKeyEventQueue_.push(InputHandlerDesktop::KeyEvent(IInputHandler::KeyEvent::Type::RELEASE, keyCode));
+    mKeyEventQueue_.push(KeyEvent(KeyEvent::Type::RELEASE, keyCode));
     trimBuffer(mKeyEventQueue_);
 }
 
@@ -29,9 +29,9 @@ void InputHandlerDesktop::clearKeys() {
     mKeyStates_.reset();
 }
 
-std::optional<IInputHandler::KeyEvent> InputHandlerDesktop::getKeyEvent() {
+std::optional<KeyEvent> InputHandlerDesktop::getKeyEvent() {
     if (mKeyEventQueue_.size() > 0) {
-        IInputHandler::KeyEvent e = mKeyEventQueue_.front();
+        KeyEvent e = mKeyEventQueue_.front();
         mKeyEventQueue_.pop();
         return e;
     } else {
@@ -41,13 +41,13 @@ std::optional<IInputHandler::KeyEvent> InputHandlerDesktop::getKeyEvent() {
 
 // START MOUSE
 
-bool InputHandlerDesktop::isMouseButtonPressed(IInputHandler::MouseEvent::Button button) {
+bool InputHandlerDesktop::isMouseButtonPressed(MouseEvent::Button button) {
     return mMouseStates_[static_cast<int>(button)];
 }
 
-void InputHandlerDesktop::onMousePress(IInputHandler::MouseEvent::Button button) {
-    mMouseEventQueue_.push(IInputHandler::MouseEvent(
-        IInputHandler::MouseEvent::Type::PRESS,
+void InputHandlerDesktop::onMousePress(MouseEvent::Button button) {
+    mMouseEventQueue_.push(MouseEvent(
+        MouseEvent::Type::PRESS,
         button,
         mMousePosition_
     ));
@@ -55,9 +55,9 @@ void InputHandlerDesktop::onMousePress(IInputHandler::MouseEvent::Button button)
     trimBuffer(mMouseEventQueue_);
 }
 
-void InputHandlerDesktop::onMouseRelease(IInputHandler::MouseEvent::Button button) {
-    mMouseEventQueue_.push(IInputHandler::MouseEvent(
-        IInputHandler::MouseEvent::Type::RELEASE,
+void InputHandlerDesktop::onMouseRelease(MouseEvent::Button button) {
+    mMouseEventQueue_.push(MouseEvent(
+        MouseEvent::Type::RELEASE,
         button,
         mMousePosition_
     ));
@@ -66,17 +66,17 @@ void InputHandlerDesktop::onMouseRelease(IInputHandler::MouseEvent::Button butto
 }
 
 void InputHandlerDesktop::onMouseMove(int x, int y) {
-    auto button = IInputHandler::MouseEvent::Button::NONE;
+    auto button = MouseEvent::Button::NONE;
 
-    for (int i = 0; i < static_cast<int>(IInputHandler::MouseEvent::Button::NUM_BUTTONS); ++i) {
+    for (int i = 0; i < static_cast<int>(MouseEvent::Button::NUM_BUTTONS); ++i) {
         if (mMouseStates_[i]) {
-            button = static_cast<IInputHandler::MouseEvent::Button>(i);
+            button = static_cast<MouseEvent::Button>(i);
             break;
         }
     }
     mMousePosition_ = {x, y};
-    mMouseEventQueue_.push(IInputHandler::MouseEvent(
-        IInputHandler::MouseEvent::Type::MOVE,
+    mMouseEventQueue_.push(MouseEvent(
+        MouseEvent::Type::MOVE,
         button,
         mMousePosition_
     ));
@@ -84,9 +84,9 @@ void InputHandlerDesktop::onMouseMove(int x, int y) {
     trimBuffer(mMouseEventQueue_);
 }
 
-std::optional<IInputHandler::MouseEvent> InputHandlerDesktop::getMouseEvent() {
+std::optional<MouseEvent> InputHandlerDesktop::getMouseEvent() {
     if (mMouseEventQueue_.size() > 0) {
-        IInputHandler::MouseEvent e = mMouseEventQueue_.front();
+        MouseEvent e = mMouseEventQueue_.front();
         mMouseEventQueue_.pop();
         return e;
     } else {
@@ -99,12 +99,12 @@ glm::ivec2 InputHandlerDesktop::getMousePosition() {
 }
 
 void InputHandlerDesktop::onMouseWheel(float yOffset) {
-    auto button = IInputHandler::MouseEvent::Button::NONE;
+    auto button = MouseEvent::Button::NONE;
 
-    mMouseEventQueue_.push(IInputHandler::MouseEvent(
+    mMouseEventQueue_.push(MouseEvent(
         (yOffset > 0) ?
-            IInputHandler::MouseEvent::Type::SCROLL_UP :
-            IInputHandler::MouseEvent::Type::SCROLL_DOWN,
+            MouseEvent::Type::SCROLL_UP :
+            MouseEvent::Type::SCROLL_DOWN,
         button,
         mMousePosition_
     ));

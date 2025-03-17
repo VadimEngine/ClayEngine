@@ -7,7 +7,7 @@
 // Define the global flag for enabling/disabling logs
 #define PRINT_GLOBAL
 
-#ifdef CLAY_PLATFORM_VR
+#ifdef CLAY_PLATFORM_XR
 // Android platform logging
 #include <android/log.h>
 
@@ -56,4 +56,5 @@
 #define LOG_E(...) // No log
 #endif // PRINT_GLOBAL
 
-#endif // CLAY_PLATFORM_VR
+#endif // #ifdef CLAY_PLATFORM_XR
+

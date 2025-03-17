@@ -26,7 +26,6 @@ namespace clay {
 GraphicsAPIOpenGLES::GraphicsAPIOpenGLES(XrInstance m_xrInstance, XrSystemId systemId) {
     OPENXR_CHECK(xrGetInstanceProcAddr(m_xrInstance, "xrGetOpenGLESGraphicsRequirementsKHR", (PFN_xrVoidFunction*)&xrGetOpenGLESGraphicsRequirementsKHR), "Failed to get InstanceProcAddr for xrGetOpenGLESGraphicsRequirementsKHR.")
     XrGraphicsRequirementsOpenGLESKHR graphicsRequirements{XR_TYPE_GRAPHICS_REQUIREMENTS_OPENGL_ES_KHR};
-    // CRASH HERE
     OPENXR_CHECK(xrGetOpenGLESGraphicsRequirementsKHR(m_xrInstance, systemId, &graphicsRequirements), "Failed to get Graphics Requirements for OpenGLES.")
 
     // Create an EGL display
@@ -81,13 +80,24 @@ GraphicsAPIOpenGLES::GraphicsAPIOpenGLES(XrInstance m_xrInstance, XrSystemId sys
     }
 }
 
+std::vector<int64_t> GraphicsAPIOpenGLES::getSupportedColorSwapchainFormats() {
+    GLint glMajorVersion = 0;
+    glGetIntegerv(GL_MAJOR_VERSION, &glMajorVersion);
+    if (glMajorVersion >= 3) {
+        return {GL_RGBA8, GL_RGBA8_SNORM, GL_SRGB8_ALPHA8};
+    } else {
+        return {GL_RGBA8, GL_RGBA8_SNORM};
+    }
+}
 
 std::vector<int64_t> GraphicsAPIOpenGLES::getSupportedDepthSwapchainFormats() {
     return {
-            GL_DEPTH_COMPONENT32F,
-            GL_DEPTH_COMPONENT24,
-            GL_DEPTH_COMPONENT16
+        GL_DEPTH24_STENCIL8, GL_DEPTH32F_STENCIL8
     };
+}
+
+std::vector<int64_t> GraphicsAPIOpenGLES::getSupportedStencilSwapchainFormats() {
+    return {GL_STENCIL_INDEX8, GL_DEPTH24_STENCIL8, GL_DEPTH32F_STENCIL8};
 }
 
 void* GraphicsAPIOpenGLES::getSwapchainImage(XrSwapchain swapchain, uint32_t index) {
@@ -101,6 +111,32 @@ int64_t GraphicsAPIOpenGLES::selectColorSwapchainFormat(const std::vector<int64_
                                                                                        std::begin(supportSwapchainFormats), std::end(supportSwapchainFormats));
     if (swapchainFormatIt == formats.end()) {
         LOG_E("Unable to find supported Color Swapchain Format");
+        return 0;
+    }
+
+    return *swapchainFormatIt;
+}
+
+int64_t GraphicsAPIOpenGLES::selectDepthSwapchainFormat(const std::vector<int64_t> &formats) {
+    const std::vector<int64_t> &supportSwapchainFormats = getSupportedDepthSwapchainFormats();
+
+    const std::vector<int64_t>::const_iterator &swapchainFormatIt = std::find_first_of(formats.begin(), formats.end(),
+                                                                                       std::begin(supportSwapchainFormats), std::end(supportSwapchainFormats));
+    if (swapchainFormatIt == formats.end()) {
+        LOG_E("Unable to find supported Depth Swapchain Format");
+        return 0;
+    }
+
+    return *swapchainFormatIt;
+}
+
+int64_t GraphicsAPIOpenGLES::selectStencilSwapchainFormat(const std::vector<int64_t> &formats) {
+    const std::vector<int64_t> &supportSwapchainFormats = getSupportedStencilSwapchainFormats();
+
+    const std::vector<int64_t>::const_iterator &swapchainFormatIt = std::find_first_of(formats.begin(), formats.end(),
+                                                                                       std::begin(supportSwapchainFormats), std::end(supportSwapchainFormats));
+    if (swapchainFormatIt == formats.end()) {
+        LOG_E("Unable to find supported Stencil Swapchain Format");
         return 0;
     }
 
@@ -257,22 +293,23 @@ void GraphicsAPIOpenGLES::setPipeline(void* pipeline) {
     glBlendColor(CBS.blendConstants[0], CBS.blendConstants[1], CBS.blendConstants[2], CBS.blendConstants[3]);
 }
 
-
-std::vector<int64_t> GraphicsAPIOpenGLES::getSupportedColorSwapchainFormats() {
-    GLint glMajorVersion = 0;
-    glGetIntegerv(GL_MAJOR_VERSION, &glMajorVersion);
-    if (glMajorVersion >= 3) {
-        return {GL_RGBA8, GL_RGBA8_SNORM, GL_SRGB8_ALPHA8};
-    } else {
-        return {GL_RGBA8, GL_RGBA8_SNORM};
-    }
-}
-
 void* GraphicsAPIOpenGLES::createImageView(const ImageViewCreateInfo &imageViewCI) {
     GLuint framebuffer = 0;
     glGenFramebuffers(1, &framebuffer);
 
-    GLenum attachment = imageViewCI.aspect == ImageViewCreateInfo::Aspect::COLOR_BIT ? GL_COLOR_ATTACHMENT0 : GL_DEPTH_ATTACHMENT;
+    GLenum attachment;
+
+    switch (imageViewCI.aspect) {
+        case ImageViewCreateInfo::Aspect::COLOR_BIT:
+            attachment = GL_COLOR_ATTACHMENT0;
+            break;
+        case ImageViewCreateInfo::Aspect::DEPTH_BIT:
+            attachment = GL_DEPTH_STENCIL_ATTACHMENT;
+            break;
+        case ImageViewCreateInfo::Aspect::STENCIL_BIT:
+            attachment = GL_DEPTH_STENCIL_ATTACHMENT;
+            break;
+    }
 
     glBindFramebuffer(GL_FRAMEBUFFER, framebuffer);
     if (imageViewCI.view == ImageViewCreateInfo::View::TYPE_2D_ARRAY) {
@@ -294,18 +331,7 @@ void* GraphicsAPIOpenGLES::createImageView(const ImageViewCreateInfo &imageViewC
     return (void*)(uint64_t)framebuffer;
 }
 
-int64_t GraphicsAPIOpenGLES::selectDepthSwapchainFormat(const std::vector<int64_t> &formats) {
-    const std::vector<int64_t> &supportSwapchainFormats = getSupportedDepthSwapchainFormats();
 
-    const std::vector<int64_t>::const_iterator &swapchainFormatIt = std::find_first_of(formats.begin(), formats.end(),
-                                                                                       std::begin(supportSwapchainFormats), std::end(supportSwapchainFormats));
-    if (swapchainFormatIt == formats.end()) {
-        LOG_E("Unable to find supported Depth Swapchain Format");
-        return 0;
-    }
-
-    return *swapchainFormatIt;
-}
 
 GLenum GraphicsAPIOpenGLES::getGLTextureTarget(const ImageCreateInfo &imageCI) {
     GLenum target = 0;
@@ -425,7 +451,7 @@ void GraphicsAPIOpenGLES::setBufferData(void* buffer, size_t offset, size_t size
     }
 }
 
-void GraphicsAPIOpenGLES::setRenderAttachments(void** colorViews, size_t colorViewCount, void* depthStencilView, uint32_t width, uint32_t height, void* pipeline) {
+void GraphicsAPIOpenGLES::setRenderAttachments(void** colorViews, size_t colorViewCount, void* depthView, uint32_t width, uint32_t height, void* pipeline) {
     // Reset Framebuffer
     glBindFramebuffer(GL_FRAMEBUFFER, 0);
     glDeleteFramebuffers(1, &setFramebuffer);
@@ -450,14 +476,14 @@ void GraphicsAPIOpenGLES::setRenderAttachments(void** colorViews, size_t colorVi
         }
     }
     // DepthStencil
-    if (depthStencilView) {
-        GLuint glDepthView = (GLuint)(uint64_t)depthStencilView;
+    if (depthView) {
+        GLuint glDepthView = (GLuint)(uint64_t)depthView;
         const ImageViewCreateInfo &imageViewCI = imageViews[glDepthView];
 
         if (imageViewCI.view == ImageViewCreateInfo::View::TYPE_2D_ARRAY) {
             //glFramebufferTextureMultiviewOVR(GL_DRAW_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, (GLuint)(uint64_t)imageViewCI.image, imageViewCI.baseMipLevel, imageViewCI.baseArrayLayer, imageViewCI.layerCount);
         } else if (imageViewCI.view == ImageViewCreateInfo::View::TYPE_2D) {
-            glFramebufferTexture2D(GL_DRAW_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_TEXTURE_2D, (GLuint)(uint64_t)imageViewCI.image, imageViewCI.baseMipLevel);
+            glFramebufferTexture2D(GL_DRAW_FRAMEBUFFER, GL_DEPTH_STENCIL_ATTACHMENT, GL_TEXTURE_2D, (GLuint)(uint64_t)imageViewCI.image, imageViewCI.baseMipLevel);
         } else {
             LOG_E("OPENGL: Unknown ImageView View type.");
         }
@@ -546,6 +572,13 @@ void GraphicsAPIOpenGLES::clearDepth(void* imageView, float d) {
     glBindFramebuffer(GL_FRAMEBUFFER, (GLuint)(uint64_t)imageView);
     glClearDepthf(d);
     glClear(GL_DEPTH_BUFFER_BIT);
+    glBindFramebuffer(GL_FRAMEBUFFER, 0);
+}
+
+void GraphicsAPIOpenGLES::clearStencil(void* imageView, int s) {
+    glBindFramebuffer(GL_FRAMEBUFFER, (GLuint)(uint64_t)imageView);
+    glClearStencil(s);
+    glClear(GL_STENCIL_BUFFER_BIT);
     glBindFramebuffer(GL_FRAMEBUFFER, 0);
 }
 
@@ -815,37 +848,57 @@ void GraphicsAPIOpenGLES::bindFrameBuffer(IGraphicsAPI::FrameBufferTarget target
 }
 
 void GraphicsAPIOpenGLES::enable(IGraphicsAPI::Capability capability) {
-//    GLenum glCapability;
-//
-//    switch (capability) {
+    GLenum glCapability;
+
+    switch (capability) {
+        // not available in opengles
 //        case IGraphicsAPI::Capability::MULTISAMPLE:
 //            glCapability = GL_MULTISAMPLE;
 //            break;
 //        case IGraphicsAPI::Capability::FRAMEBUFFER_SRGB:
 //            glCapability = GL_FRAMEBUFFER_SRGB;
 //            break;
-//        default:
-//            throw std::runtime_error("Invalid capability");
-//    }
-//
-//    GL_CALL(glEnable(glCapability));
+        case IGraphicsAPI::Capability::CULL_FACE:
+            glCapability = GL_CULL_FACE;
+            break;
+        case IGraphicsAPI::Capability::STENCIL_TEST:
+            glCapability = GL_STENCIL_TEST;
+            break;
+        case IGraphicsAPI::Capability::DEPTH_TEST:
+            glCapability = GL_DEPTH_TEST;
+            break;
+        default:
+            throw std::runtime_error("Invalid capability");
+    }
+
+    GL_CALL(glEnable(glCapability));
 }
 
 void GraphicsAPIOpenGLES::disable(IGraphicsAPI::Capability capability) {
-//    GLenum glCapability;
-//
-//    switch (capability) {
+    GLenum glCapability;
+
+    switch (capability) {
+        // not available in opengles
 //        case IGraphicsAPI::Capability::MULTISAMPLE:
 //            glCapability = GL_MULTISAMPLE;
 //            break;
 //        case IGraphicsAPI::Capability::FRAMEBUFFER_SRGB:
 //            glCapability = GL_FRAMEBUFFER_SRGB;
 //            break;
-//        default:
-//            throw std::runtime_error("Invalid capability");
-//    }
-//
-//    GL_CALL(glDisable(glCapability));
+        case IGraphicsAPI::Capability::CULL_FACE:
+            glCapability = GL_CULL_FACE;
+            break;
+        case IGraphicsAPI::Capability::STENCIL_TEST:
+            glCapability = GL_STENCIL_TEST;
+            break;
+        case IGraphicsAPI::Capability::DEPTH_TEST:
+            glCapability = GL_DEPTH_TEST;
+            break;
+        default:
+            throw std::runtime_error("Invalid capability");
+    }
+
+    GL_CALL(glDisable(glCapability));
 }
 
 void GraphicsAPIOpenGLES::genVertexArrays(unsigned int n, unsigned int* arrays) {
@@ -1078,7 +1131,7 @@ unsigned int GraphicsAPIOpenGLES::getUniformBlockIndex(unsigned int programId, c
 
 void GraphicsAPIOpenGLES::uniformBlockBinding(unsigned int programId, unsigned int uniformBlockIndex, unsigned int uniformBlockBinding) {
     if (uniformBlockIndex != GL_INVALID_INDEX) {
-        GL_CALL(GL_CALL(glUniformBlockBinding(programId, uniformBlockIndex, uniformBlockBinding)));
+        GL_CALL(glUniformBlockBinding(programId, uniformBlockIndex, uniformBlockBinding));
     } else {
         LOG_E("Invalid uniformBlockIndex %d", uniformBlockIndex);
     }
@@ -1638,6 +1691,153 @@ void GraphicsAPIOpenGLES::stencilFunc(TestFunction func, unsigned int mask) {
     }
 
     glStencilFunc(glFunc, 1, mask);
+}
+
+void GraphicsAPIOpenGLES::stencilOp(StencilAction sFail, StencilAction dpfail, StencilAction dppass) {
+    GLenum glsFail;
+    GLenum gldpFail;
+    GLenum gldpPass;
+
+    switch (sFail) {
+        case StencilAction::KEEP:
+            glsFail = GL_KEEP;
+            break;
+        case StencilAction::ZERO:
+            glsFail = GL_ZERO;
+            break;
+        case StencilAction::REPLACE:
+            glsFail = GL_REPLACE;
+            break;
+        case StencilAction::INCR:
+            glsFail = GL_INCR;
+            break;
+        case StencilAction::INCR_WRAP:
+            glsFail = GL_INCR_WRAP;
+            break;
+        case StencilAction::DECR:
+            glsFail = GL_DECR;
+            break;
+        case StencilAction::DECR_WRAP:
+            glsFail = GL_DECR_WRAP;
+            break;
+        case StencilAction::INVERT:
+            glsFail = GL_INVERT;
+            break;
+        default:
+            throw std::runtime_error("Invalid sFail Action");
+    }
+
+    switch (dpfail) {
+        case StencilAction::KEEP:
+            gldpFail = GL_KEEP;
+            break;
+        case StencilAction::ZERO:
+            gldpFail = GL_ZERO;
+            break;
+        case StencilAction::REPLACE:
+            gldpFail = GL_REPLACE;
+            break;
+        case StencilAction::INCR:
+            gldpFail = GL_INCR;
+            break;
+        case StencilAction::INCR_WRAP:
+            gldpFail = GL_INCR_WRAP;
+            break;
+        case StencilAction::DECR:
+            gldpFail = GL_DECR;
+            break;
+        case StencilAction::DECR_WRAP:
+            gldpFail = GL_DECR_WRAP;
+            break;
+        case StencilAction::INVERT:
+            gldpFail = GL_INVERT;
+            break;
+        default:
+            throw std::runtime_error("Invalid sFail Action");
+    }
+
+    switch (dppass) {
+        case StencilAction::KEEP:
+            gldpPass = GL_KEEP;
+            break;
+        case StencilAction::ZERO:
+            gldpPass = GL_ZERO;
+            break;
+        case StencilAction::REPLACE:
+            gldpPass = GL_REPLACE;
+            break;
+        case StencilAction::INCR:
+            gldpPass = GL_INCR;
+            break;
+        case StencilAction::INCR_WRAP:
+            gldpPass = GL_INCR_WRAP;
+            break;
+        case StencilAction::DECR:
+            gldpPass = GL_DECR;
+            break;
+        case StencilAction::DECR_WRAP:
+            gldpPass = GL_DECR_WRAP;
+            break;
+        case StencilAction::INVERT:
+            gldpPass = GL_INVERT;
+            break;
+        default:
+            throw std::runtime_error("Invalid sFail Action");
+    }
+    glStencilOp(glsFail, gldpFail, gldpPass);
+}
+
+void GraphicsAPIOpenGLES::cullFace(IGraphicsAPI::PolygonModeFace faceMode) {
+    GLenum glFaceMode;
+
+    switch (faceMode) {
+        case PolygonModeFace::FRONT:
+            glFaceMode = GL_FRONT;
+            break;
+        case PolygonModeFace::BACK:
+            glFaceMode = GL_BACK;
+            break;
+        case PolygonModeFace::FRONT_AND_BACK:
+            glFaceMode = GL_FRONT_AND_BACK ;
+            break;
+    }
+
+    glCullFace(glFaceMode);
+}
+
+void GraphicsAPIOpenGLES::depthMask(bool flag)  {
+    GLboolean glFlag;
+    if (flag) {
+        glFlag = GL_TRUE;
+    } else {
+        glFlag = GL_FALSE;
+    }
+    glDepthMask(glFlag);
+}
+
+void GraphicsAPIOpenGLES::generateMipMap() {
+    glGenerateMipmap(GL_TEXTURE_2D);
+}
+
+void GraphicsAPIOpenGLES::bindBufferBase(BufferTarget target, unsigned int index, unsigned int buffer) {
+    GLenum glTarget;
+    switch (target) {
+        case BufferTarget::ATOMIC_COUNTER_BUFFER:
+            glTarget = GL_ATOMIC_COUNTER_BUFFER;
+            break;
+        case BufferTarget::TRANSFORM_FEEDBACK_BUFFER:
+            glTarget = GL_TRANSFORM_FEEDBACK_BUFFER;
+            break;
+        case BufferTarget::UNIFORM_BUFFER:
+            glTarget = GL_UNIFORM_BUFFER ;
+            break;
+        case BufferTarget::SHADER_STORAGE_BUFFER:
+            glTarget = GL_SHADER_STORAGE_BUFFER;
+            break;
+        default:
+            throw std::runtime_error("Invalid BufferTarget");
+    }
+    glBindBufferBase(glTarget, index, buffer);
 }
 
 } // namespace clay

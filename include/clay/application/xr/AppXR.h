@@ -1,5 +1,5 @@
 #pragma once
-#ifdef CLAY_PLATFORM_VR
+#ifdef CLAY_PLATFORM_XR
 
 // standard lib
 #include <string>
@@ -7,14 +7,17 @@
 // third party
 // project
 #include "clay/graphics/opengles/GraphicsAPIOpenGLES.h" // include this on top
+#include "clay/graphics/opengles/RendererOpenGLES.h"
 #include "clay/audio/AudioManager.h"
 #include "clay/application/xr/InputHandlerXR.h"
 #include "clay/application/common/Resources.h"
-#include "clay/application/xr/SceneXR.h"
+#include "clay/application/common/BaseScene.h"
+#include "clay/application/common/IApp.h"
+#include "clay/gui/xr/WindowXR.h"
 
 namespace clay {
 
-class AppXR {
+class AppXR : public IApp {
 public:
     struct AndroidAppState {
         ANativeWindow* nativeWindow = nullptr;
@@ -40,19 +43,32 @@ public:
 
     ~AppXR();
 
+    virtual void initialize();
+
     void run();
 
-    void setScene(SceneXR* newScene);
+    void setScene(BaseScene* newScene) override;
 
-    clay::InputHandlerXR& getInputHandler();
+    InputHandlerXR& getInputHandler();
 
     AAssetManager* getAssetManager();
 
-    clay::Resources& getResources();
+    Resources& getResources() override;
 
-    clay::AudioManager& getAudioManager();
+    AudioManager& getAudioManager() override;
 
-private:
+    IGraphicsAPI* getGraphicsAPI() override;
+
+    IWindow* getWindow() override;
+
+    utils::FileData loadFileToMemory_XR(const std::string& filePath);
+
+    utils::ImageData loadImageFileToMemory_XR(const std::string &filePath);
+
+    // must be called before initialize. Must load the the shaders "TextShader",  "TextureFlipShader", and mesh "RectPlane"
+    virtual void createResources();
+
+protected:
     void createInstance();
 
     void getInstanceProperties();
@@ -68,8 +84,6 @@ private:
     void createReferenceSpace();
 
     void createSwapchains();
-
-    void createResources();
 
     void pollSystemEvents();
 
@@ -89,7 +103,7 @@ private:
 
     bool renderLayer(RenderLayerInfo &renderLayerInfo);
 
-private:
+protected:
     AndroidAppState mAndroidAppState_;
     android_app* mpAndroidApp_;
     XrInstance mXRInstance_ = XR_NULL_HANDLE;
@@ -107,6 +121,7 @@ private:
     XrSpace mHeadSpace_ = XR_NULL_HANDLE;
     std::vector<SwapchainInfo> mColorSwapchainInfos_ = {};
     std::vector<SwapchainInfo> mDepthSwapchainInfos_ = {};
+    std::vector<SwapchainInfo> mStencilSwapchainInfos_ = {};
     XrViewConfigurationType mViewConfiguration_ = XR_VIEW_CONFIGURATION_TYPE_MAX_ENUM;
     std::vector<XrViewConfigurationView> mViewConfigurationViews_;
     XrSessionState mSessionState_ = XR_SESSION_STATE_UNKNOWN;
@@ -115,11 +130,13 @@ private:
     std::vector<XrEnvironmentBlendMode> mApplicationEnvironmentBlendModes_ = {XR_ENVIRONMENT_BLEND_MODE_OPAQUE, XR_ENVIRONMENT_BLEND_MODE_ADDITIVE};
     std::vector<XrViewConfigurationType> mViewConfigurations_;
     std::vector<XrViewConfigurationType> mApplicationViewConfigurations_ = {XR_VIEW_CONFIGURATION_TYPE_PRIMARY_STEREO, XR_VIEW_CONFIGURATION_TYPE_PRIMARY_MONO};
-    std::unique_ptr<clay::GraphicsAPIOpenGLES> mGraphicsAPI_ = nullptr;
-    std::vector<clay::SceneXR*> mScenes_;
-    clay::Resources mResources_;
-    clay::InputHandlerXR mInputHandler_;
-    clay::AudioManager mAudioManger_;
+    std::unique_ptr<GraphicsAPIOpenGLES> mGraphicsAPI_ = nullptr;
+    std::unique_ptr<RendererOpenGLES> mRenderer_ = nullptr;
+    std::vector<std::unique_ptr<BaseScene>> mScenes_;
+    Resources mResources_;
+    InputHandlerXR mInputHandler_;
+    AudioManager mAudioManger_;
+    WindowXR mWindow_;
 };
 
 } // namespace clay

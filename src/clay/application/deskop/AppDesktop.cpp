@@ -20,9 +20,10 @@ AppDesktop::AppDesktop() {}
 AppDesktop::~AppDesktop() {
     // Clean Application resources
     ImGuiComponent::deinitialize();
+    mResources_.releaseAll();
     glfwTerminate();
     // Play "0" audio to clear audio buffer
-    mAudioManger_.playSound(0);
+    mAudioManager_.playSound(0);
 }
 
 void AppDesktop::initialize() {
@@ -34,7 +35,7 @@ void AppDesktop::initialize() {
     // Load/build Application resources
     loadResources();
     // Renderer and Scene (must be called after OpenGL is initialized)
-    mpRenderer_ = std::make_unique<Renderer>(
+    mpRenderer_ = std::make_unique<RendererOpenGL>(
         mpWindow_->getDimensions(),
         *(mResources_.getResource<ShaderProgram>("TextureSurface")),
         *(mResources_.getResource<ShaderProgram>("Text")),
@@ -74,27 +75,17 @@ void AppDesktop::update() {
     InputHandlerDesktop* handler = (InputHandlerDesktop*)mpWindow_->getInputHandler();
 
     // Propagate key events to the scenes
-    while (const auto keyEvent = handler->getKeyEvent()) {
+    // TODO how to pass a generic event to scene
+    while (auto keyEvent = handler->getKeyEvent()) {
         for (auto it = mScenes_.rbegin(); it != mScenes_.rend(); ++it) {
-            if (keyEvent.value().getType() == IInputHandler::KeyEvent::Type::PRESS) {
-                (*it)->onKeyPress(keyEvent.value().getCode());
-            } else if (keyEvent.value().getType() == IInputHandler::KeyEvent::Type::RELEASE) {
-                (*it)->onKeyRelease(keyEvent.value().getCode());
-            }
+            (*it)->onInputEvent(keyEvent.value());
         }
     }
 
     // Propagate mouse events to scenes
-    while (const auto mouseEvent = handler->getMouseEvent()) {
+    while (auto mouseEvent = handler->getMouseEvent()) {
         for (auto it = mScenes_.rbegin(); it != mScenes_.rend(); ++it) {
-            if (mouseEvent.value().getType() == IInputHandler::MouseEvent::Type::PRESS) {
-                (*it)->onMousePress(mouseEvent.value());
-            } else if (mouseEvent.value().getType() == IInputHandler::MouseEvent::Type::RELEASE) {
-                (*it)->onMouseRelease(mouseEvent.value());
-            } else if (mouseEvent.value().getType() == IInputHandler::MouseEvent::Type::SCROLL_UP ||
-                mouseEvent.value().getType() == IInputHandler::MouseEvent::Type::SCROLL_DOWN) {
-                (*it)->onMouseWheel(mouseEvent.value());
-            }
+            (*it)->onInputEvent(mouseEvent.value());
         }
     }
 }
@@ -120,8 +111,9 @@ void AppDesktop::render() {
     mGraphicsAPI_->bindFrameBuffer(IGraphicsAPI::FrameBufferTarget::FRAMEBUFFER, 0);
 
     // Render list in reverse order
+    IGraphicsContext gContext(*mpRenderer_);
     for (auto it = mScenes_.rbegin(); it != mScenes_.rend(); ++it) {
-       (*it)->render(*mpRenderer_);
+       (*it)->render(gContext);
     }
 
     // render guis on top (avoid gamma correction)
@@ -168,7 +160,7 @@ void AppDesktop::setAntiAliasing(unsigned int sampleSize) {
 }
 
 void AppDesktop::loadResources() {
-    // Shaders
+    // Shaders TODO REPLACE WITH UPDATED RESOURCE LOADING
     {
         auto vertexShaderFileData = Resources::loadFileToMemory((Resources::RESOURCE_PATH / "shaders/AssimpLight.vert").string());
         auto fragmentShaderFileData = Resources::loadFileToMemory((Resources::RESOURCE_PATH / "shaders/AssimpLight.frag").string());
@@ -450,7 +442,7 @@ void AppDesktop::loadResources() {
         "RectPlane"
     );
     mResources_.loadResource<Mesh>(
-        {Resources::RESOURCE_PATH / "Sphere.obj"},
+        { (Resources::RESOURCE_PATH / "Sphere.obj").string() },
         "Sphere"
     );
     // Circle plane
@@ -497,15 +489,15 @@ void AppDesktop::loadResources() {
         );
     }
     // Audio
-    if (mAudioManger_.isInitialized()) {
-        mResources_.loadResource<Audio>({Resources::RESOURCE_PATH / "audio/beep_deep_1.wav"}, "Blip_Deep");
-        mResources_.loadResource<Audio>({Resources::RESOURCE_PATH / "audio/Blip_1.wav"}, "Blip1");
-        mResources_.loadResource<Audio>({Resources::RESOURCE_PATH / "audio/button_click_1.wav"}, "Button_click");
-        mResources_.loadResource<Audio>({Resources::RESOURCE_PATH / "audio/PatakasWorld.wav"}, "PatakasWorld");
+    if (mAudioManager_.isInitialized()) {
+        mResources_.loadResource<Audio>({ (Resources::RESOURCE_PATH / "audio/beep_deep_1.wav").string() }, "Blip_Deep");
+        mResources_.loadResource<Audio>({ (Resources::RESOURCE_PATH / "audio/Blip_1.wav").string() }, "Blip1");
+        mResources_.loadResource<Audio>({ (Resources::RESOURCE_PATH / "audio/button_click_1.wav").string() }, "Button_click");
+        mResources_.loadResource<Audio>({ (Resources::RESOURCE_PATH / "audio/PatakasWorld.wav").string() }, "PatakasWorld");
     }
     // Fonts
-    mResources_.loadResource<Font>({Resources::RESOURCE_PATH / "fonts/Consolas.ttf"}, "Consolas");
-    mResources_.loadResource<Font>({Resources::RESOURCE_PATH / "fonts/runescape_uf.ttf"}, "Runescape");
+    mResources_.loadResource<Font>({ (Resources::RESOURCE_PATH / "fonts/Consolas.ttf").string() }, "Consolas");
+    mResources_.loadResource<Font>({ (Resources::RESOURCE_PATH / "fonts/runescape_uf.ttf").string() }, "Runescape");
 
     // SpriteSheet
     mResources_.addResource(
@@ -524,15 +516,15 @@ void AppDesktop::initializeOpenGL() {
     }
 }
 
-AudioManager& AppDesktop::getAudioManger() {
-    return mAudioManger_;
+AudioManager& AppDesktop::getAudioManager() {
+    return mAudioManager_;
 }
 
 Resources& AppDesktop::getResources() {
     return mResources_;
 }
 
-Renderer& AppDesktop::getRenderer() {
+RendererOpenGL& AppDesktop::getRenderer() {
     return *mpRenderer_.get();
 }
 

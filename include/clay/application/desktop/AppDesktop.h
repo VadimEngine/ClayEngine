@@ -11,7 +11,7 @@
 #include "clay/application/common/Resources.h"
 #include "clay/application/common/BaseScene.h"
 #include "clay/audio/AudioManager.h"
-#include "clay/graphics/common/Renderer.h"
+#include "clay/graphics/opengl/RendererOpenGL.h"
 #include "clay/gui/desktop/WindowDesktop.h"
 #include "clay/gui/common/IWindow.h"
 #include "clay/application/common/IApp.h"
@@ -50,7 +50,7 @@ public:
      * Set the current Scene of the application
      * @param newScene The new Scene
      */
-    void setScene(BaseScene* newScene);
+    void setScene(BaseScene* newScene) override;
 
     /**
      * Set Anti-Aliasing sample size. If the size is 0 then anti aliasing is disabled
@@ -59,21 +59,21 @@ public:
     void setAntiAliasing(unsigned int sampleSize);
 
     /** Get Application Window */
-    IWindow* getWindow();
+    IWindow* getWindow() override;
 
     void setWindow(std::unique_ptr<IWindow> pWindow);
 
     /** Get the audio manager for this application */
-    AudioManager& getAudioManger();
+    AudioManager& getAudioManager() override;
 
     /** Get application resources */
-    Resources& getResources();
+    Resources& getResources() override;
 
     /** Get the Renderer for this App */
-    Renderer& getRenderer();
+    RendererOpenGL& getRenderer();
 
     // TODO USE THIS IN SCENES TO PASS TO RESOURCES
-    IGraphicsAPI* getGraphicsAPI();
+    IGraphicsAPI* getGraphicsAPI() override;
 
 private:
     /** Load/Build the common resources for the scenes in this application */
@@ -90,9 +90,9 @@ private:
     /** The current Scenes of the application. List to allow controlled scene deleting */
     std::list<std::unique_ptr<BaseScene>> mScenes_;
     /** Renderer used to render the scenes */
-    std::unique_ptr<Renderer> mpRenderer_;
+    std::unique_ptr<RendererOpenGL> mpRenderer_;
     /** Audio manager */
-    AudioManager mAudioManger_;
+    AudioManager mAudioManager_;
     /** Resource for this application that can be shared with child scenes */
     Resources mResources_;
 

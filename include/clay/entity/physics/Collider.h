@@ -9,7 +9,7 @@
 #include <glm/gtx/intersect.hpp>
 // project
 #include "clay/entity/physics/PhysicsComponentBase.h"
-#include "clay/graphics/common/Renderer.h"
+#include "clay/graphics/common/IRenderer.h"
 
 namespace clay {
 

@@ -32,21 +32,21 @@ void mouse_button_callback(GLFWwindow* window, int button, int action, int mods)
    if (button == GLFW_MOUSE_BUTTON_LEFT) {
        if (action == GLFW_PRESS) {
            inputHandler.onMousePress(
-               IInputHandler::MouseEvent::Button::LEFT
+               MouseEvent::Button::LEFT
            );
        } else if (action == GLFW_RELEASE) {
            inputHandler.onMouseRelease(
-               IInputHandler::MouseEvent::Button::LEFT
+               MouseEvent::Button::LEFT
            );
        }
    } else if (button == GLFW_MOUSE_BUTTON_RIGHT) {
        if (action == GLFW_PRESS) {
            inputHandler.onMousePress(
-               IInputHandler::MouseEvent::Button::RIGHT
+               MouseEvent::Button::RIGHT
            );
        } else if (action == GLFW_RELEASE) {
            inputHandler.onMouseRelease(
-               IInputHandler::MouseEvent::Button::RIGHT
+               MouseEvent::Button::RIGHT
            );
        }
    }

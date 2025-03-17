@@ -24,9 +24,9 @@ public:
      * @param theRenderer Helper Renderer object
      * @param parentModelMat Model matrix with the model transforms
      */
-    void render(const Renderer& theRenderer, const glm::mat4& parentModelMat) const override;
+    void render(IGraphicsContext& gContext, const glm::mat4& parentModelMat) const override;
 
-    void render(const Renderer& theRenderer, const glm::mat4& parentModelMat, ShaderProgram& shader) const override;
+    void render(IGraphicsContext& gContext, const glm::mat4& parentModelMat, ShaderProgram& shader) const override;
 
     /** Get the Model for this Renderable */
     const Model* getModel() const;
@@ -54,12 +54,6 @@ public:
      */
     void setTexture(unsigned int textureUnit, unsigned int textureId, const std::string& uniformName);
 
-    /**
-     * Set if wireframes should be rendered
-     * @param enable if wireframe rendering is enabled
-     */
-    void setWireframeRendering(const bool enable);
-
     void setSubTextureSize(const glm::vec2& size);
 
     void setSubTextureTopLeft(const glm::vec2& pos);
@@ -71,8 +65,6 @@ private:
     const ShaderProgram* mpShader_ = nullptr;
     /** Map of texture ids and the uniform name for the shader*/
     std::unordered_map<unsigned int, std::pair<unsigned int, std::string>> mTextureByUnit_;
-    /** If the wire frames are also rendered */
-    bool renderWireframe_ = false;
     /** Size of the sub texture rendered on this model */
     glm::vec2 mSubTextureSize = {1.f, 1.f};
     /** Top left corner of the sub texture rendered on this model */

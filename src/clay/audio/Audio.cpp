@@ -2,6 +2,7 @@
 #include <climits> // linux
 #include <inttypes.h> // linux
 #include <cstring> // linux
+#include <stdexcept>
 // third party
 #include <AL/alext.h>
 #include <sndfile.h>

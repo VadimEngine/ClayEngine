@@ -1,6 +1,5 @@
 #pragma once
 // standard lib
-#include <filesystem>
 #include <stdexcept>
 // third party
 #include <glm/vec2.hpp>

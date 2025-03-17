@@ -15,10 +15,10 @@ void BoxCollider2D::update(float dt) {
     mPosition_ = mParentEntity_.getPosition();
 }
 
-void BoxCollider2D::render(const Renderer& theRenderer) {
+void BoxCollider2D::render(const IRenderer& theRenderer) {
     glm::mat4 translationMatrix = glm::translate(glm::mat4(1.0f), mPosition_);
     // TODO use other matrices
-    theRenderer.renderRectangleSimple(translationMatrix, {1,1,1,1});
+    //theRenderer.renderRectangleSimple(translationMatrix, {1,1,1,1});
 }
 
 bool BoxCollider2D::isColliding(const Collider& other) const {

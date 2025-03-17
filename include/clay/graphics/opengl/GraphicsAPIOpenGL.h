@@ -119,6 +119,16 @@ public:
     void stencilMask(unsigned int mask) override;
 
     void stencilFunc(TestFunction func, unsigned int mask) override;
+
+    void stencilOp(StencilAction sFail, StencilAction dpfail, StencilAction dppass) override;
+
+    void cullFace(PolygonModeFace faceMode) override;
+
+    void depthMask(bool flag) override;
+
+    void generateMipMap() override;
+
+    void bindBufferBase(BufferTarget target, unsigned int index, unsigned int buffer) override;
 };
 
 

@@ -21,45 +21,42 @@ void Entity::update(float dt) {
     mPosition_ += mVelocity_ * dt;
 }
 
-void Entity::render(const Renderer& theRenderer) const {
+void Entity::render(IGraphicsContext& gContext) const {
     // translation matrix for position
-    glm::mat4 translationMatrix = glm::translate(glm::mat4(1.0f), mPosition_);
+    const glm::mat4 translationMatrix = glm::translate(glm::mat4(1.0f), mPosition_);
     // rotation matrix
-    glm::mat4 rotationMatrix = glm::rotate(glm::mat4(1), glm::radians(mRotation_.x), glm::vec3(1.0f, 0.0f, 0.0f));
-    rotationMatrix = glm::rotate(rotationMatrix, glm::radians(mRotation_.y), glm::vec3(0.0f, 1.0f, 0.0f));
-    rotationMatrix = glm::rotate(rotationMatrix, glm::radians(mRotation_.z), glm::vec3(0.0f, 0.0f, 1.0f));
+    const glm::mat4 rotationMatrix = glm::mat4_cast(mOrientation_);
     // scale matrix
-    glm::mat4 scaleMatrix = glm::scale(glm::mat4(1.0f), mScale_);
+    const glm::mat4 scaleMatrix = glm::scale(glm::mat4(1.0f), mScale_);
 
     const glm::mat4 modelMat = translationMatrix * rotationMatrix * scaleMatrix;
+
     for (const auto& eachRenderable : mRenderableComponents_) {
         if (eachRenderable->isEnabled()) {
-            eachRenderable->render(theRenderer, modelMat);
+            eachRenderable->render(gContext, modelMat);
         }
     }
 }
 
-void Entity::render(const Renderer& theRenderer, ShaderProgram& shader) const {
+void Entity::render(IGraphicsContext& gContext, ShaderProgram& shader) const {
     // translation matrix for position
-    glm::mat4 translationMatrix = glm::translate(glm::mat4(1.0f), mPosition_);
+    const glm::mat4 translationMatrix = glm::translate(glm::mat4(1.0f), mPosition_);
     // rotation matrix
-    glm::mat4 rotationMatrix = glm::rotate(glm::mat4(1), glm::radians(mRotation_.x), glm::vec3(1.0f, 0.0f, 0.0f));
-    rotationMatrix = glm::rotate(rotationMatrix, glm::radians(mRotation_.y), glm::vec3(0.0f, 1.0f, 0.0f));
-    rotationMatrix = glm::rotate(rotationMatrix, glm::radians(mRotation_.z), glm::vec3(0.0f, 0.0f, 1.0f));
+    const glm::mat4 rotationMatrix = glm::mat4_cast(mOrientation_);
     // scale matrix
-    glm::mat4 scaleMatrix = glm::scale(glm::mat4(1.0f), mScale_);
+    const glm::mat4 scaleMatrix = glm::scale(glm::mat4(1.0f), mScale_);
 
     const glm::mat4 modelMat = translationMatrix * rotationMatrix * scaleMatrix;
     for (const auto& eachRenderable : mRenderableComponents_) {
         if (eachRenderable->isEnabled()) {
-            eachRenderable->render(theRenderer, modelMat, shader);
+            eachRenderable->render(gContext, modelMat, shader);
         }
     }
 }
 
-void Entity::renderHighlight(const Renderer& theRenderer) const {
+void Entity::renderHighlight(IGraphicsContext& gContext) const {
     // TODO replace with stencil
-    getCollider()->render(theRenderer);
+    getCollider()->render(gContext);
 }
 
  std::vector<std::unique_ptr<BaseRenderable>>& Entity::getRenderableComponents() {
@@ -81,10 +78,6 @@ glm::vec3 Entity::getPosition() const {
     return mPosition_;
 }
 
-glm::vec3 Entity::getRotation() const {
-    return mRotation_;
-}
-
 glm::vec3 Entity::getScale() const {
     return mScale_;
 }
@@ -98,10 +91,6 @@ void Entity::setPosition(const glm::vec3& newPosition) {
     if (mCollider_ != nullptr) {
         mCollider_->setPosition(newPosition);
     }
-}
-
-void Entity::setRotation(const glm::vec3& newRotation) {
-    mRotation_ = newRotation;
 }
 
 void Entity::setScale(const glm::vec3& newScale) {
@@ -156,6 +145,18 @@ std::vector<T*> Entity::getPhysicsComponents() {
         }
     }
     return result;
+}
+
+glm::quat Entity::getOrientation() const {
+    return mOrientation_;
+}
+
+glm::quat &Entity::getOrientation() {
+    return mOrientation_;
+}
+
+void Entity::setOrientation(const glm::quat& newOrientation) {
+    mOrientation_ = newOrientation;
 }
 
 // Explicit instantiate template for expected types

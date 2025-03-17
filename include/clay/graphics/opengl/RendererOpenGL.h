@@ -1,4 +1,7 @@
 #pragma once
+
+#ifdef CLAY_ENABLE_OPENGL
+
 // third party
 // project
 #include "clay/graphics/common/Camera.h"
@@ -9,10 +12,13 @@
 #include "clay/graphics/common/SpriteSheet.h"
 #include "clay/graphics/common/Texture.h"
 #include "clay/graphics/common/IGraphicsAPI.h"
+#include "clay/graphics/common/IRenderer.h"
+
+
 
 namespace clay {
 
-class Renderer {
+class RendererOpenGL : public IRenderer {
 public:
     /** Constructor */
 
@@ -25,12 +31,12 @@ public:
      * @param mvpShader shader for rendering simple shapes
      * @param rectPlane Mesh for a simple rect shape
      */
-    Renderer(const glm::vec2& screenDim, ShaderProgram& spriteShader,
-        ShaderProgram& text2Shader, ShaderProgram& mvpShader, Mesh& rectPlane,
-        ShaderProgram& frameBufferShader, ShaderProgram& bloomFinalShader, IGraphicsAPI& graphicsAPI);
+    RendererOpenGL(const glm::vec2& screenDim, ShaderProgram& spriteShader,
+                   ShaderProgram& text2Shader, ShaderProgram& mvpShader, Mesh& rectPlane,
+                   ShaderProgram& frameBufferShader, ShaderProgram& bloomFinalShader, IGraphicsAPI& graphicsAPI);
 
     /** Destructor*/
-    ~Renderer();
+    ~RendererOpenGL();
 
     /**
      * @brief Update the camera used for this render
@@ -48,18 +54,18 @@ public:
      * @param textureId Texture Id to Render
      * @param modelMat Model matrix to transform the sprite by
      */
-    void renderSprite(unsigned int textureId, const glm::mat4& modelMat, const glm::vec4& theColor = {1,1,1,1}) const;
+    void renderSprite(unsigned int textureId, const glm::mat4& modelMat, const glm::vec4& theColor = {1,1,1,1}) const override;
 
-    void renderSprite(unsigned int textureId, ShaderProgram& shader, const glm::mat4& modelMat, const glm::vec4& theColor = {1,1,1,1}) const;
+    void renderSprite(unsigned int textureId, ShaderProgram& shader, const glm::mat4& modelMat, const glm::vec4& theColor = {1,1,1,1}) const override;
 
     /**
      * Render the given Sprite from a sprite sheet with the applied camera and model transforms.
      * @param theSprite The sprite to render
      * @param modelMat Model matrix to transform the sprite by
      */
-    void renderSprite(SpriteSheet::Sprite& theSprite, const glm::mat4& modelMat, const glm::vec4& theColor = {1,1,1,1}) const;
+    void renderSprite(SpriteSheet::Sprite& theSprite, const glm::mat4& modelMat, const glm::vec4& theColor = {1,1,1,1}) const override;
 
-    void renderSprite(SpriteSheet::Sprite& theSprite, ShaderProgram& shader, const glm::mat4& modelMat, const glm::vec4& theColor = {1,1,1,1}) const;
+    void renderSprite(SpriteSheet::Sprite& theSprite, ShaderProgram& shader, const glm::mat4& modelMat, const glm::vec4& theColor = {1,1,1,1}) const override;
 
     /**
      * Render text at the given location. TODO scale.x scale.y
@@ -79,7 +85,7 @@ public:
      * @param scale Text scale
      * @param color Text color
      */
-    void renderTextNormalized(const std::string& text, const glm::mat4& modelMat, const Font& font, const glm::vec3& scale, const glm::vec3& color);
+    void renderTextNormalized(const std::string& text, const glm::mat4& modelMat, const Font& font, const glm::vec3& scale, const glm::vec3& color) override;
 
     void renderTextNormalized(const std::string& text, ShaderProgram& shader, const glm::mat4& modelMat, const Font& font, const glm::vec3& scale, const glm::vec3& color);
 
@@ -197,3 +203,5 @@ private:
 };
 
 } // namespace clay
+
+#endif

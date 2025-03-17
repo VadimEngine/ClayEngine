@@ -71,7 +71,15 @@ glm::quat Camera::getOrientation() const {
     return mOrientation_;
 }
 
+glm::quat& Camera::getOrientation() {
+    return mOrientation_;
+}
+
 glm::vec3 Camera::getPosition() const {
+    return mPosition_;
+}
+
+glm::vec3& Camera::getPosition() {
     return mPosition_;
 }
 
@@ -131,6 +139,14 @@ void Camera::updateCameraVectors() {
     mForward_ = glm::normalize(glm::vec3(rotationMatrix * glm::vec4(0.0f, 0.0f, -1.0f, 0.0f)));
     mRight_ = glm::normalize(glm::vec3(rotationMatrix * glm::vec4(1.0f, 0.0f, 0.0f, 0.0f)));
     mUp_ = glm::normalize(glm::cross(mRight_, mForward_));
+}
+
+float Camera::getNear() const {
+    return mNear_;
+}
+
+float Camera::getFar() const {
+    return mFar_;
 }
 
 } // namespace clay

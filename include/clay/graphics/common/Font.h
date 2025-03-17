@@ -1,6 +1,5 @@
 #pragma once
 // standard lib
-#include <filesystem>
 #include <unordered_map>
 // third party
 #include <glm/vec2.hpp>

@@ -26,7 +26,7 @@ public:
     void update(float dt);
 
     /**
-     * Move the camera from current postion in the given direction and step
+     * Move the camera from current position in the given direction and step
      * @param dir Direction to move
      * @param step Amount to move
      */
@@ -84,8 +84,13 @@ public:
     /** Get camera rotations */
     glm::quat getOrientation() const;
 
+    glm::quat& getOrientation();
+
+
     /** Get camera position */
     glm::vec3 getPosition() const;
+
+    glm::vec3& getPosition();
 
     /** Get camera forward direction */
     glm::vec3 getForward() const;
@@ -137,6 +142,10 @@ public:
      * Get the Camera zoom speed
      */
     float getZoomSpeed() const;
+
+    float getNear() const;
+
+    float getFar() const;
 
 private:
     /** Update the forward, Right and Up vector based on the camera's rotation*/

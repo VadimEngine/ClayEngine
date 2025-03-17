@@ -3,6 +3,7 @@
 #include <cstdint>
 #include <string>
 #include <stdexcept>
+#include <vector>
 // third party
 #include <glm/glm.hpp>
 #include <glm/gtc/type_ptr.hpp>
@@ -41,6 +42,11 @@ public:
 
     void setTexture(const std::string& uniformName, unsigned int textureId, unsigned int textureUnit) const;
 
+    void bindUniformBuffer(unsigned int index, unsigned int buffer) const;
+
+    void bindUniformBuffer(const std::string& uniformBlockName, unsigned int index, unsigned int buffer) const;
+
+
     /** Get the shader program Id*/
     unsigned int getProgramId() const;
 
@@ -48,6 +54,7 @@ private:
     /** Program Id for this Shader*/
     unsigned int mProgramId_;
     IGraphicsAPI& mGraphicsAPI_;
+    std::vector<unsigned int> mShaderIds_;
 };
 
 } // namespace clay

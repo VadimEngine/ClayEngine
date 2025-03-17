@@ -21,7 +21,7 @@ Texture::Texture(IGraphicsAPI& graphicsAPI, utils::ImageData& imageData, bool ga
     mWidth_ = imageData.width;
     mHeight_ = imageData.height;
     mChannels_ = imageData.channels;
-    mTextureId_ = genGLTexture(graphicsAPI, imageData.pixels, imageData.width, imageData.height, imageData.channels, gammaCorrect);
+    mTextureId_ = genGLTexture(graphicsAPI, imageData.pixels.get(), imageData.width, imageData.height, imageData.channels, gammaCorrect);
 }
 
 Texture::~Texture() {
@@ -82,8 +82,6 @@ unsigned int Texture::genGLTexture(IGraphicsAPI& graphicsAPI, const unsigned cha
     graphicsAPI.texParameter(IGraphicsAPI::TextureTarget::TEXTURE_2D, IGraphicsAPI::TextureParameterType::TEXTURE_MIN_FILTER, IGraphicsAPI::TextureParameterOption::NEAREST);
     graphicsAPI.texParameter(IGraphicsAPI::TextureTarget::TEXTURE_2D, IGraphicsAPI::TextureParameterType::TEXTURE_MAG_FILTER, IGraphicsAPI::TextureParameterOption::NEAREST);
     if (gammaCorrect) {
-        // Use GL_SRGB or GL_SRGB_ALPHA for gamma correction
-        // TODO always use RGBA for internal?
         graphicsAPI.texImage2D(
             IGraphicsAPI::TextureTarget::TEXTURE_2D, 0,
             (channels == 3) ? IGraphicsAPI::TextureFormat::SRGB : IGraphicsAPI::TextureFormat::SRGB_ALPHA,

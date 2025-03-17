@@ -2,8 +2,7 @@
 // third party
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
-// ClayEngine
-#include "clay/application/desktop/AppDesktop.h"
+// Clay
 #include "clay/application/common/IApp.h"
 // class
 #include "clay/application/common/BaseScene.h"
@@ -56,14 +55,6 @@ Resources& BaseScene::getResources() {
     return mResources_;
 }
 
-void BaseScene::onKeyPress(unsigned int code) {}
-
-void BaseScene::onKeyRelease(unsigned int code) {}
-
-void BaseScene::onMousePress(const IInputHandler::MouseEvent& mouseEvent) {}
-
-void BaseScene::onMouseRelease(const IInputHandler::MouseEvent& mouseEvent) {}
-
-void BaseScene::onMouseWheel(const IInputHandler::MouseEvent& mouseEvent) {}
+void BaseScene::onInputEvent(InputEvent& e) {}
 
 } // namespace clay

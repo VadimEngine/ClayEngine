@@ -26,7 +26,8 @@ public:
         MULTISAMPLE,
         FRAMEBUFFER_SRGB,
         DEPTH_TEST,
-        STENCIL_TEST
+        STENCIL_TEST,
+        CULL_FACE
     };
 
     enum class FrameBufferTarget {
@@ -153,6 +154,8 @@ public:
     };
 
     enum class PolygonModeFace {
+        FRONT,
+        BACK,
         FRONT_AND_BACK
     };
 
@@ -171,6 +174,17 @@ public:
         EQUAL,
         NOTEQUAL,
         ALWAYS
+    };
+
+    enum class StencilAction {
+        KEEP,
+        ZERO,
+        REPLACE,
+        INCR,
+        INCR_WRAP,
+        DECR,
+        DECR_WRAP,
+        INVERT
     };
 
     virtual ~IGraphicsAPI() = default;
@@ -281,6 +295,16 @@ public:
     virtual void stencilMask(unsigned int mask) = 0;
 
     virtual void stencilFunc(TestFunction func, unsigned int mask) = 0;
+
+    virtual void stencilOp(StencilAction sFail, StencilAction dpfail, StencilAction dppass) = 0;
+
+    virtual void cullFace(PolygonModeFace faceMode) = 0;
+
+    virtual void depthMask(bool flag) = 0;
+
+    virtual void generateMipMap() = 0;
+
+    virtual void bindBufferBase(BufferTarget target, unsigned int index, unsigned int buffer) = 0;
 };
 
 } // namespace clay

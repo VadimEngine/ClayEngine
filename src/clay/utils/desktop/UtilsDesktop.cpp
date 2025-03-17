@@ -94,24 +94,36 @@ namespace clay::utils {
     }
 
     clay::utils::ImageData fileDataToImageData(utils::FileData& imageFile) {
-        clay::utils::ImageData imageData;
-        imageData.pixels = SOIL_load_image_from_memory(
-            imageFile.data.get(), 
+        utils::ImageData imageData;
+
+        unsigned char* rawPixels = SOIL_load_image_from_memory(
+            imageFile.data.get(),
             imageFile.size,
-            &imageData.width, 
-            &imageData.height, 
-            &imageData.channels, 
+            &imageData.width,
+            &imageData.height,
+            &imageData.channels,
             SOIL_LOAD_AUTO
         );
-    
-        if (imageData.pixels == nullptr) {
+
+        // Wrap the raw pointer in a std::unique_ptr
+            
+        if (rawPixels == nullptr) {
             LOG_E("ERROR LOADING TEXTURE");
             const char* errorMessage = SOIL_last_result();
             if (errorMessage != nullptr) {
-                LOG_E("SOIL error: %s", errorMessage)
+                LOG_E("SOIL error: %s", errorMessage);
             }
             throw std::runtime_error("Texture load failed");
         }
+
+        imageData.pixels = std::unique_ptr<unsigned char[]>(rawPixels);
+
+        return imageData;
+    }
+
+    utils::ImageData loadImageFileToMemory_desktop(const std::string& filePath) {
+        auto fileData = loadFileToMemory_desktop(filePath);
+        auto imageData = utils::fileDataToImageData(fileData);
 
         return imageData;
     }

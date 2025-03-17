@@ -16,7 +16,7 @@ public:
 
     void update(float dt) override;
 
-    void render(const Renderer& theRenderer);
+    void render(const IRenderer& theRenderer);
 
     std::optional<glm::vec3> getCollisionMTV(const Collider& other) const override;
 

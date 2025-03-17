@@ -1,8 +1,7 @@
-// class
-#include "clay/graphics/common/ShaderProgram.h"
 // project
 #include "clay/utils/common/Logger.h"
-
+// class
+#include "clay/graphics/common/ShaderProgram.h"
 
 namespace clay {
 
@@ -12,7 +11,6 @@ ShaderProgram::ShaderProgram(IGraphicsAPI& graphicsAPI)
 }
 
 ShaderProgram::~ShaderProgram() {
-    // TODO make sure shaders are deleted/detached at this point
     mGraphicsAPI_.deleteProgram(mProgramId_);
 }
 
@@ -25,19 +23,17 @@ void ShaderProgram::addShader(const ShaderCreateInfo& shaderInfo) {
     }
 
     mGraphicsAPI_.attachShader(mProgramId_, shaderID);
-    // TODO delete/detach shaders?
+    mShaderIds_.push_back(shaderID);  // Store shader ID for later deletion
 }
 
 void ShaderProgram::linkProgram() {
     mGraphicsAPI_.linkProgram(mProgramId_);
-    // TODO avoid Invalid uniformBlockIndex error
-    // Bind the Camera UBO
-    const unsigned int uniformBlockIndex = mGraphicsAPI_.getUniformBlockIndex(mProgramId_, "Camera");
-    mGraphicsAPI_.uniformBlockBinding(mProgramId_, uniformBlockIndex, 0);
 
-    // Bind the LightBuffer UBO
-    const unsigned int lightBlockIndex = mGraphicsAPI_.getUniformBlockIndex(mProgramId_, "LightBuffer");
-    mGraphicsAPI_.uniformBlockBinding(mProgramId_, lightBlockIndex, 1);
+    // delete shaders after linking
+    for (unsigned int shaderID : mShaderIds_) {
+        mGraphicsAPI_.deleteShader(shaderID);
+    }
+    mShaderIds_.clear();
 }
 
 void ShaderProgram::bind() const {
@@ -100,9 +96,19 @@ void ShaderProgram::setTexture(const std::string& uniformName, unsigned int text
     setInt(uniformName, textureUnit);
 }
 
+void ShaderProgram::bindUniformBuffer(unsigned int index, unsigned int buffer) const {
+    mGraphicsAPI_.bindBufferBase(IGraphicsAPI::BufferTarget::UNIFORM_BUFFER, index, buffer);
+}
+
+void ShaderProgram::bindUniformBuffer(const std::string& uniformBlockName, unsigned int index, unsigned int buffer) const {
+    unsigned int blockIndex = mGraphicsAPI_.getUniformBlockIndex(mProgramId_, uniformBlockName.c_str());
+
+    mGraphicsAPI_.uniformBlockBinding(mProgramId_, blockIndex, index);
+    mGraphicsAPI_.bindBufferBase(IGraphicsAPI::BufferTarget::UNIFORM_BUFFER, index, buffer);
+}
+
 unsigned int ShaderProgram::getProgramId() const {
     return mProgramId_;
 }
-
 
 } // namespace clay

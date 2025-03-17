@@ -5,7 +5,7 @@ cmake_minimum_required(VERSION 3.12)
 project(ClayEngine)
 # For some reason, uncommenting these options breaks VR build
 # java.io.FileNotFoundException: /apex/com.meta.xr/priv-app/VrDriver/VrDriver.apk (No such file or directory)
-#option(CLAY_PLATFORM_VR "Set Platform to VR" OFF)
+#option(CLAY_PLATFORM_XR "Set Platform to VR" OFF)
 #option(CLAY_PLATFORM_DESKTOP "Set Platform to Desktop" OFF)
 #option(CLAY_ENABLE_OPENGL "Enable OpenGL support" OFF)
 #option(CLAY_ENABLE_OPENGL_ES "Enable OpenGL ES support" OFF)
@@ -45,7 +45,7 @@ add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/thirdparty/assimp)
 add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/thirdparty/freetype)
 add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/thirdparty/libsndfile)
 add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/thirdparty/openal-soft)
-if(CLAY_PLATFORM_VR)
+if(CLAY_PLATFORM_XR)
     add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/thirdparty/OpenXR-SDK-Source)
 endif()
 if(CLAY_PLATFORM_DESKTOP)
@@ -66,7 +66,7 @@ list(APPEND SRC_FILES
     ${CMAKE_CURRENT_SOURCE_DIR}/thirdparty/imgui/imgui_tables.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/thirdparty/imgui/imgui_widgets.cpp
 )
-if(CLAY_PLATFORM_VR)
+if(CLAY_PLATFORM_XR)
     list(APPEND SRC_FILES
         ${CMAKE_CURRENT_SOURCE_DIR}/thirdparty/imgui/backends/imgui_impl_android.cpp
     )
@@ -79,7 +79,7 @@ endif()
 
 # Define the library target
 add_library(${PROJECT_NAME} STATIC ${SRC_FILES})
-if(CLAY_PLATFORM_VR)
+if(CLAY_PLATFORM_XR)
     # Android-specific imports
     include(AndroidNdkModules)
     android_ndk_import_module_native_app_glue()
@@ -93,7 +93,7 @@ target_include_directories(${PROJECT_NAME} PUBLIC
     ${CMAKE_CURRENT_SOURCE_DIR}/thirdparty/imgui/backends
 )
 
-if(CLAY_PLATFORM_VR)
+if(CLAY_PLATFORM_XR)
     target_include_directories(${PROJECT_NAME} PUBLIC
         ${ANDROID_NDK}/sources/android/native_app_glue
     )
@@ -112,7 +112,7 @@ set(CLAY_COMMON_LIBS
     assimp
 )
 
-if(CLAY_PLATFORM_VR)
+if(CLAY_PLATFORM_XR)
     set(CLAY_PLATFORM_LIBS
         android
         EGL
@@ -151,10 +151,8 @@ endif()
 # Link platform-specific and common libraries
 target_link_libraries(${PROJECT_NAME} PUBLIC ${CLAY_COMMON_LIBS} ${CLAY_PLATFORM_LIBS})
 
-# Define the DEFAULT_RESOURCE_PATH macro
-target_compile_definitions(${PROJECT_NAME} PRIVATE DEFAULT_CLAY_RESOURCE_PATH="${CMAKE_SOURCE_DIR}/res")
-if(CLAY_PLATFORM_VR)
-    target_compile_definitions(${PROJECT_NAME} PUBLIC CLAY_PLATFORM_VR)
+if(CLAY_PLATFORM_XR)
+    target_compile_definitions(${PROJECT_NAME} PUBLIC CLAY_PLATFORM_XR)
 endif()
 if(CLAY_PLATFORM_DESKTOP)
     target_compile_definitions(${PROJECT_NAME} PUBLIC CLAY_PLATFORM_DESKTOP)

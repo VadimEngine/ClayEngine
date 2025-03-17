@@ -1,4 +1,4 @@
-#ifdef CLAY_PLATFORM_VR
+#ifdef CLAY_PLATFORM_XR
 
 // standard lib
 #include <vector>

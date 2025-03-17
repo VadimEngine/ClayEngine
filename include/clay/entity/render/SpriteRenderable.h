@@ -21,9 +21,9 @@ public:
      * @param theRenderer Helper Render object
      * @param parentModelMat Model matrix of the parent to render relative to
      */
-    void render(const Renderer& theRenderer, const glm::mat4& parentModelMat) const override;
+    void render(IGraphicsContext& gContext, const glm::mat4& parentModelMat) const override;
 
-    void render(const Renderer& theRenderer, const glm::mat4& parentModelMat, ShaderProgram& shader) const override;
+    void render(IGraphicsContext& gContext, const glm::mat4& parentModelMat, ShaderProgram& shader) const override;
 
     /**
      * Set the Sprite this Renderable will draw
