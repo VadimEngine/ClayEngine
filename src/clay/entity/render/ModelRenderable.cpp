@@ -19,7 +19,9 @@ void ModelRenderable::render(IGraphicsContext& gContext, const glm::mat4& parent
     glm::mat4 localModelMat = translationMat * rotationMatrix * scaleMat;
 
     mpShader_->bind();
-    mpShader_->bindUniformBuffer(0, gContext.renderer.getCurrentUBO());
+    mpShader_->bindUniformBuffer(0, gContext.renderer.getCurrentCameraUBO()); // TODO should other renderables also do this such as sprite?
+    mpShader_->bindUniformBuffer(1, gContext.renderer.getCurrentLightUBO());
+
 
     // Bind all textures to the Texture Units
     for (const auto& [slot, texInfo] : mTextureByUnit_) {
@@ -47,7 +49,7 @@ void ModelRenderable::render(IGraphicsContext& gContext, const glm::mat4& parent
     glm::mat4 localModelMat = translationMat * rotationMatrix * scaleMat;
 
     inputShader.bind();
-    inputShader.bindUniformBuffer(0, gContext.renderer.getCurrentUBO());
+    inputShader.bindUniformBuffer(0, gContext.renderer.getCurrentCameraUBO());
 
     // Bind all textures to the Texture Units
     for (const auto& [slot, texInfo] : mTextureByUnit_) {

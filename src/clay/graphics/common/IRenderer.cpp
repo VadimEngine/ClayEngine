@@ -2,12 +2,16 @@
 
 namespace clay {
 
-void IRenderer::setUBO(unsigned int ubo) {
-    mCurrentUBO_ = ubo;
+void IRenderer::setCameraUBO(unsigned int cameraUBO) {
+    mCurrentCameraUBO_ = cameraUBO;
 }
 
-unsigned int IRenderer::getCurrentUBO() const {
-    return mCurrentUBO_;
+unsigned int IRenderer::getCurrentCameraUBO() const {
+    return mCurrentCameraUBO_;
+}
+
+unsigned int IRenderer::getCurrentLightUBO() const {
+    return mCurrentLightUBO_;
 }
 
 } // namespace clay

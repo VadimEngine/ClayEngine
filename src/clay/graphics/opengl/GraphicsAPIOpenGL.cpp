@@ -177,17 +177,17 @@ void GraphicsAPIOpenGL::clearColor(float r, float g, float b, float a) {
     GL_CALL(glClearColor(r,g ,b, a));
 }
 
-void GraphicsAPIOpenGL::bindFrameBuffer(IGraphicsAPI::FrameBufferTarget target, unsigned int bufferId) {
+void GraphicsAPIOpenGL::bindFrameBuffer(FrameBufferTarget target, unsigned int bufferId) {
     GLenum glTarget;
 
     switch (target) {
-    case IGraphicsAPI::FrameBufferTarget::FRAMEBUFFER:
+    case FrameBufferTarget::FRAMEBUFFER:
         glTarget = GL_FRAMEBUFFER;
         break;
-    case IGraphicsAPI::FrameBufferTarget::DRAW_FRAMEBUFFER:
+    case FrameBufferTarget::DRAW_FRAMEBUFFER:
         glTarget = GL_DRAW_FRAMEBUFFER;
         break;
-    case IGraphicsAPI::FrameBufferTarget::READ_FRAMEBUFFER:
+    case FrameBufferTarget::READ_FRAMEBUFFER:
         glTarget = GL_READ_FRAMEBUFFER ;
         break;
     default:
@@ -197,20 +197,20 @@ void GraphicsAPIOpenGL::bindFrameBuffer(IGraphicsAPI::FrameBufferTarget target, 
     GL_CALL(glBindFramebuffer(glTarget, bufferId));
 }
 
-void GraphicsAPIOpenGL::enable(IGraphicsAPI::Capability capability) {
+void GraphicsAPIOpenGL::enable(Capability capability) {
     GLenum glCapability;
 
     switch (capability) {
-        case IGraphicsAPI::Capability::MULTISAMPLE:
+        case Capability::MULTISAMPLE:
             glCapability = GL_MULTISAMPLE;
             break;
-        case IGraphicsAPI::Capability::FRAMEBUFFER_SRGB:
+        case Capability::FRAMEBUFFER_SRGB:
             glCapability = GL_FRAMEBUFFER_SRGB;
             break;
-        case IGraphicsAPI::Capability::DEPTH_TEST:
+        case Capability::DEPTH_TEST:
             glCapability = GL_DEPTH_TEST;
             break;
-        case IGraphicsAPI::Capability::STENCIL_TEST:
+        case Capability::STENCIL_TEST:
             glCapability = GL_STENCIL_TEST;
             break;
         default:
@@ -220,14 +220,14 @@ void GraphicsAPIOpenGL::enable(IGraphicsAPI::Capability capability) {
     GL_CALL(glEnable(glCapability));
 }
 
-void GraphicsAPIOpenGL::disable(IGraphicsAPI::Capability capability) {
+void GraphicsAPIOpenGL::disable(Capability capability) {
     GLenum glCapability;
 
     switch (capability) {
-    case IGraphicsAPI::Capability::MULTISAMPLE:
+    case Capability::MULTISAMPLE:
         glCapability = GL_MULTISAMPLE;
         break;
-    case IGraphicsAPI::Capability::FRAMEBUFFER_SRGB:
+    case Capability::FRAMEBUFFER_SRGB:
         glCapability = GL_FRAMEBUFFER_SRGB;
         break;
     default:
@@ -249,50 +249,50 @@ void GraphicsAPIOpenGL::genBuffer(int size, unsigned int* vaos) {
     GL_CALL(glGenBuffers(size, vaos));
 }
 
-void GraphicsAPIOpenGL::bindBuffer(IGraphicsAPI::BufferTarget target, unsigned int bufferId) {
+void GraphicsAPIOpenGL::bindBuffer(BufferTarget target, unsigned int bufferId) {
     GLenum glTarget;
 
     switch (target) {
-    case IGraphicsAPI::BufferTarget::ARRAY_BUFFER:
+    case BufferTarget::ARRAY_BUFFER:
         glTarget = GL_ARRAY_BUFFER;
         break;
-    case IGraphicsAPI::BufferTarget::ATOMIC_COUNTER_BUFFER:
+    case BufferTarget::ATOMIC_COUNTER_BUFFER:
         glTarget = GL_ATOMIC_COUNTER_BUFFER;
         break;
-    case IGraphicsAPI::BufferTarget::COPY_READ_BUFFER:
+    case BufferTarget::COPY_READ_BUFFER:
         glTarget = GL_COPY_READ_BUFFER;
         break;
-    case IGraphicsAPI::BufferTarget::COPY_WRITE_BUFFER:
+    case BufferTarget::COPY_WRITE_BUFFER:
         glTarget = GL_COPY_WRITE_BUFFER;
         break;
-    case IGraphicsAPI::BufferTarget::DISPATCH_INDIRECT_BUFFER:
+    case BufferTarget::DISPATCH_INDIRECT_BUFFER:
         glTarget = GL_DISPATCH_INDIRECT_BUFFER;
         break;
-    case IGraphicsAPI::BufferTarget::DRAW_INDIRECT_BUFFER:
+    case BufferTarget::DRAW_INDIRECT_BUFFER:
         glTarget = GL_DRAW_INDIRECT_BUFFER;
         break;
-    case IGraphicsAPI::BufferTarget::ELEMENT_ARRAY_BUFFER:
+    case BufferTarget::ELEMENT_ARRAY_BUFFER:
         glTarget = GL_ELEMENT_ARRAY_BUFFER;
         break;
-    case IGraphicsAPI::BufferTarget::PIXEL_PACK_BUFFER:
+    case BufferTarget::PIXEL_PACK_BUFFER:
         glTarget = GL_PIXEL_PACK_BUFFER;
         break;
-    case IGraphicsAPI::BufferTarget::PIXEL_UNPACK_BUFFER:
+    case BufferTarget::PIXEL_UNPACK_BUFFER:
         glTarget = GL_PIXEL_UNPACK_BUFFER;
         break;
-    case IGraphicsAPI::BufferTarget::QUERY_BUFFER:
+    case BufferTarget::QUERY_BUFFER:
         glTarget = GL_QUERY_BUFFER;
         break;
-    case IGraphicsAPI::BufferTarget::SHADER_STORAGE_BUFFER:
+    case BufferTarget::SHADER_STORAGE_BUFFER:
         glTarget = GL_SHADER_STORAGE_BUFFER;
         break;
-    case IGraphicsAPI::BufferTarget::TEXTURE_BUFFER:
+    case BufferTarget::TEXTURE_BUFFER:
         glTarget = GL_TEXTURE_BUFFER;
         break;
-    case IGraphicsAPI::BufferTarget::TRANSFORM_FEEDBACK_BUFFER:
+    case BufferTarget::TRANSFORM_FEEDBACK_BUFFER:
         glTarget = GL_TRANSFORM_FEEDBACK_BUFFER;
         break;
-    case IGraphicsAPI::BufferTarget::UNIFORM_BUFFER:
+    case BufferTarget::UNIFORM_BUFFER:
         glTarget = GL_UNIFORM_BUFFER;
         break;
     default:
@@ -302,50 +302,50 @@ void GraphicsAPIOpenGL::bindBuffer(IGraphicsAPI::BufferTarget target, unsigned i
     GL_CALL(glBindBuffer(glTarget, bufferId));
 }
 
-void GraphicsAPIOpenGL::bufferData(IGraphicsAPI::BufferTarget target, size_t size, void* data, IGraphicsAPI::DataUsage usage) {
+void GraphicsAPIOpenGL::bufferData(BufferTarget target, size_t size, void* data, DataUsage usage) {
     GLenum glTarget;
 
     switch (target) {
-    case IGraphicsAPI::BufferTarget::ARRAY_BUFFER:
+    case BufferTarget::ARRAY_BUFFER:
         glTarget = GL_ARRAY_BUFFER;
         break;
-    case IGraphicsAPI::BufferTarget::ATOMIC_COUNTER_BUFFER:
+    case BufferTarget::ATOMIC_COUNTER_BUFFER:
         glTarget = GL_ATOMIC_COUNTER_BUFFER;
         break;
-    case IGraphicsAPI::BufferTarget::COPY_READ_BUFFER:
+    case BufferTarget::COPY_READ_BUFFER:
         glTarget = GL_COPY_READ_BUFFER;
         break;
-    case IGraphicsAPI::BufferTarget::COPY_WRITE_BUFFER:
+    case BufferTarget::COPY_WRITE_BUFFER:
         glTarget = GL_COPY_WRITE_BUFFER;
         break;
-    case IGraphicsAPI::BufferTarget::DISPATCH_INDIRECT_BUFFER:
+    case BufferTarget::DISPATCH_INDIRECT_BUFFER:
         glTarget = GL_DISPATCH_INDIRECT_BUFFER;
         break;
-    case IGraphicsAPI::BufferTarget::DRAW_INDIRECT_BUFFER:
+    case BufferTarget::DRAW_INDIRECT_BUFFER:
         glTarget = GL_DRAW_INDIRECT_BUFFER;
         break;
-    case IGraphicsAPI::BufferTarget::ELEMENT_ARRAY_BUFFER:
+    case BufferTarget::ELEMENT_ARRAY_BUFFER:
         glTarget = GL_ELEMENT_ARRAY_BUFFER;
         break;
-    case IGraphicsAPI::BufferTarget::PIXEL_PACK_BUFFER:
+    case BufferTarget::PIXEL_PACK_BUFFER:
         glTarget = GL_PIXEL_PACK_BUFFER;
         break;
-    case IGraphicsAPI::BufferTarget::PIXEL_UNPACK_BUFFER:
+    case BufferTarget::PIXEL_UNPACK_BUFFER:
         glTarget = GL_PIXEL_UNPACK_BUFFER;
         break;
-    case IGraphicsAPI::BufferTarget::QUERY_BUFFER:
+    case BufferTarget::QUERY_BUFFER:
         glTarget = GL_QUERY_BUFFER;
         break;
-    case IGraphicsAPI::BufferTarget::SHADER_STORAGE_BUFFER:
+    case BufferTarget::SHADER_STORAGE_BUFFER:
         glTarget = GL_SHADER_STORAGE_BUFFER;
         break;
-    case IGraphicsAPI::BufferTarget::TEXTURE_BUFFER:
+    case BufferTarget::TEXTURE_BUFFER:
         glTarget = GL_TEXTURE_BUFFER;
         break;
-    case IGraphicsAPI::BufferTarget::TRANSFORM_FEEDBACK_BUFFER:
+    case BufferTarget::TRANSFORM_FEEDBACK_BUFFER:
         glTarget = GL_TRANSFORM_FEEDBACK_BUFFER;
         break;
-    case IGraphicsAPI::BufferTarget::UNIFORM_BUFFER:
+    case BufferTarget::UNIFORM_BUFFER:
         glTarget = GL_UNIFORM_BUFFER;
         break;
     default:
@@ -355,31 +355,31 @@ void GraphicsAPIOpenGL::bufferData(IGraphicsAPI::BufferTarget target, size_t siz
     GLenum glUsage;
 
     switch (usage) {
-    case IGraphicsAPI::DataUsage::STREAM_DRAW:
+    case DataUsage::STREAM_DRAW:
         glUsage = GL_STREAM_DRAW;
         break;
-    case IGraphicsAPI::DataUsage::STREAM_READ:
+    case DataUsage::STREAM_READ:
         glUsage = GL_STREAM_READ;
         break;
-    case IGraphicsAPI::DataUsage::STREAM_COPY:
+    case DataUsage::STREAM_COPY:
         glUsage = GL_STREAM_COPY;
         break;
-    case IGraphicsAPI::DataUsage::STATIC_DRAW:
+    case DataUsage::STATIC_DRAW:
         glUsage = GL_STATIC_DRAW;
         break;
-    case IGraphicsAPI::DataUsage::STATIC_READ:
+    case DataUsage::STATIC_READ:
         glUsage = GL_STATIC_READ;
         break;
-    case IGraphicsAPI::DataUsage::STATIC_COPY:
+    case DataUsage::STATIC_COPY:
         glUsage = GL_STATIC_COPY;
         break;
-    case IGraphicsAPI::DataUsage::DYNAMIC_DRAW:
+    case DataUsage::DYNAMIC_DRAW:
         glUsage = GL_DYNAMIC_DRAW;
         break;
-    case IGraphicsAPI::DataUsage::DYNAMIC_READ:
+    case DataUsage::DYNAMIC_READ:
         glUsage = GL_DYNAMIC_READ;
         break;
-    case IGraphicsAPI::DataUsage::DYNAMIC_COPY:
+    case DataUsage::DYNAMIC_COPY:
         glUsage = GL_DYNAMIC_COPY;
         break;
     default:
@@ -393,14 +393,14 @@ void GraphicsAPIOpenGL::enableVertexAttribArray(unsigned int index) {
     GL_CALL(glEnableVertexAttribArray(index));
 }
 
-void GraphicsAPIOpenGL::vertexAttribPointer(unsigned int index, int size, IGraphicsAPI::DataType type, bool normalized, size_t stride, const void* offset) {
+void GraphicsAPIOpenGL::vertexAttribPointer(unsigned int index, int size, DataType type, bool normalized, size_t stride, const void* offset) {
     GLenum glType;
 
     switch (type) {
-    case IGraphicsAPI::DataType::FLOAT:
+    case DataType::FLOAT:
         glType = GL_FLOAT;
         break;
-    case IGraphicsAPI::DataType::INT:
+    case DataType::INT:
         glType = GL_INT;
         break;
     default:
@@ -410,29 +410,29 @@ void GraphicsAPIOpenGL::vertexAttribPointer(unsigned int index, int size, IGraph
     GL_CALL(glVertexAttribPointer(index, size, glType, normalized, stride, offset));
 }
 
-void GraphicsAPIOpenGL::drawElements(IGraphicsAPI::PrimitiveTopology mode, int count, IGraphicsAPI::DataType type, const void* indices) {
+void GraphicsAPIOpenGL::drawElements(PrimitiveTopology mode, int count, DataType type, const void* indices) {
     GLenum glMode;
 
     switch (mode) {
-    case IGraphicsAPI::PrimitiveTopology::POINT_LIST:
+    case PrimitiveTopology::POINT_LIST:
         glMode = GL_POINTS;
         break;
-    case IGraphicsAPI::PrimitiveTopology::LINE_LIST:
+    case PrimitiveTopology::LINE_LIST:
         glMode = GL_LINES;
         break;
-    case IGraphicsAPI::PrimitiveTopology::LINE_STRIP:
+    case PrimitiveTopology::LINE_STRIP:
         glMode = GL_LINE_STRIP;
         break;
-    case IGraphicsAPI::PrimitiveTopology::LINE_LOOP:
+    case PrimitiveTopology::LINE_LOOP:
         glMode = GL_LINE_LOOP;
         break;
-    case IGraphicsAPI::PrimitiveTopology::TRIANGLE_LIST:
+    case PrimitiveTopology::TRIANGLE_LIST:
         glMode = GL_TRIANGLES;
         break;
-    case IGraphicsAPI::PrimitiveTopology::TRIANGLE_STRIP:
+    case PrimitiveTopology::TRIANGLE_STRIP:
         glMode = GL_TRIANGLE_STRIP;
         break;
-    case IGraphicsAPI::PrimitiveTopology::TRIANGLE_FAN:
+    case PrimitiveTopology::TRIANGLE_FAN:
         glMode = GL_TRIANGLE_FAN;
         break;
     default:
@@ -442,13 +442,13 @@ void GraphicsAPIOpenGL::drawElements(IGraphicsAPI::PrimitiveTopology mode, int c
     GLenum glType;
 
     switch (type) {
-    case IGraphicsAPI::DataType::FLOAT:
+    case DataType::FLOAT:
         glType = GL_FLOAT;
         break;
-    case IGraphicsAPI::DataType::INT:
+    case DataType::INT:
         glType = GL_INT;
         break;
-    case IGraphicsAPI::DataType::UINT:
+    case DataType::UINT:
         glType = GL_UNSIGNED_INT;
         break;
     default:
@@ -481,26 +481,26 @@ void GraphicsAPIOpenGL::genTextures(unsigned int count, unsigned int* textures) 
     GL_CALL(glGenTextures(count, textures));
 }
 
-void GraphicsAPIOpenGL::texParameter(IGraphicsAPI::TextureTarget target, IGraphicsAPI::TextureParameterType paramName, IGraphicsAPI::TextureParameterOption paramValue) {
+void GraphicsAPIOpenGL::texParameter(TextureTarget target, TextureParameterType paramName, TextureParameterOption paramValue) {
     GLenum glTarget;
 
     switch (target) {
-        case IGraphicsAPI::TextureTarget::TEXTURE_1D: 
+        case TextureTarget::TEXTURE_1D: 
             glTarget = GL_TEXTURE_1D;
             break;
-        case IGraphicsAPI::TextureTarget::TEXTURE_1D_ARRAY: 
+        case TextureTarget::TEXTURE_1D_ARRAY: 
             glTarget = GL_TEXTURE_1D_ARRAY;
             break;
-        case IGraphicsAPI::TextureTarget::TEXTURE_2D: 
+        case TextureTarget::TEXTURE_2D: 
             glTarget = GL_TEXTURE_2D;
             break;
-        case IGraphicsAPI::TextureTarget::TEXTURE_2D_ARRAY: 
+        case TextureTarget::TEXTURE_2D_ARRAY: 
             glTarget = GL_TEXTURE_2D_ARRAY;
             break;
-        case IGraphicsAPI::TextureTarget::TEXTURE_2D_MULTISAMPLE: 
+        case TextureTarget::TEXTURE_2D_MULTISAMPLE: 
             glTarget = GL_TEXTURE_2D_MULTISAMPLE;
             break;
-        case IGraphicsAPI::TextureTarget::TEXTURE_2D_MULTISAMPLE_ARRAY: 
+        case TextureTarget::TEXTURE_2D_MULTISAMPLE_ARRAY: 
             glTarget = GL_TEXTURE_2D_MULTISAMPLE_ARRAY;
             break;
         default:
@@ -510,16 +510,16 @@ void GraphicsAPIOpenGL::texParameter(IGraphicsAPI::TextureTarget target, IGraphi
     GLenum glParamName;
 
     switch (paramName) {
-        case IGraphicsAPI::TextureParameterType::TEXTURE_WRAP_S: 
+        case TextureParameterType::TEXTURE_WRAP_S: 
             glParamName = GL_TEXTURE_WRAP_S;
             break;
-        case IGraphicsAPI::TextureParameterType::TEXTURE_WRAP_T: 
+        case TextureParameterType::TEXTURE_WRAP_T: 
             glParamName = GL_TEXTURE_WRAP_T;
             break;
-        case IGraphicsAPI::TextureParameterType::TEXTURE_MIN_FILTER: 
+        case TextureParameterType::TEXTURE_MIN_FILTER: 
             glParamName = GL_TEXTURE_MIN_FILTER;
             break;
-        case IGraphicsAPI::TextureParameterType::TEXTURE_MAG_FILTER: 
+        case TextureParameterType::TEXTURE_MAG_FILTER: 
             glParamName = GL_TEXTURE_MAG_FILTER;
             break;
         default:
@@ -529,19 +529,19 @@ void GraphicsAPIOpenGL::texParameter(IGraphicsAPI::TextureTarget target, IGraphi
     GLenum glParamValue;
 
     switch (paramValue) {
-        case IGraphicsAPI::TextureParameterOption::CLAMP_TO_BORDER: 
+        case TextureParameterOption::CLAMP_TO_BORDER: 
             glParamValue = GL_CLAMP_TO_BORDER;
             break;
-        case IGraphicsAPI::TextureParameterOption::NEAREST: 
+        case TextureParameterOption::NEAREST: 
             glParamValue = GL_NEAREST;
             break;
-        case IGraphicsAPI::TextureParameterOption::LINEAR: 
+        case TextureParameterOption::LINEAR: 
             glParamValue = GL_LINEAR;
             break;
-        case IGraphicsAPI::TextureParameterOption::CLAMP_TO_EDGE: 
+        case TextureParameterOption::CLAMP_TO_EDGE: 
             glParamValue = GL_CLAMP_TO_EDGE;
             break;
-        case IGraphicsAPI::TextureParameterOption::REPEAT: 
+        case TextureParameterOption::REPEAT: 
             glParamValue = GL_REPEAT;
             break;
         default:
@@ -551,7 +551,7 @@ void GraphicsAPIOpenGL::texParameter(IGraphicsAPI::TextureTarget target, IGraphi
     GL_CALL(glTexParameteri(glTarget, glParamName, glParamValue));
 }
 
-void GraphicsAPIOpenGL::texImage2D(IGraphicsAPI::TextureTarget target,
+void GraphicsAPIOpenGL::texImage2D(TextureTarget target,
                         unsigned int level,
                         TextureFormat internalFormat,
                         unsigned int width,
@@ -564,22 +564,22 @@ void GraphicsAPIOpenGL::texImage2D(IGraphicsAPI::TextureTarget target,
     GLenum glTarget;
 
     switch (target) {
-        case IGraphicsAPI::TextureTarget::TEXTURE_1D: 
+        case TextureTarget::TEXTURE_1D: 
             glTarget = GL_TEXTURE_1D;
             break;
-        case IGraphicsAPI::TextureTarget::TEXTURE_1D_ARRAY: 
+        case TextureTarget::TEXTURE_1D_ARRAY: 
             glTarget = GL_TEXTURE_1D_ARRAY;
             break;
-        case IGraphicsAPI::TextureTarget::TEXTURE_2D: 
+        case TextureTarget::TEXTURE_2D: 
             glTarget = GL_TEXTURE_2D;
             break;
-        case IGraphicsAPI::TextureTarget::TEXTURE_2D_ARRAY: 
+        case TextureTarget::TEXTURE_2D_ARRAY: 
             glTarget = GL_TEXTURE_2D_ARRAY;
             break;
-        case IGraphicsAPI::TextureTarget::TEXTURE_2D_MULTISAMPLE: 
+        case TextureTarget::TEXTURE_2D_MULTISAMPLE: 
             glTarget = GL_TEXTURE_2D_MULTISAMPLE;
             break;
-        case IGraphicsAPI::TextureTarget::TEXTURE_2D_MULTISAMPLE_ARRAY: 
+        case TextureTarget::TEXTURE_2D_MULTISAMPLE_ARRAY: 
             glTarget = GL_TEXTURE_2D_MULTISAMPLE_ARRAY;
             break;
         default:
@@ -589,22 +589,22 @@ void GraphicsAPIOpenGL::texImage2D(IGraphicsAPI::TextureTarget target,
     GLenum glInternalFormat;
 
     switch (internalFormat) {
-        case IGraphicsAPI::TextureFormat::SRGB: 
+        case TextureFormat::SRGB: 
             glInternalFormat = GL_SRGB;
             break;
-        case IGraphicsAPI::TextureFormat::SRGB_ALPHA: 
+        case TextureFormat::SRGB_ALPHA: 
             glInternalFormat = GL_SRGB_ALPHA;
             break;
-        case IGraphicsAPI::TextureFormat::RGB: 
+        case TextureFormat::RGB: 
             glInternalFormat = GL_RGB;
             break;
-        case IGraphicsAPI::TextureFormat::RGBA: 
+        case TextureFormat::RGBA: 
             glInternalFormat = GL_RGBA;
             break;
-        case IGraphicsAPI::TextureFormat::RED: 
+        case TextureFormat::RED: 
             glInternalFormat = GL_RED;
             break;
-        case IGraphicsAPI::TextureFormat::RGBA16F: 
+        case TextureFormat::RGBA16F: 
             glInternalFormat = GL_RGBA16F;
             break;
         default:
@@ -614,22 +614,22 @@ void GraphicsAPIOpenGL::texImage2D(IGraphicsAPI::TextureTarget target,
     GLenum glFormat;
 
     switch (format) {
-        case IGraphicsAPI::TextureFormat::SRGB: 
+        case TextureFormat::SRGB: 
             glFormat = GL_SRGB;
             break;
-        case IGraphicsAPI::TextureFormat::SRGB_ALPHA: 
+        case TextureFormat::SRGB_ALPHA: 
             glFormat = GL_SRGB_ALPHA;
             break;
-        case IGraphicsAPI::TextureFormat::RGB: 
+        case TextureFormat::RGB: 
             glFormat = GL_RGB;
             break;
-        case IGraphicsAPI::TextureFormat::RGBA: 
+        case TextureFormat::RGBA: 
             glFormat = GL_RGBA;
             break;
-        case IGraphicsAPI::TextureFormat::RED: 
+        case TextureFormat::RED: 
             glFormat = GL_RED;
             break;
-        case IGraphicsAPI::TextureFormat::RGBA16F: 
+        case TextureFormat::RGBA16F: 
             glFormat = GL_RGBA16F;
             break;
         default:
@@ -639,13 +639,13 @@ void GraphicsAPIOpenGL::texImage2D(IGraphicsAPI::TextureTarget target,
     GLenum glDataType;
 
     switch (dataType) {
-        case IGraphicsAPI::DataType::BYTE: 
+        case DataType::BYTE: 
             glDataType = GL_BYTE;
             break;
-        case IGraphicsAPI::DataType::UBYTE: 
+        case DataType::UBYTE: 
             glDataType = GL_UNSIGNED_BYTE;
             break;
-        case IGraphicsAPI::DataType::FLOAT: 
+        case DataType::FLOAT: 
             glDataType = GL_FLOAT;
             break;
         default:
@@ -659,22 +659,22 @@ void GraphicsAPIOpenGL::bindTexture(TextureTarget target, unsigned int textureId
     GLenum glTarget;
 
     switch (target) {
-        case IGraphicsAPI::TextureTarget::TEXTURE_1D: 
+        case TextureTarget::TEXTURE_1D: 
             glTarget = GL_TEXTURE_1D;
             break;
-        case IGraphicsAPI::TextureTarget::TEXTURE_1D_ARRAY: 
+        case TextureTarget::TEXTURE_1D_ARRAY: 
             glTarget = GL_TEXTURE_1D_ARRAY;
             break;
-        case IGraphicsAPI::TextureTarget::TEXTURE_2D: 
+        case TextureTarget::TEXTURE_2D: 
             glTarget = GL_TEXTURE_2D;
             break;
-        case IGraphicsAPI::TextureTarget::TEXTURE_2D_ARRAY: 
+        case TextureTarget::TEXTURE_2D_ARRAY: 
             glTarget = GL_TEXTURE_2D_ARRAY;
             break;
-        case IGraphicsAPI::TextureTarget::TEXTURE_2D_MULTISAMPLE: 
+        case TextureTarget::TEXTURE_2D_MULTISAMPLE: 
             glTarget = GL_TEXTURE_2D_MULTISAMPLE;
             break;
-        case IGraphicsAPI::TextureTarget::TEXTURE_2D_MULTISAMPLE_ARRAY: 
+        case TextureTarget::TEXTURE_2D_MULTISAMPLE_ARRAY: 
             glTarget = GL_TEXTURE_2D_MULTISAMPLE_ARRAY;
             break;
         default:
@@ -688,22 +688,22 @@ void GraphicsAPIOpenGL::getTexImage(TextureTarget target, unsigned int level, Te
     GLenum glTarget;
 
     switch (target) {
-        case IGraphicsAPI::TextureTarget::TEXTURE_1D: 
+        case TextureTarget::TEXTURE_1D: 
             glTarget = GL_TEXTURE_1D;
             break;
-        case IGraphicsAPI::TextureTarget::TEXTURE_1D_ARRAY: 
+        case TextureTarget::TEXTURE_1D_ARRAY: 
             glTarget = GL_TEXTURE_1D_ARRAY;
             break;
-        case IGraphicsAPI::TextureTarget::TEXTURE_2D: 
+        case TextureTarget::TEXTURE_2D: 
             glTarget = GL_TEXTURE_2D;
             break;
-        case IGraphicsAPI::TextureTarget::TEXTURE_2D_ARRAY: 
+        case TextureTarget::TEXTURE_2D_ARRAY: 
             glTarget = GL_TEXTURE_2D_ARRAY;
             break;
-        case IGraphicsAPI::TextureTarget::TEXTURE_2D_MULTISAMPLE: 
+        case TextureTarget::TEXTURE_2D_MULTISAMPLE: 
             glTarget = GL_TEXTURE_2D_MULTISAMPLE;
             break;
-        case IGraphicsAPI::TextureTarget::TEXTURE_2D_MULTISAMPLE_ARRAY: 
+        case TextureTarget::TEXTURE_2D_MULTISAMPLE_ARRAY: 
             glTarget = GL_TEXTURE_2D_MULTISAMPLE_ARRAY;
             break;
         default:
@@ -713,22 +713,22 @@ void GraphicsAPIOpenGL::getTexImage(TextureTarget target, unsigned int level, Te
     GLenum glFormat;
 
     switch (format) {
-        case IGraphicsAPI::TextureFormat::SRGB: 
+        case TextureFormat::SRGB: 
             glFormat = GL_SRGB;
             break;
-        case IGraphicsAPI::TextureFormat::SRGB_ALPHA: 
+        case TextureFormat::SRGB_ALPHA: 
             glFormat = GL_SRGB_ALPHA;
             break;
-        case IGraphicsAPI::TextureFormat::RGB: 
+        case TextureFormat::RGB: 
             glFormat = GL_RGB;
             break;
-        case IGraphicsAPI::TextureFormat::RGBA: 
+        case TextureFormat::RGBA: 
             glFormat = GL_RGBA;
             break;
-        case IGraphicsAPI::TextureFormat::RED: 
+        case TextureFormat::RED: 
             glFormat = GL_RED;
             break;
-        case IGraphicsAPI::TextureFormat::RGBA16F: 
+        case TextureFormat::RGBA16F: 
             glFormat = GL_RGBA16F;
             break;
         default:
@@ -738,13 +738,13 @@ void GraphicsAPIOpenGL::getTexImage(TextureTarget target, unsigned int level, Te
     GLenum glDataType;
 
     switch (dataType) {
-        case IGraphicsAPI::DataType::BYTE: 
+        case DataType::BYTE: 
             glDataType = GL_BYTE;
             break;
-        case IGraphicsAPI::DataType::UBYTE: 
+        case DataType::UBYTE: 
             glDataType = GL_UNSIGNED_BYTE;
             break;
-        case IGraphicsAPI::DataType::FLOAT: 
+        case DataType::FLOAT: 
             glDataType = GL_FLOAT;
             break;
         default:
@@ -778,46 +778,46 @@ void GraphicsAPIOpenGL::bindBufferRange(BufferTarget target, unsigned int index,
     GLenum glTarget;
 
     switch (target) {
-    case IGraphicsAPI::BufferTarget::ARRAY_BUFFER:
+    case BufferTarget::ARRAY_BUFFER:
         glTarget = GL_ARRAY_BUFFER;
         break;
-    case IGraphicsAPI::BufferTarget::ATOMIC_COUNTER_BUFFER:
+    case BufferTarget::ATOMIC_COUNTER_BUFFER:
         glTarget = GL_ATOMIC_COUNTER_BUFFER;
         break;
-    case IGraphicsAPI::BufferTarget::COPY_READ_BUFFER:
+    case BufferTarget::COPY_READ_BUFFER:
         glTarget = GL_COPY_READ_BUFFER;
         break;
-    case IGraphicsAPI::BufferTarget::COPY_WRITE_BUFFER:
+    case BufferTarget::COPY_WRITE_BUFFER:
         glTarget = GL_COPY_WRITE_BUFFER;
         break;
-    case IGraphicsAPI::BufferTarget::DISPATCH_INDIRECT_BUFFER:
+    case BufferTarget::DISPATCH_INDIRECT_BUFFER:
         glTarget = GL_DISPATCH_INDIRECT_BUFFER;
         break;
-    case IGraphicsAPI::BufferTarget::DRAW_INDIRECT_BUFFER:
+    case BufferTarget::DRAW_INDIRECT_BUFFER:
         glTarget = GL_DRAW_INDIRECT_BUFFER;
         break;
-    case IGraphicsAPI::BufferTarget::ELEMENT_ARRAY_BUFFER:
+    case BufferTarget::ELEMENT_ARRAY_BUFFER:
         glTarget = GL_ELEMENT_ARRAY_BUFFER;
         break;
-    case IGraphicsAPI::BufferTarget::PIXEL_PACK_BUFFER:
+    case BufferTarget::PIXEL_PACK_BUFFER:
         glTarget = GL_PIXEL_PACK_BUFFER;
         break;
-    case IGraphicsAPI::BufferTarget::PIXEL_UNPACK_BUFFER:
+    case BufferTarget::PIXEL_UNPACK_BUFFER:
         glTarget = GL_PIXEL_UNPACK_BUFFER;
         break;
-    case IGraphicsAPI::BufferTarget::QUERY_BUFFER:
+    case BufferTarget::QUERY_BUFFER:
         glTarget = GL_QUERY_BUFFER;
         break;
-    case IGraphicsAPI::BufferTarget::SHADER_STORAGE_BUFFER:
+    case BufferTarget::SHADER_STORAGE_BUFFER:
         glTarget = GL_SHADER_STORAGE_BUFFER;
         break;
-    case IGraphicsAPI::BufferTarget::TEXTURE_BUFFER:
+    case BufferTarget::TEXTURE_BUFFER:
         glTarget = GL_TEXTURE_BUFFER;
         break;
-    case IGraphicsAPI::BufferTarget::TRANSFORM_FEEDBACK_BUFFER:
+    case BufferTarget::TRANSFORM_FEEDBACK_BUFFER:
         glTarget = GL_TRANSFORM_FEEDBACK_BUFFER;
         break;
-    case IGraphicsAPI::BufferTarget::UNIFORM_BUFFER:
+    case BufferTarget::UNIFORM_BUFFER:
         glTarget = GL_UNIFORM_BUFFER;
         break;
     default:
@@ -831,7 +831,7 @@ void GraphicsAPIOpenGL::genFrameBuffers(unsigned int count, unsigned int* fbos) 
     GL_CALL(glGenFramebuffers(count, fbos));
 }
 
-void GraphicsAPIOpenGL::framebufferTexture2D(IGraphicsAPI::FrameBufferTarget target, unsigned int attachment, FBOTextureTarget texTarget, unsigned int textureId, unsigned int level) {
+void GraphicsAPIOpenGL::framebufferTexture2D(FrameBufferTarget target, unsigned int attachment, FBOTextureTarget texTarget, unsigned int textureId, unsigned int level) {
     // TODO confirm if GL_FRAMEBUFFER/GL_TEXTURE_2D can ever be different options in here
     GL_CALL(glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0 + attachment, GL_TEXTURE_2D, textureId, level));
 }
@@ -865,46 +865,46 @@ void GraphicsAPIOpenGL::bufferSubData(BufferTarget target, size_t offset, size_t
     GLenum glTarget;
 
     switch (target) {
-    case IGraphicsAPI::BufferTarget::ARRAY_BUFFER:
+    case BufferTarget::ARRAY_BUFFER:
         glTarget = GL_ARRAY_BUFFER;
         break;
-    case IGraphicsAPI::BufferTarget::ATOMIC_COUNTER_BUFFER:
+    case BufferTarget::ATOMIC_COUNTER_BUFFER:
         glTarget = GL_ATOMIC_COUNTER_BUFFER;
         break;
-    case IGraphicsAPI::BufferTarget::COPY_READ_BUFFER:
+    case BufferTarget::COPY_READ_BUFFER:
         glTarget = GL_COPY_READ_BUFFER;
         break;
-    case IGraphicsAPI::BufferTarget::COPY_WRITE_BUFFER:
+    case BufferTarget::COPY_WRITE_BUFFER:
         glTarget = GL_COPY_WRITE_BUFFER;
         break;
-    case IGraphicsAPI::BufferTarget::DISPATCH_INDIRECT_BUFFER:
+    case BufferTarget::DISPATCH_INDIRECT_BUFFER:
         glTarget = GL_DISPATCH_INDIRECT_BUFFER;
         break;
-    case IGraphicsAPI::BufferTarget::DRAW_INDIRECT_BUFFER:
+    case BufferTarget::DRAW_INDIRECT_BUFFER:
         glTarget = GL_DRAW_INDIRECT_BUFFER;
         break;
-    case IGraphicsAPI::BufferTarget::ELEMENT_ARRAY_BUFFER:
+    case BufferTarget::ELEMENT_ARRAY_BUFFER:
         glTarget = GL_ELEMENT_ARRAY_BUFFER;
         break;
-    case IGraphicsAPI::BufferTarget::PIXEL_PACK_BUFFER:
+    case BufferTarget::PIXEL_PACK_BUFFER:
         glTarget = GL_PIXEL_PACK_BUFFER;
         break;
-    case IGraphicsAPI::BufferTarget::PIXEL_UNPACK_BUFFER:
+    case BufferTarget::PIXEL_UNPACK_BUFFER:
         glTarget = GL_PIXEL_UNPACK_BUFFER;
         break;
-    case IGraphicsAPI::BufferTarget::QUERY_BUFFER:
+    case BufferTarget::QUERY_BUFFER:
         glTarget = GL_QUERY_BUFFER;
         break;
-    case IGraphicsAPI::BufferTarget::SHADER_STORAGE_BUFFER:
+    case BufferTarget::SHADER_STORAGE_BUFFER:
         glTarget = GL_SHADER_STORAGE_BUFFER;
         break;
-    case IGraphicsAPI::BufferTarget::TEXTURE_BUFFER:
+    case BufferTarget::TEXTURE_BUFFER:
         glTarget = GL_TEXTURE_BUFFER;
         break;
-    case IGraphicsAPI::BufferTarget::TRANSFORM_FEEDBACK_BUFFER:
+    case BufferTarget::TRANSFORM_FEEDBACK_BUFFER:
         glTarget = GL_TRANSFORM_FEEDBACK_BUFFER;
         break;
-    case IGraphicsAPI::BufferTarget::UNIFORM_BUFFER:
+    case BufferTarget::UNIFORM_BUFFER:
         glTarget = GL_UNIFORM_BUFFER;
         break;
     default:
@@ -918,25 +918,25 @@ void GraphicsAPIOpenGL::drawArrays(PrimitiveTopology mode, unsigned int start, u
     GLenum glMode;
 
     switch (mode) {
-    case IGraphicsAPI::PrimitiveTopology::POINT_LIST:
+    case PrimitiveTopology::POINT_LIST:
         glMode = GL_POINTS;
         break;
-    case IGraphicsAPI::PrimitiveTopology::LINE_LIST:
+    case PrimitiveTopology::LINE_LIST:
         glMode = GL_LINES;
         break;
-    case IGraphicsAPI::PrimitiveTopology::LINE_STRIP:
+    case PrimitiveTopology::LINE_STRIP:
         glMode = GL_LINE_STRIP;
         break;
-    case IGraphicsAPI::PrimitiveTopology::LINE_LOOP:
+    case PrimitiveTopology::LINE_LOOP:
         glMode = GL_LINE_LOOP;
         break;
-    case IGraphicsAPI::PrimitiveTopology::TRIANGLE_LIST:
+    case PrimitiveTopology::TRIANGLE_LIST:
         glMode = GL_TRIANGLES;
         break;
-    case IGraphicsAPI::PrimitiveTopology::TRIANGLE_STRIP:
+    case PrimitiveTopology::TRIANGLE_STRIP:
         glMode = GL_TRIANGLE_STRIP;
         break;
-    case IGraphicsAPI::PrimitiveTopology::TRIANGLE_FAN:
+    case PrimitiveTopology::TRIANGLE_FAN:
         glMode = GL_TRIANGLE_FAN;
         break;
     default:
@@ -1173,6 +1173,109 @@ void GraphicsAPIOpenGL::bindBufferBase(BufferTarget target, unsigned int index, 
             throw std::runtime_error("Invalid BufferTarget");
     }
     GL_CALL(glBindBufferBase(glTarget, index, buffer));
+}
+
+void GraphicsAPIOpenGL::getTexLevelParameteriv(TextureTarget target, unsigned int level, TextureParameterName paramName, int* output) {
+    GLenum glTarget;
+
+    switch (target) {
+        case TextureTarget::TEXTURE_1D: 
+            glTarget = GL_TEXTURE_1D;
+            break;
+        case TextureTarget::TEXTURE_1D_ARRAY: 
+            glTarget = GL_TEXTURE_1D_ARRAY;
+            break;
+        case TextureTarget::TEXTURE_2D: 
+            glTarget = GL_TEXTURE_2D;
+            break;
+        case TextureTarget::TEXTURE_2D_ARRAY: 
+            glTarget = GL_TEXTURE_2D_ARRAY;
+            break;
+        case TextureTarget::TEXTURE_2D_MULTISAMPLE: 
+            glTarget = GL_TEXTURE_2D_MULTISAMPLE;
+            break;
+        case TextureTarget::TEXTURE_2D_MULTISAMPLE_ARRAY: 
+            glTarget = GL_TEXTURE_2D_MULTISAMPLE_ARRAY;
+            break;
+        default:
+            throw std::runtime_error("Invalid Texture target");
+    }
+
+     GLenum glParamName;
+
+     switch (paramName) {
+     case TextureParameterName::WIDTH:
+        glParamName = GL_TEXTURE_WIDTH;
+        break;
+    case TextureParameterName::HEIGHT:
+        glParamName = GL_TEXTURE_HEIGHT;
+        break;
+    case TextureParameterName::DEPTH:
+        glParamName = GL_TEXTURE_DEPTH;
+        break;
+    case TextureParameterName::INTERNAL_FORMAT:
+        glParamName = GL_TEXTURE_INTERNAL_FORMAT;
+        break;
+    case TextureParameterName::RED_SIZE:
+        glParamName = GL_TEXTURE_RED_SIZE;
+        break;
+    case TextureParameterName::GREEN_SIZE:
+        glParamName = GL_TEXTURE_GREEN_SIZE;
+        break;
+    case TextureParameterName::BLUE_SIZE:
+        glParamName = GL_TEXTURE_BLUE_SIZE;
+        break;
+    case TextureParameterName::ALPHA_SIZE:
+        glParamName = GL_TEXTURE_ALPHA_SIZE;
+        break;
+    case TextureParameterName::DEPTH_SIZE:
+        glParamName = GL_TEXTURE_DEPTH_SIZE;
+        break;
+    case TextureParameterName::COMPRESSED:
+        glParamName = GL_TEXTURE_COMPRESSED;
+        break;
+    case TextureParameterName::COMPRESSED_IMAGE_SIZE:
+        glParamName = GL_TEXTURE_COMPRESSED_IMAGE_SIZE;
+        break;
+    case TextureParameterName::BUFFER_OFFSET:
+        glParamName = GL_TEXTURE_BUFFER_OFFSET;
+        break;
+     default:
+        throw std::runtime_error("Invalid TextureParameterName");
+     }
+
+    glGetTexLevelParameteriv(glTarget, 0, glParamName, output);
+}
+
+IGraphicsAPI::TextureFormat GraphicsAPIOpenGL::intToTextureFormat(int input) {
+    TextureFormat format;
+    switch (input)
+    {
+    case GL_SRGB:
+        format = TextureFormat::SRGB;
+        break;
+    case GL_SRGB_ALPHA:
+        format = TextureFormat::SRGB_ALPHA;
+        break;
+    case GL_RGB:
+        format = TextureFormat::RGB;
+        break;
+    case GL_RGBA:
+        format = TextureFormat::RGBA;
+        break;
+    case GL_RED:
+        format = TextureFormat::RED;
+        break;
+    case GL_LUMINANCE:
+        format = TextureFormat::LUMINANCE;
+        break;
+    case GL_RGBA16F:
+        format = TextureFormat::RGBA16F;
+        break;
+    default:
+        throw std::runtime_error("Invalid TextureFormat");
+    }
+    return format;
 }
 
 } // namespace clay

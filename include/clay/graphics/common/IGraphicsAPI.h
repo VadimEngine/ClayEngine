@@ -101,6 +101,21 @@ public:
         TEXTURE_2D_MULTISAMPLE_ARRAY
     };
 
+    enum class TextureParameterName: uint8_t {
+        WIDTH,
+        HEIGHT,
+        DEPTH,
+        INTERNAL_FORMAT,
+        RED_SIZE,
+        GREEN_SIZE,
+        BLUE_SIZE,
+        ALPHA_SIZE,
+        DEPTH_SIZE,
+        COMPRESSED,
+        COMPRESSED_IMAGE_SIZE,
+        BUFFER_OFFSET
+    };
+
     enum class TextureParameterType : uint8_t {
         TEXTURE_WRAP_S,
         TEXTURE_WRAP_T,
@@ -305,6 +320,10 @@ public:
     virtual void generateMipMap() = 0;
 
     virtual void bindBufferBase(BufferTarget target, unsigned int index, unsigned int buffer) = 0;
+
+    virtual void getTexLevelParameteriv(TextureTarget target, unsigned int level, TextureParameterName paramName, int* output) = 0;
+
+    virtual TextureFormat intToTextureFormat(int input) = 0;
 };
 
 } // namespace clay

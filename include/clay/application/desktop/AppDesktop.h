@@ -75,9 +75,11 @@ public:
     // TODO USE THIS IN SCENES TO PASS TO RESOURCES
     IGraphicsAPI* getGraphicsAPI() override;
 
-private:
     /** Load/Build the common resources for the scenes in this application */
-    void loadResources();
+    virtual void loadResources() = 0;
+
+protected:
+
     /** Initialize OpenGL if not already initialized */
     static void initializeOpenGL();
 

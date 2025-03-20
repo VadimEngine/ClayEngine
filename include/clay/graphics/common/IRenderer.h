@@ -16,9 +16,12 @@ class IRenderer {
 public:
     virtual ~IRenderer() = default;
 
-    void setUBO(unsigned int ubo);
+    void setCameraUBO(unsigned int cameraUBO);
 
-    unsigned int getCurrentUBO() const;
+    unsigned int getCurrentCameraUBO() const;
+
+    unsigned int getCurrentLightUBO() const;
+
 
     virtual void renderTextNormalized(
         const std::string& text,
@@ -47,7 +50,9 @@ public:
 
 
 protected:
-    unsigned int mCurrentUBO_;
+    unsigned int mCurrentCameraUBO_;
+    unsigned int mCurrentLightUBO_;
+
 };
 
 }

@@ -196,7 +196,8 @@ RendererOpenGL::RendererOpenGL(const glm::vec2& screenDim, ShaderProgram& sprite
     }
     // by default, disable bloom
     setBloom(false);
-    mCurrentUBO_ = mCameraUBO_;
+    mCurrentCameraUBO_ = mCameraUBO_;
+    mCurrentLightUBO_ = mLightUBO_;
 }
 
 RendererOpenGL::~RendererOpenGL() {}
