@@ -90,8 +90,8 @@ WindowDesktop::WindowDesktop(const std::string& windowLbl, int width, int height
    if (!glfwInit()) {
        throw std::runtime_error("glfwInit failed");
    }
-   glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
-   glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
+   glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 4);
+   glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 5);
    // TODO be aware of opengl/opengles/vulkan
    //Context profiles are only defined for OpenGL version 3.2 and above
    glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);  // 3.2+ only
