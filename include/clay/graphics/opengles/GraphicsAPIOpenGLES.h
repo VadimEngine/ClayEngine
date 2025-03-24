@@ -896,6 +896,10 @@ public:
 
     void bindBufferBase(BufferTarget target, unsigned int index, unsigned int buffer) override;
 
+    void getTexLevelParameteriv(TextureTarget target, unsigned int level, TextureParameterName paramName, int* output) override;
+
+    TextureFormat intToTextureFormat(int input) override;
+
 };
 
 } // namespace clay

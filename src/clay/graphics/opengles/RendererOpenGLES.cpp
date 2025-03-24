@@ -24,7 +24,7 @@ RendererOpenGLES::RendererOpenGLES(const glm::vec2& screenDim, IGraphicsAPI& gra
     mGraphicsAPI_.bindBufferRange(IGraphicsAPI::BufferTarget::UNIFORM_BUFFER, 0, mCameraWorldLockedUBO_, 0, 2 * sizeof(glm::mat4));
     mGraphicsAPI_.bindBuffer(IGraphicsAPI::BufferTarget::UNIFORM_BUFFER, 0);
 
-    mCurrentUBO_ = mCameraWorldLockedUBO_;
+    mCurrentCameraUBO_ = mCameraWorldLockedUBO_;
 }
 
 void RendererOpenGLES::renderTextNormalized(const std::string& text,
@@ -34,7 +34,7 @@ void RendererOpenGLES::renderTextNormalized(const std::string& text,
                                             const glm::vec3& color) {
     // activate corresponding render state
     mTextShader_.bind();
-    mTextShader_.bindUniformBuffer(0, mCurrentUBO_);
+    mTextShader_.bindUniformBuffer(0, mCurrentCameraUBO_);
     mTextShader_.setVec3("textColor", color);
     mGraphicsAPI_.activeTexture(0);
     mGraphicsAPI_.bindVertexArray(font.getVAO());

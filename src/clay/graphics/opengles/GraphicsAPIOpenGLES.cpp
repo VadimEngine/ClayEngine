@@ -1840,6 +1840,106 @@ void GraphicsAPIOpenGLES::bindBufferBase(BufferTarget target, unsigned int index
     glBindBufferBase(glTarget, index, buffer);
 }
 
+void
+GraphicsAPIOpenGLES::getTexLevelParameteriv(IGraphicsAPI::TextureTarget target, unsigned int level,
+                                            IGraphicsAPI::TextureParameterName paramName,
+                                            int *output) {
+    GLenum glTarget;
+
+    switch (target) {
+        case TextureTarget::TEXTURE_1D:
+            glTarget = GL_TEXTURE_1D;
+            break;
+        case TextureTarget::TEXTURE_1D_ARRAY:
+            glTarget = GL_TEXTURE_1D_ARRAY;
+            break;
+        case TextureTarget::TEXTURE_2D:
+            glTarget = GL_TEXTURE_2D;
+            break;
+        case TextureTarget::TEXTURE_2D_ARRAY:
+            glTarget = GL_TEXTURE_2D_ARRAY;
+            break;
+        case TextureTarget::TEXTURE_2D_MULTISAMPLE:
+            glTarget = GL_TEXTURE_2D_MULTISAMPLE;
+            break;
+        case TextureTarget::TEXTURE_2D_MULTISAMPLE_ARRAY:
+            glTarget = GL_TEXTURE_2D_MULTISAMPLE_ARRAY;
+            break;
+        default:
+            throw std::runtime_error("Invalid Texture target");
+    }
+
+    GLenum glParamName;
+
+    switch (paramName) {
+        case TextureParameterName::WIDTH:
+            glParamName = GL_TEXTURE_WIDTH;
+            break;
+        case TextureParameterName::HEIGHT:
+            glParamName = GL_TEXTURE_HEIGHT;
+            break;
+        case TextureParameterName::DEPTH:
+            glParamName = GL_TEXTURE_DEPTH;
+            break;
+        case TextureParameterName::INTERNAL_FORMAT:
+            glParamName = GL_TEXTURE_INTERNAL_FORMAT;
+            break;
+        case TextureParameterName::RED_SIZE:
+            glParamName = GL_TEXTURE_RED_SIZE;
+            break;
+        case TextureParameterName::GREEN_SIZE:
+            glParamName = GL_TEXTURE_GREEN_SIZE;
+            break;
+        case TextureParameterName::BLUE_SIZE:
+            glParamName = GL_TEXTURE_BLUE_SIZE;
+            break;
+        case TextureParameterName::ALPHA_SIZE:
+            glParamName = GL_TEXTURE_ALPHA_SIZE;
+            break;
+        case TextureParameterName::DEPTH_SIZE:
+            glParamName = GL_TEXTURE_DEPTH_SIZE;
+            break;
+        case TextureParameterName::COMPRESSED:
+            glParamName = GL_TEXTURE_COMPRESSED;
+            break;
+        case TextureParameterName::BUFFER_OFFSET:
+            glParamName = GL_TEXTURE_BUFFER_OFFSET;
+            break;
+        default:
+            throw std::runtime_error("Invalid TextureParameterName");
+    }
+
+    glGetTexLevelParameteriv(glTarget, 0, glParamName, output);
+}
+
+IGraphicsAPI::TextureFormat GraphicsAPIOpenGLES::intToTextureFormat(int input) {
+    TextureFormat format;
+    switch (input)
+    {
+        case GL_SRGB:
+            format = TextureFormat::SRGB;
+            break;
+        case GL_RGB:
+            format = TextureFormat::RGB;
+            break;
+        case GL_RGBA:
+            format = TextureFormat::RGBA;
+            break;
+        case GL_RED:
+            format = TextureFormat::RED;
+            break;
+        case GL_LUMINANCE:
+            format = TextureFormat::LUMINANCE;
+            break;
+        case GL_RGBA16F:
+            format = TextureFormat::RGBA16F;
+            break;
+        default:
+            throw std::runtime_error("Invalid TextureFormat");
+    }
+    return format;
+}
+
 } // namespace clay
 
 #endif
