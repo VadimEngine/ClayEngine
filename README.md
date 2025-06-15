@@ -1,5 +1,11 @@
 # Clay Engine
-Early Alpha Clay Engine cross-platform static library for developing games in C++. Currently supports an entity component system for game objects that are rendered in custom Scenes using OpenGL or OpenGLES got VR. Works on windows and Linux (Tested on Arch and Fedora) and on VR (Tested on Meta Quest 3)
+
+# ⚠️ This Repository is Deprecated
+
+This OpenGL-based engine is no longer maintained. Development has moved to a new Vulkan-based version, available here: https://github.com/VadimEngine/ClayEngineVK
+---
+
+Early Alpha Clay Engine cross-platform static library for developing games in C++. Currently supports an entity component system for game objects that are rendered in custom Scenes using OpenGL or OpenGLES for VR. Works on windows and Linux (Tested on Arch and Fedora) and on VR (Tested on Meta Quest 3)
 
 ### Third Party Libraries
 This libraries uses the following third party libraries:
